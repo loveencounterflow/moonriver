@@ -20,5 +20,10 @@
   "bugs": {
     "url": "https://github.com/loveencounterflow/moonriver/issues"
   },
-  "homepage": "https://github.com/loveencounterflow/moonriver#readme"
+  "homepage": "https://github.com/loveencounterflow/moonriver#readme",
+  "dependencies": {
+    "cnd": "^9.2.2",
+    "guy": "^4.1.0",
+    "intertype": "^7.7.0"
+  }
 }
