@@ -1,0 +1,24 @@
+{
+  "name": "moonriver",
+  "version": "0.0.0",
+  "description": "Synchronous and asynchronous streams",
+  "main": "lib/main.js",
+  "scripts": {
+    "test": "echo \"see https://github.com/loveeencounterflow/hengist/tree/master/dev/moonriver\""
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/loveencounterflow/moonriver.git"
+  },
+  "keywords": [
+    "pipe",
+    "piping",
+    "stream"
+  ],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/loveencounterflow/moonriver/issues"
+  },
+  "homepage": "https://github.com/loveencounterflow/moonriver#readme"
+}
