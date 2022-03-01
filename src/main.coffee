@@ -83,9 +83,15 @@ class @Moonriver extends @Classmethods
     is_source = false
     switch type = type_of raw_transform
       when 'function'
-        transform       = raw_transform
-        unless ( arity = transform.length ) is 2
-          throw new Error "^steampipes@1^ expected function with arity 2 got one with arity #{arity}"
+        switch ( arity = raw_transform.length )
+          when 0
+            throw new Error "^moonriver@1^ zero-arity transform not implemented"
+          when 1
+            throw new Error "^moonriver@1^ observers not implemented"
+          when 2
+            transform = raw_transform
+          else
+            throw new Error "^moonriver@1^ expected function with arity 2 got one with arity #{arity}"
       when 'generatorfunction'
         is_source       = true
         transform       = @_source_from_generatorfunction raw_transform
