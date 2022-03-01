@@ -55,13 +55,16 @@ class @Moonriver extends @Classmethods
     @run_count      = 0
     @is_repeatable  = true
     for raw_transform, idx in raw_pipeline
-      { is_source
+      { is_sender
+        is_source
         transform } = @_get_transform raw_transform
-      do ( transform, idx, is_source ) =>
+      do ( is_sender, is_source, transform, idx ) =>
+        arity       = transform.length
         input       = if idx is 0         then @first_input else @pipeline[ idx - 1 ].output
         output      = if idx is last_idx  then @last_output else []
-        segment     = { transform, input, output, over: false, exit: false, is_source, }
-        call        = ( d ) -> @send.call_count++; return @transform d, @send
+        segment     = { transform, arity, input, output, over: false, exit: false, is_sender, is_source, }
+        if is_sender then call  = ( d ) -> @send.call_count++; @transform d, @send;   return null
+        else              call  = ( d ) -> @send.call_count++; @transform d; @send d; return null
         call        = call.bind segment
         send        = ( d ) ->
           switch d
@@ -75,8 +78,8 @@ class @Moonriver extends @Classmethods
         send.over       = -> send send.symbol.over
         send.exit       = -> send send.symbol.exit
         send.call_count = 0
-        GUY.props.hide segment, 'send',   send
-        GUY.props.hide segment, 'call',  call
+        GUY.props.hide segment, 'send', send
+        GUY.props.hide segment, 'call', call
         @pipeline.push  segment
         @sources.push   segment if is_source
         @inputs.push    input
@@ -85,13 +88,15 @@ class @Moonriver extends @Classmethods
   #---------------------------------------------------------------------------------------------------------
   _get_transform: ( raw_transform ) ->
     is_source = false
+    is_sender = true
     switch type = type_of raw_transform
       when 'function'
         switch ( arity = raw_transform.length )
           when 0
             throw new Error "^moonriver@1^ zero-arity transform not implemented"
           when 1
-            throw new Error "^moonriver@1^ observers not implemented"
+            is_sender = false
+            transform = raw_transform
           when 2
             transform = raw_transform
           else
@@ -113,7 +118,7 @@ class @Moonriver extends @Classmethods
             throw new Error "^moonriver@3^ expected function with arity 2 got one with arity #{arity}"
         else
           throw new Error "^moonriver@4^ cannot convert a #{type} to a source"
-    return { transform, is_source, }
+    return { is_sender, is_source, transform, }
 
   #---------------------------------------------------------------------------------------------------------
   _source_from_generatorfunction: ( generatorfunction ) ->
