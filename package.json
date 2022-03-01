@@ -4,7 +4,7 @@
   "description": "Synchronous and asynchronous streams",
   "main": "lib/main.js",
   "scripts": {
-    "test": "echo \"see https://github.com/loveeencounterflow/hengist/tree/master/dev/moonriver\""
+    "test": "echo \"see https://github.com/loveencounterflow/hengist/tree/master/dev/moonriver/src\""
   },
   "repository": {
     "type": "git",
