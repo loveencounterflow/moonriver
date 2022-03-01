@@ -160,8 +160,10 @@ class @Moonriver extends @Classmethods
 
   #---------------------------------------------------------------------------------------------------------
   drive: ( cfg ) ->
-    { mode      } = cfg
+    ### TAINT validate `cfg` ###
     throw new Error "^moonriver@5^ pipeline is not repeatable" unless @_on_drive_start()
+    defaults      = { mode: 'depth', }
+    { mode      } = { defaults..., cfg..., }
     segment.over  = false for segment in @pipeline
     loop
       for segment, idx in @pipeline
