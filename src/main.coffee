@@ -90,7 +90,7 @@ class @Moonriver extends @Classmethods
         is_source       = true
         transform       = @_source_from_generatorfunction raw_transform
         unless ( arity = transform.length ) is 2
-          throw new Error "^steampipes@2^ expected function with arity 2 got one with arity #{arity}"
+          throw new Error "^moonriver@2^ expected function with arity 2 got one with arity #{arity}"
       when 'list'
         is_source       = true
         transform       = @_source_from_list raw_transform
@@ -100,9 +100,9 @@ class @Moonriver extends @Classmethods
           is_source       = true
           transform       = @_source_from_generator raw_transform
           unless ( arity = transform.length ) is 2
-            throw new Error "^steampipes@3^ expected function with arity 2 got one with arity #{arity}"
+            throw new Error "^moonriver@3^ expected function with arity 2 got one with arity #{arity}"
         else
-          throw new Error "^steampipes@4^ cannot convert a #{type} to a source"
+          throw new Error "^moonriver@4^ cannot convert a #{type} to a source"
     return { transform, is_source, }
 
   #---------------------------------------------------------------------------------------------------------
@@ -154,8 +154,8 @@ class @Moonriver extends @Classmethods
 
   #---------------------------------------------------------------------------------------------------------
   drive: ( cfg ) ->
-    throw new Error "^steampipes@5^ pipeline is not repeatable" unless @_on_drive_start()
     { mode      } = cfg
+    throw new Error "^moonriver@5^ pipeline is not repeatable" unless @_on_drive_start()
     segment.over  = false for segment in @pipeline
     loop
       for segment, idx in @pipeline
