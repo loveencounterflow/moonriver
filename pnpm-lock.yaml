@@ -4,13 +4,11 @@ specifiers:
   cnd: ^9.2.2
   guy: ^4.1.0
   intertype: ^7.7.0
-  moonriver: ^0.0.0
 
 dependencies:
   cnd: 9.2.2
   guy: 4.1.0
   intertype: 7.7.0
-  moonriver: 0.0.0
 
 packages:
 
@@ -47,10 +45,6 @@ packages:
 
   /letsfreezethat/3.1.0:
     resolution: {integrity: sha512-jJ1nvvQi6unW0WifjNPMIb64Byom0EXzSKWFYA++EpyjK3qv1J2pqeSoEJ61tGJoNG0GoNjPoeLYhxW16riZaA==}
-    dev: false
-
-  /moonriver/0.0.0:
-    resolution: {integrity: sha512-t9c7IzS2ltf2KF79plW0TmrJU9EgHKeTZjpM0sF/HMWB5StL8lzlpLdy7ze2mWk98Aoh680soEVWEu3et95idQ==}
     dev: false
 
   /multimix/5.0.0:
