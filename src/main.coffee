@@ -61,8 +61,8 @@ class @Moonriver extends @Classmethods
         input       = if idx is 0         then @first_input else @pipeline[ idx - 1 ].output
         output      = if idx is last_idx  then @last_output else []
         segment     = { transform, input, output, over: false, exit: false, is_source, }
-        call       = ( d ) -> @count++; return @transform d, @send
-        call       = call.bind segment
+        call        = ( d ) -> @call_count++; return @transform d, @send
+        call        = call.bind segment
         send        = ( d ) ->
           switch d
             when symbol.drop  then  null
@@ -70,11 +70,11 @@ class @Moonriver extends @Classmethods
             when symbol.exit  then  @exit = true
             else @output.push d
           return null
-        send        = send.bind segment
-        send.symbol = symbol
-        send.over   = -> send send.symbol.over
-        send.exit   = -> send send.symbol.exit
-        send.count  = 0
+        send            = send.bind segment
+        send.symbol     = symbol
+        send.over       = -> send send.symbol.over
+        send.exit       = -> send send.symbol.exit
+        send.call_count = 0
         GUY.props.hide segment, 'send',   send
         GUY.props.hide segment, 'call',  call
         @pipeline.push  segment
