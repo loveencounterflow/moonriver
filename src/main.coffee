@@ -61,6 +61,8 @@ class @Moonriver extends @Classmethods
         input       = if idx is 0         then @first_input else @pipeline[ idx - 1 ].output
         output      = if idx is last_idx  then @last_output else []
         segment     = { transform, input, output, over: false, exit: false, is_source, }
+        call       = ( d ) -> @count++; return @transform d, @send
+        call       = call.bind segment
         send        = ( d ) ->
           switch d
             when symbol.drop  then  null
@@ -72,7 +74,9 @@ class @Moonriver extends @Classmethods
         send.symbol = symbol
         send.over   = -> send send.symbol.over
         send.exit   = -> send send.symbol.exit
-        GUY.props.hide segment, 'send', send
+        send.count  = 0
+        GUY.props.hide segment, 'send',   send
+        GUY.props.hide segment, 'call',  call
         @pipeline.push  segment
         @sources.push   segment if is_source
         @inputs.push    input
@@ -171,10 +175,10 @@ class @Moonriver extends @Classmethods
           segment.output.push segment.input.shift() while segment.input.length > 0
           continue
         if segment.is_source and segment.input.length is 0
-          segment.transform symbol.drop, segment.send
+          segment.call symbol.drop
         else
           while segment.input.length > 0
-            segment.transform segment.input.shift(), segment.send
+            segment.call segment.input.shift()
             break if mode is 'depth'
         @last_output.length = 0
         throw symbol.exit if segment.exit
