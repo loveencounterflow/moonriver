@@ -61,7 +61,7 @@ class @Moonriver extends @Classmethods
   @C = GUY.lft.freeze
     symbol: symbol
     defaults:
-      modifications: { first: symbol.misfit, }
+      modifications: { first: symbol.misfit, last: symbol.misfit, }
 
   #---------------------------------------------------------------------------------------------------------
   constructor: ( raw_pipeline ) ->
@@ -72,6 +72,7 @@ class @Moonriver extends @Classmethods
     last_idx        = raw_pipeline.length - 1
     @inputs         = []
     @sources        = []
+    @on_last        = []
     @user           = {} ### user area for sharing state between transforms, etc ###
     @run_count      = 0
     @is_repeatable  = true
@@ -110,7 +111,9 @@ class @Moonriver extends @Classmethods
             when symbol.drop  then  null
             when symbol.over  then  @over = true
             when symbol.exit  then  @exit = true
-            else @output.push d
+            else
+              throw new Error "^moonriver@1^ cannot send values after pipeline has terminated" if @over
+              @output.push d
           return null
         send            = send.bind segment
         send.symbol     = symbol
@@ -120,6 +123,7 @@ class @Moonriver extends @Classmethods
         GUY.props.hide segment, 'send', send
         GUY.props.hide segment, 'call', call
         @pipeline.push  segment
+        @on_last.push   segment if modifications.last isnt symbol.misfit
         @sources.push   segment if is_source
         @inputs.push    input
     return undefined
@@ -226,7 +230,7 @@ class @Moonriver extends @Classmethods
     segment.over  = false for segment in @pipeline
     do_exit       = false
     loop
-      for segment, idx in @pipeline
+      for segment in @pipeline
         if segment.over
           segment.output.push segment.input.shift() while segment.input.length > 0
           continue
@@ -243,6 +247,10 @@ class @Moonriver extends @Classmethods
       if @sources.every ( source ) -> source.over
         unless @inputs.some ( input ) -> input.length > 0
           break
+    for segment in @on_last
+      continue if segment.over or segment.exit
+      segment.over = true
+      segment.call segment.modifications.last
     return null
 
   #---------------------------------------------------------------------------------------------------------
