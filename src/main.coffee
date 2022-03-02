@@ -18,6 +18,12 @@ types                     = new ( require 'intertype' ).Intertype()
 { isa
   type_of
   validate }              = types
+misfit                    = Symbol 'misfit'
+symbol                    = GUY.lft.freeze
+  drop:       Symbol.for 'drop' # this value will not go to output
+  exit:       Symbol.for 'exit' # exit pipeline processing
+  # done:       Symbol.for 'done' # done for this iteration
+  over:       Symbol.for 'over' # do not call again in this round
 
 
 
