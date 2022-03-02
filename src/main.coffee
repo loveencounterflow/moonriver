@@ -52,6 +52,7 @@ class @Moonriver extends @Classmethods
     last_idx        = raw_pipeline.length - 1
     @inputs         = []
     @sources        = []
+    @user           = {} ### user area for sharing state between transforms, etc ###
     @run_count      = 0
     @is_repeatable  = true
     for raw_transform, idx in raw_pipeline
