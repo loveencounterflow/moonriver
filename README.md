@@ -15,7 +15,6 @@
     - [Transforms are Bound to Moonriver Instance (Where Possible)](#transforms-are-bound-to-moonriver-instance-where-possible)
     - [The Remit Method `$()`](#the-remit-method-)
       - [Modifiers](#modifiers)
-  - [Demo](#demo)
   - [To Do](#to-do)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
@@ -121,8 +120,6 @@ mr.drive()
   * called with the associated value;
   * called *after* any data is sent down pipeline;
   * *always* called, even if pipeline should be empty.
-
-## Demo
 
 ## To Do
 
