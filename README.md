@@ -11,8 +11,10 @@
 
 - [MoonRiver](#moonriver)
   - [Notes](#notes)
+    - [Symbols and Signals](#symbols-and-signals)
     - [Transforms are Bound to Moonriver Instance (Where Possible)](#transforms-are-bound-to-moonriver-instance-where-possible)
     - [The Remit Method `$()`](#the-remit-method-)
+      - [Modifications](#modifications)
   - [Demo](#demo)
   - [To Do](#to-do)
 
@@ -34,6 +36,23 @@
   * use `$map f` to turn an ordinary synchronous function into a transform
   * a function with two arguments will be called once for each lap; it must return a value that can be used
     as a transform ( such as a list of values, an iterator, a function with arity 2 and so on)
+
+### Symbols and Signals
+
+Symbols enjoy a special status in MoonRiver as they are used to send signals to guide the processing of data
+in pipelines. Here
+
+
+```coffee
+symbol =
+  misfit:     Symbol.for 'misfit' # this value indicates absence of a value so can use `null`, `undefined`
+  drop:       Symbol.for 'drop'   # this value will not go to output
+  exit:       Symbol.for 'exit'   # exit pipeline processing
+  over:       Symbol.for 'over'   # do not call again in this round
+  value:      Symbol.for 'value'  # represents the current `d` value going down the pipeline
+  # once:       Symbol.for 'once'   # signals wish of transform to be called only once
+```
+
 
 
 ### Transforms are Bound to Moonriver Instance (Where Possible)
@@ -79,6 +98,16 @@ pipeline = [
 mr = new Moonriver pipeline
 mr.drive()
 ```
+
+#### Modifications
+
+Modified transforms will be called with an object `o` that has a `d`
+property that contains the current stream data item
+
+* `first`:
+  * `symbol.value`: indicates to call
+* `once`:
+
 
 ## Demo
 
