@@ -61,7 +61,11 @@ class @Moonriver extends @Classmethods
   @C = GUY.lft.freeze
     symbol: symbol
     defaults:
-      modifications: { first: symbol.misfit, last: symbol.misfit, }
+      modifications:
+        once_before:  symbol.misfit
+        first:        symbol.misfit
+        last:         symbol.misfit
+        once_after:   symbol.misfit
 
   #---------------------------------------------------------------------------------------------------------
   constructor: ( raw_pipeline ) ->
