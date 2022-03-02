@@ -19,11 +19,11 @@ types                     = new ( require 'intertype' ).Intertype()
   type_of
   validate }              = types
 symbol                    = GUY.lft.freeze
-  misfit:     Symbol.for 'misfit'
-  drop:       Symbol.for 'drop' # this value will not go to output
-  exit:       Symbol.for 'exit' # exit pipeline processing
+  misfit:     Symbol.for 'misfit' # this value indicates absence of a value so can use `null`, `undefined`
+  drop:       Symbol.for 'drop'   # this value will not go to output
+  exit:       Symbol.for 'exit'   # exit pipeline processing
   # done:       Symbol.for 'done' # done for this iteration
-  over:       Symbol.for 'over' # do not call again in this round
+  over:       Symbol.for 'over'   # do not call again in this round
 
 
 
@@ -36,7 +36,7 @@ class Modifications
   constructor: ( modifications..., transform ) ->
     @modifications  = Object.assign {}, modifications...
     @transform      = transform
-    debug '^43957397^', @
+    # debug '^43957397^', @
     return undefined
 
 
