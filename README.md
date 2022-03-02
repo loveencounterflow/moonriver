@@ -11,6 +11,8 @@
 
 - [MoonRiver](#moonriver)
   - [Notes](#notes)
+    - [Transforms are Bound to Moonriver Instance (Where Possible)](#transforms-are-bound-to-moonriver-instance-where-possible)
+    - [The Remit Method `$()`](#the-remit-method-)
   - [Demo](#demo)
   - [To Do](#to-do)
 
@@ -32,15 +34,51 @@
   * use `$map f` to turn an ordinary synchronous function into a transform
   * a function with two arguments will be called once for each lap; it must return a value that can be used
     as a transform ( such as a list of values, an iterator, a function with arity 2 and so on)
-* all transforms will be bound to the pipeline they are part of, so from within the function body one can
-  access the `this` property (`@` in CoffeeScript) to access that object. Pass in a bound function or a fat
-  arrow function (defined with `=>`) to opt out of `this` (pun intended).
-  * This is one more reason to use higher order functions (factory functions for functions) instead of
-    plain, 'direct' functions for transforms. The way this works means if one just passed around a plain
-    function to do work independently in several pipelines (totally doable), then the `this` property in the
-    second and third and so on pipelines would always refere to the *first* pipeline (because a bound
-    function will not get re-bound when its `f.bind()` is called). This is surprising and very probably not
-    what one wants. Using the factory pattern (`$tf = -> return ( d, send ) -> ...`) avoids this pitfall.
+
+
+### Transforms are Bound to Moonriver Instance (Where Possible)
+
+* all transforms will be bound to the Moonriver instance (a.k.a. 'the pipeline') they are part of, so from
+  within the function body one can access the `this` property (`@` in CoffeeScript) to access that object.
+  Pass in a bound function or a fat arrow function (defined with `=>`) to opt out of `this` (pun intended).
+
+* This is one more reason to use higher order functions (factory functions for functions) instead of plain,
+  'direct' functions for transforms. The way this works means if one just passed around a plain function to
+  do work independently in several pipelines (totally doable), then the `this` property in the second and
+  third and so on pipelines would always refere to the *first* pipeline (because a bound function will not
+  get re-bound when its `f.bind()` is called). This is surprising and very probably not what one wants.
+  Using the factory pattern (`$tf = -> return ( d, send ) -> ...`) avoids this pitfall.
+
+* While one will not want to mess with the pipeline's properties directly outside of using the API,
+  Moonriver instances have an initially empty object called `user` which is intended to be used to share
+  data across all transforms in the pipeline.
+
+
+### The Remit Method `$()`
+
+The 'Dollar sign' or 'remit' method is an optional device used to implement transform variations. By way of
+example, one often wants a given transform in a pipeline to deal with setup or teardown tasks, and hence
+to know whether the transform is being called for the first or the last time, or configure it to be called
+only once.
+
+```coffee
+{ Moonriver } = require 'moonriver'
+{ $ }         = Moonriver
+first         = Symbol 'first'
+$my_setup_transform = $ { first, }, ( d ) ->
+  if d is first
+    do_setup()
+  return null
+
+pipeline = [
+  source
+  $my_setup_transform()
+  ...
+  ]
+
+mr = new Moonriver pipeline
+mr.drive()
+```
 
 ## Demo
 
