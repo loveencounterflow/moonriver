@@ -101,13 +101,26 @@ mr.drive()
 
 #### Modifications
 
-Modified transforms will be called with an object `o` that has a `d`
-property that contains the current stream data item
-
+* `once_before`:
+  * called exactly once;
+  * called with the associated value;
+  * called *before* any data is sent down pipeline;
+  * *always* called, even if pipeline should be empty.
 * `first`:
-  * `symbol.value`: indicates to call
-* `once`:
-
+  * called with the associated value;
+  * also called with all other data items;
+  * called *before* the first data item comes down the pipeline;
+  * *not* called if pipeline should be empty.
+* `last`:
+  * called with the associated value;
+  * also called with all other data items;
+  * called *after* the last data item has come down the pipeline;
+  * *not* called if pipeline should be empty.
+* `once_after`:
+  * called exactly once;
+  * called with the associated value;
+  * called *after* any data is sent down pipeline;
+  * *always* called, even if pipeline should be empty.
 
 ## Demo
 
