@@ -142,19 +142,19 @@ class @Moonriver extends @Classmethods
       when 'function'
         switch ( arity = raw_transform.length )
           when 0
-            throw new Error "^moonriver@1^ zero-arity transform not implemented"
+            throw new Error "^moonriver@2^ zero-arity transform not implemented"
           when 1
             is_sender = false
             transform = raw_transform
           when 2
             transform = raw_transform
           else
-            throw new Error "^moonriver@1^ expected function with arity 2 got one with arity #{arity}"
+            throw new Error "^moonriver@3^ expected function with arity 2 got one with arity #{arity}"
       when 'generatorfunction'
         is_source       = true
         transform       = @_source_from_generatorfunction raw_transform
         unless ( arity = transform.length ) is 2
-          throw new Error "^moonriver@2^ expected function with arity 2 got one with arity #{arity}"
+          throw new Error "^moonriver@4^ expected function with arity 2 got one with arity #{arity}"
       when 'list'
         is_source       = true
         transform       = @_source_from_list raw_transform
@@ -164,9 +164,9 @@ class @Moonriver extends @Classmethods
           is_source       = true
           transform       = @_source_from_generator raw_transform
           unless ( arity = transform.length ) is 2
-            throw new Error "^moonriver@3^ expected function with arity 2 got one with arity #{arity}"
+            throw new Error "^moonriver@5^ expected function with arity 2 got one with arity #{arity}"
         else
-          throw new Error "^moonriver@4^ cannot convert a #{type} to a source"
+          throw new Error "^moonriver@6^ cannot convert a #{type} to a source"
     transform = transform.bind @
     return { is_sender, is_source, transform, }
 
@@ -220,7 +220,7 @@ class @Moonriver extends @Classmethods
   #---------------------------------------------------------------------------------------------------------
   drive: ( cfg ) ->
     ### TAINT validate `cfg` ###
-    throw new Error "^moonriver@5^ pipeline is not repeatable" unless @_on_drive_start()
+    throw new Error "^moonriver@7^ pipeline is not repeatable" unless @_on_drive_start()
     defaults      = { mode: 'depth', }
     { mode      } = { defaults..., cfg..., }
     segment.over  = false for segment in @pipeline
