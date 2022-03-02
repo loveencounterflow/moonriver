@@ -118,6 +118,7 @@ class @Moonriver extends @Classmethods
             throw new Error "^moonriver@3^ expected function with arity 2 got one with arity #{arity}"
         else
           throw new Error "^moonriver@4^ cannot convert a #{type} to a source"
+    transform = transform.bind @
     return { is_sender, is_source, transform, }
 
   #---------------------------------------------------------------------------------------------------------
