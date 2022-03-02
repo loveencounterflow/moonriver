@@ -120,6 +120,8 @@ mr.drive()
   * called with the associated value;
   * called *after* any data is sent down pipeline;
   * *always* called, even if pipeline should be empty.
+  * **NB that transforms modified with `once_after` *must* take a single argument and can never send values
+    into the pipeline as it is already shut down at the point of time when they get called.**
 
 ## To Do
 
