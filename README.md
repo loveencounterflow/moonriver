@@ -14,7 +14,7 @@
     - [Symbols and Signals](#symbols-and-signals)
     - [Transforms are Bound to Moonriver Instance (Where Possible)](#transforms-are-bound-to-moonriver-instance-where-possible)
     - [The Remit Method `$()`](#the-remit-method-)
-      - [Modifications](#modifications)
+      - [Modifiers](#modifiers)
   - [Demo](#demo)
   - [To Do](#to-do)
 
@@ -99,7 +99,7 @@ mr = new Moonriver pipeline
 mr.drive()
 ```
 
-#### Modifications
+#### Modifiers
 
 * `once_before`:
   * called exactly once;
