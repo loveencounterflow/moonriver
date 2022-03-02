@@ -18,8 +18,8 @@ types                     = new ( require 'intertype' ).Intertype()
 { isa
   type_of
   validate }              = types
-misfit                    = Symbol 'misfit'
 symbol                    = GUY.lft.freeze
+  misfit:     Symbol.for 'misfit'
   drop:       Symbol.for 'drop' # this value will not go to output
   exit:       Symbol.for 'exit' # exit pipeline processing
   # done:       Symbol.for 'done' # done for this iteration
@@ -59,10 +59,9 @@ class @Moonriver extends @Classmethods
 
   #---------------------------------------------------------------------------------------------------------
   @C = GUY.lft.freeze
-    misfit: misfit
     symbol: symbol
     defaults:
-      modifications: { first: misfit, }
+      modifications: { first: symbol.misfit, }
 
   #---------------------------------------------------------------------------------------------------------
   constructor: ( raw_pipeline ) ->
@@ -91,7 +90,7 @@ class @Moonriver extends @Classmethods
         if is_sender
           call = ( d ) ->
             @send.call_count++
-            if ( @send.call_count is 1 ) and ( ( first = @modifications.first ) isnt misfit )
+            if ( @send.call_count is 1 ) and ( ( first = @modifications.first ) isnt symbol.misfit )
               @transform first, @send
             @transform d, @send
             return null
@@ -99,7 +98,7 @@ class @Moonriver extends @Classmethods
         else
           call = ( d ) ->
             @send.call_count++
-            if ( @send.call_count is 1 ) and ( ( first = @modifications.first ) isnt misfit )
+            if ( @send.call_count is 1 ) and ( ( first = @modifications.first ) isnt symbol.misfit )
               @transform first
             @transform d
             @send d
