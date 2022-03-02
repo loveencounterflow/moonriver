@@ -27,6 +27,18 @@ symbol                    = GUY.lft.freeze
 
 
 
+#===========================================================================================================
+#
+#-----------------------------------------------------------------------------------------------------------
+class Modifications
+
+  #---------------------------------------------------------------------------------------------------------
+  constructor: ( modifications..., transform ) ->
+    @modifications  = Object.assign {}, modifications...
+    @transform      = transform
+    debug '^43957397^', @
+    return undefined
+
 
 #===========================================================================================================
 #
@@ -36,18 +48,21 @@ class @Classmethods
   # #---------------------------------------------------------------------------------------------------------
   # @$once = ( f ) ->
 
+
 #===========================================================================================================
 #
 #-----------------------------------------------------------------------------------------------------------
 class @Moonriver extends @Classmethods
 
   #---------------------------------------------------------------------------------------------------------
-  @C =
-    symbol =
-      drop:       Symbol.for 'drop' # this value will not go to output
-      exit:       Symbol.for 'exit' # exit pipeline processing
-      # done:       Symbol.for 'done' # done for this iteration
-      over:       Symbol.for 'over' # do not call again in this round
+  @$: ( modifications..., transform ) -> new Modifications modifications..., transform
+
+  #---------------------------------------------------------------------------------------------------------
+  @C = GUY.lft.freeze
+    misfit: misfit
+    symbol: symbol
+    defaults:
+      modifications: { first: misfit, }
 
   #---------------------------------------------------------------------------------------------------------
   constructor: ( raw_pipeline ) ->
@@ -64,14 +79,32 @@ class @Moonriver extends @Classmethods
     for raw_transform, idx in raw_pipeline
       { is_sender
         is_source
-        transform } = @_get_transform raw_transform
-      do ( is_sender, is_source, transform, idx ) =>
+        modifications
+        transform     } = @_get_transform raw_transform
+      do ( is_sender, is_source, modifications, transform, idx ) =>
         arity       = transform.length
         input       = if idx is 0         then @first_input else @pipeline[ idx - 1 ].output
         output      = if idx is last_idx  then @last_output else []
-        segment     = { transform, arity, input, output, over: false, exit: false, is_sender, is_source, }
-        if is_sender then call  = ( d ) -> @send.call_count++; @transform d, @send;   return null
-        else              call  = ( d ) -> @send.call_count++; @transform d; @send d; return null
+        segment     = { modifications, transform, arity, input, output, \
+                          over: false, exit: false, is_sender, is_source, }
+        #...................................................................................................
+        if is_sender
+          call = ( d ) ->
+            @send.call_count++
+            if ( @send.call_count is 1 ) and ( ( first = @modifications.first ) isnt misfit )
+              @transform first, @send
+            @transform d, @send
+            return null
+        #...................................................................................................
+        else
+          call = ( d ) ->
+            @send.call_count++
+            if ( @send.call_count is 1 ) and ( ( first = @modifications.first ) isnt misfit )
+              @transform first
+            @transform d
+            @send d
+            return null
+        #...................................................................................................
         call        = call.bind segment
         send        = ( d ) ->
           switch d
@@ -94,8 +127,18 @@ class @Moonriver extends @Classmethods
 
   #---------------------------------------------------------------------------------------------------------
   _get_transform: ( raw_transform ) ->
-    is_source = false
-    is_sender = true
+    modifications = { @constructor.C.defaults.modifications..., }
+    if ( type_of raw_transform ) is 'modifications'
+      Object.assign modifications, raw_transform.modifications
+      transform     = @_get_transform_2 raw_transform.transform
+    else
+      transform     = @_get_transform_2 raw_transform
+    return { modifications, transform..., }
+
+  #---------------------------------------------------------------------------------------------------------
+  _get_transform_2: ( raw_transform ) ->
+    is_source     = false
+    is_sender     = true
     switch type = type_of raw_transform
       when 'function'
         switch ( arity = raw_transform.length )
