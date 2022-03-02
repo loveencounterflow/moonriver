@@ -224,6 +224,7 @@ class @Moonriver extends @Classmethods
     defaults      = { mode: 'depth', }
     { mode      } = { defaults..., cfg..., }
     segment.over  = false for segment in @pipeline
+    do_exit       = false
     loop
       for segment, idx in @pipeline
         if segment.over
@@ -236,8 +237,9 @@ class @Moonriver extends @Classmethods
             segment.call segment.input.shift()
             break if mode is 'depth'
         @last_output.length = 0
-        throw symbol.exit if segment.exit
+        if segment.exit then do_exit = true; break
       ### TAINT collect stats in above loop ###
+      break if do_exit
       if @sources.every ( source ) -> source.over
         unless @inputs.some ( input ) -> input.length > 0
           break
