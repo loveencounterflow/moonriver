@@ -77,6 +77,8 @@ class @Moonriver extends @Classmethods
     @inputs         = []
     @sources        = []
     @on_last        = []
+    @on_once_before = []
+    @on_once_after  = []
     @user           = {} ### user area for sharing state between transforms, etc ###
     @run_count      = 0
     @is_repeatable  = true
@@ -93,6 +95,8 @@ class @Moonriver extends @Classmethods
                           over: false, exit: false, is_sender, is_source, }
         #...................................................................................................
         if is_sender
+          if modifications.once_after isnt symbol.misfit
+            throw new Error "^moonriver@1^ transforms with once_after cannot be senders"
           call = ( d ) ->
             @send.call_count++
             if ( @send.call_count is 1 ) and ( ( first = @modifications.first ) isnt symbol.misfit )
@@ -106,7 +110,8 @@ class @Moonriver extends @Classmethods
             if ( @send.call_count is 1 ) and ( ( first = @modifications.first ) isnt symbol.misfit )
               @transform first
             @transform d
-            @send d
+            @send d unless ( @modifications.once_before isnt symbol.misfit ) or \
+                           ( @modifications.once_after  isnt symbol.misfit )
             return null
         #...................................................................................................
         call        = call.bind segment
@@ -126,9 +131,11 @@ class @Moonriver extends @Classmethods
         send.call_count = 0
         GUY.props.hide segment, 'send', send
         GUY.props.hide segment, 'call', call
-        @pipeline.push  segment
-        @on_last.push   segment if modifications.last isnt symbol.misfit
-        @sources.push   segment if is_source
+        @pipeline.push        segment
+        @on_once_before.push  segment if modifications.once_before  isnt symbol.misfit
+        @on_once_after.push   segment if modifications.once_after   isnt symbol.misfit
+        @on_last.push         segment if modifications.last         isnt symbol.misfit
+        @sources.push         segment if is_source
         @inputs.push    input
     return undefined
 
@@ -233,6 +240,10 @@ class @Moonriver extends @Classmethods
     { mode      } = { defaults..., cfg..., }
     segment.over  = false for segment in @pipeline
     do_exit       = false
+    #.......................................................................................................
+    for segment in @on_once_before
+      segment.call segment.modifications.once_before
+    #.......................................................................................................
     loop
       for segment in @pipeline
         if segment.over
@@ -251,10 +262,17 @@ class @Moonriver extends @Classmethods
       if @sources.every ( source ) -> source.over
         unless @inputs.some ( input ) -> input.length > 0
           break
+    #.......................................................................................................
     for segment in @on_last
       continue if segment.over or segment.exit
       segment.over = true
       segment.call segment.modifications.last
+    #.......................................................................................................
+    for segment in @on_once_after
+      continue if segment.over or segment.exit
+      segment.over = true
+      segment.call segment.modifications.once_after
+    #.......................................................................................................
     return null
 
   #---------------------------------------------------------------------------------------------------------
