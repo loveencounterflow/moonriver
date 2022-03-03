@@ -246,23 +246,42 @@ class @Moonriver extends @Classmethods
     #.......................................................................................................
     loop
       for segment in @pipeline
+        #...................................................................................................
         if segment.over
+          ### If current segment has signalled it's gone out of business for this lap, route all data on its
+          input queue to its output queue: ###
+          ### TAINT rewrite to single step operation using Array::splice() ###
           segment.output.push segment.input.shift() while segment.input.length > 0
           continue
+        #...................................................................................................
         if segment.is_source and segment.input.length is 0
+          ### If current segment is a source and no inputs are waiting to be sent, trigger the transform by
+          calling  with a discardable `drop` value: ###
           segment.call symbol.drop
+        #...................................................................................................
         else
+          ### Otherwise, call transform with next value from input queue, if any; when in operational mode
+          `breadth`, repeat until input queue is empty: ###
           while segment.input.length > 0
             segment.call segment.input.shift()
             break if mode is 'depth'
-        @last_output.length = 0
+        #...................................................................................................
+        ### Discard any data that has made it to the final output queue of the pipeline: ###
+        @last_output.length = 0 if @last_output.length isnt 0
+        #...................................................................................................
+        ### Stop processing if the `exit` signal has been received: ###
         if segment.exit then do_exit = true; break
-      ### TAINT collect stats in above loop ###
       break if do_exit
+      #.....................................................................................................
+      ### When all sources have called it quits and no more input queues have data, end processing: ###
+      ### TAINT collect stats in above loop ###
       if @sources.every ( source ) -> source.over
         unless @inputs.some ( input ) -> input.length > 0
           break
     #.......................................................................................................
+    ### Call all transforms that have the `last` modifier, then all transforms with the `once_after`
+    modifier, skipping those that have signalled `over` or `exit`: ###
+    ### TAINT make `last` and `once_after` mutually exclusive ###
     for segment in @on_last
       continue if segment.over or segment.exit
       segment.over = true
