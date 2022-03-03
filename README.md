@@ -127,3 +127,13 @@ mr.drive()
 ## To Do
 
 * consider to make modifiers `last` and `once_after` mutually exclusive
+* consider to mark `first`, `last` etc. on `send()`
+
+
+
+
+
+
+
+
+
