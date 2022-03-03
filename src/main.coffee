@@ -39,6 +39,9 @@ class Transform_with_modifications
   constructor: ( modifications..., transform ) ->
     @modifications                = Object.assign {}, modifications...
     for key of @modifications
+      # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+      continue if key is 'before_last'
+      # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
       continue if @constructor.C.known_modifications.has key
       throw new Error "^moonriver@1^ unknown modifications key #{rpr key}"
     @modifications.do_once_before = true if @modifications.once_before  isnt undefined
@@ -276,6 +279,9 @@ class @Moonriver # extends @Classmethods
       ### TAINT collect stats in above loop ###
       if @sources.every ( source ) -> source.over
         unless @inputs.some ( input ) -> input.length > 0
+          debug '^453453^', "recognized pipeline exhausted"
+          debug '^453453^', @pipeline[ 2 ].send Symbol.for 'before_last'
+          continue
           break
     #.......................................................................................................
     ### Call all transforms that have the `last` modifier, then all transforms with the `once_after`
