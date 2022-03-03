@@ -97,27 +97,27 @@ class @Moonriver # extends @Classmethods
         arity       = transform.length
         input       = if idx is 0         then @first_input else @pipeline[ idx - 1 ].output
         output      = if idx is last_idx  then @last_output else []
+        is_listener = not ( modifications.do_once_before or modifications.do_once_after )
         segment     = { modifications, transform, arity, input, output, \
                           over: false, exit: false, is_sender, is_source, }
         #...................................................................................................
         if is_sender
-          if modifications.once_after isnt symbol.misfit
-            throw new Error "^moonriver@1^ transforms with once_after cannot be senders"
+          if modifications.do_once_after
+            throw new Error "^moonriver@1^ transforms with modifier once_after cannot be senders"
           call = ( d ) ->
             @send.call_count++
-            if ( @send.call_count is 1 ) and ( ( first = @modifications.first ) isnt symbol.misfit )
-              @transform first, @send
+            if ( @send.call_count is 1 ) and @modifications.do_first
+              @transform @modifications.first, @send
             @transform d, @send
             return null
         #...................................................................................................
         else
           call = ( d ) ->
             @send.call_count++
-            if ( @send.call_count is 1 ) and ( ( first = @modifications.first ) isnt symbol.misfit )
-              @transform first
+            if ( @send.call_count is 1 ) and @modifications.do_first
+              @transform @modifications.first
             @transform d
-            @send d unless ( @modifications.once_before isnt symbol.misfit ) or \
-                           ( @modifications.once_after  isnt symbol.misfit )
+            @send d if ( not @modifications.do_once_before ) and ( not @modifications.do_once_after )
             return null
         #...................................................................................................
         call        = call.bind segment
@@ -138,9 +138,9 @@ class @Moonriver # extends @Classmethods
         GUY.props.hide segment, 'send', send
         GUY.props.hide segment, 'call', call
         @pipeline.push        segment
-        @on_once_before.push  segment if modifications.once_before  isnt symbol.misfit
-        @on_once_after.push   segment if modifications.once_after   isnt symbol.misfit
-        @on_last.push         segment if modifications.last         isnt symbol.misfit
+        @on_once_before.push  segment if modifications.do_once_before
+        @on_once_after.push   segment if modifications.do_once_after
+        @on_last.push         segment if modifications.do_last
         @sources.push         segment if is_source
         @inputs.push    input
     return undefined
