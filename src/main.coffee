@@ -87,7 +87,7 @@ class @Moonriver # extends @Classmethods
         output      = if idx is last_idx  then @last_output else []
         is_listener = not ( modifications.do_once_before or modifications.do_once_after )
         segment     = { modifications, transform, arity, input, output, \
-                          over: false, exit: false, is_sender, is_source, }
+                          over: false, exit: false, is_listener, is_sender, is_source, }
         #...................................................................................................
         if is_sender
           if modifications.do_once_after
@@ -242,10 +242,12 @@ class @Moonriver # extends @Classmethods
     loop
       for segment in @pipeline
         #...................................................................................................
-        if segment.over
-          ### If current segment has signalled it's gone out of business for this lap, route all data on its
-          input queue to its output queue: ###
+        if segment.over or not segment.is_listener
+          ### If current segment has signalled it's gone out of business for this lap or is not a listener
+          in the first place, route all data on its input queue to its output queue: ###
           ### TAINT rewrite to single step operation using Array::splice() ###
+          ### TAINT taking non-listeners out of the pipeline would speed this up but also somehwat
+          complicate the construction ###
           segment.output.push segment.input.shift() while segment.input.length > 0
           continue
         #...................................................................................................
