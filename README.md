@@ -114,14 +114,16 @@ mr.drive()
   * called with the associated value;
   * also called with all other data items;
   * called *after* the last data item has come down the pipeline;
-  * *not* called if pipeline should be empty.
+  * *not* called if pipeline should be empty;
+  * **NB** transforms modified with `last` can send values, but not after the point the transform has been
+    called with the associated value for `last` as the pipeline has already finished by then.
 * `once_after`:
   * called exactly once;
   * called with the associated value;
   * called *after* any data is sent down pipeline;
-  * *always* called, even if pipeline should be empty.
-  * **NB that transforms modified with `once_after` *must* take a single argument and can never send values
-    into the pipeline as it is already shut down at the point of time when they get called.**
+  * *always* called, even if pipeline should be empty;
+  * **NB** transforms modified with `once_after` *must* take a single argument and can never send values.
 
 ## To Do
 
+* consider to make modifiers `last` and `once_after` mutually exclusive
