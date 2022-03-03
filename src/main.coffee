@@ -115,7 +115,8 @@ class @Moonriver # extends @Classmethods
             when symbol.over  then  @over = true
             when symbol.exit  then  @exit = true
             else
-              throw new Error "^moonriver@2^ cannot send values after pipeline has terminated" if @over
+              throw new Error "^moonriver@3^ cannot send values after pipeline has terminated;" \
+                + "error occurred in transform idx #{idx} (#{rpr segment.transform.name})" if @over
               @output.push d
           return null
         send            = send.bind segment
