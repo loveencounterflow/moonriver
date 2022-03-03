@@ -19,7 +19,6 @@ types                     = new ( require 'intertype' ).Intertype()
   type_of
   validate }              = types
 symbol                    = GUY.lft.freeze
-  misfit:     Symbol.for 'misfit' # this value indicates absence of a value so can use `null`, `undefined`
   drop:       Symbol.for 'drop'   # this value will not go to output
   exit:       Symbol.for 'exit'   # exit pipeline processing
   # done:       Symbol.for 'done' # done for this iteration
@@ -34,20 +33,18 @@ class Modifications
 
   #---------------------------------------------------------------------------------------------------------
   @C = GUY.lft.freeze
-    defaults:
-      modifications:
-        once_before:  symbol.misfit
-        first:        symbol.misfit
-        last:         symbol.misfit
-        once_after:   symbol.misfit
+    known_modifications: new Set [ 'once_before', 'first', 'last', 'once_after', ]
 
   #---------------------------------------------------------------------------------------------------------
   constructor: ( modifications..., transform ) ->
-    @modifications                = { @constructor.C.defaults.modifications..., modifications..., }
-    @modifications.do_once_before = @modifications.once_before  isnt symbol.misfit
-    @modifications.do_first       = @modifications.first        isnt symbol.misfit
-    @modifications.do_last        = @modifications.last         isnt symbol.misfit
-    @modifications.do_once_after  = @modifications.once_after   isnt symbol.misfit
+    @modifications                = Object.assign {}, modifications...
+    for key of @modifications
+      continue if @constructor.C.known_modifications.has key
+      throw new Error "^moonriver@1^ unknown modifications key #{rpr key}"
+    @modifications.do_once_before = true if @modifications.once_before  isnt undefined
+    @modifications.do_first       = true if @modifications.first        isnt undefined
+    @modifications.do_last        = true if @modifications.last         isnt undefined
+    @modifications.do_once_after  = true if @modifications.once_after   isnt undefined
     @transform                    = transform
     return undefined
 
@@ -151,7 +148,7 @@ class @Moonriver # extends @Classmethods
       modifications = raw_transform.modifications
       transform     = @_get_transform_2 raw_transform.transform
     else
-      modifications = ( new Modifications -> ).modifications
+      modifications = {}
       transform     = @_get_transform_2 raw_transform
     #.......................................................................................................
     return { modifications, transform..., }
