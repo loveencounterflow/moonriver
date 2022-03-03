@@ -100,12 +100,13 @@ class @Moonriver # extends @Classmethods
             return null
         #...................................................................................................
         else
-          call = ( d ) ->
+          call = ( d, forward = true ) ->
             @send.call_count++
             if ( @send.call_count is 1 ) and @modifications.do_first
               @transform @modifications.first
             @transform d
-            @send d if ( not @modifications.do_once_before ) and ( not @modifications.do_once_after )
+            @send d if forward \
+              and ( not @modifications.do_once_before ) and ( not @modifications.do_once_after )
             return null
         #...................................................................................................
         call        = call.bind segment
@@ -283,12 +284,12 @@ class @Moonriver # extends @Classmethods
     for segment in @on_last
       continue if segment.over or segment.exit
       segment.over = true
-      segment.call segment.modifications.last
+      segment.call segment.modifications.last, false
     #.......................................................................................................
     for segment in @on_once_after
       continue if segment.over or segment.exit
       segment.over = true
-      segment.call segment.modifications.once_after
+      segment.call segment.modifications.once_after, false
     #.......................................................................................................
     return null
 
