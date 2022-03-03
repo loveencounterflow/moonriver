@@ -33,10 +33,22 @@ symbol                    = GUY.lft.freeze
 class Modifications
 
   #---------------------------------------------------------------------------------------------------------
+  @C = GUY.lft.freeze
+    defaults:
+      modifications:
+        once_before:  symbol.misfit
+        first:        symbol.misfit
+        last:         symbol.misfit
+        once_after:   symbol.misfit
+
+  #---------------------------------------------------------------------------------------------------------
   constructor: ( modifications..., transform ) ->
-    @modifications  = Object.assign {}, modifications...
-    @transform      = transform
-    # debug '^43957397^', @
+    @modifications                = { @constructor.C.defaults.modifications..., modifications..., }
+    @modifications.do_once_before = @modifications.once_before  isnt symbol.misfit
+    @modifications.do_first       = @modifications.first        isnt symbol.misfit
+    @modifications.do_last        = @modifications.last         isnt symbol.misfit
+    @modifications.do_once_after  = @modifications.once_after   isnt symbol.misfit
+    @transform                    = transform
     return undefined
 
 
@@ -60,12 +72,6 @@ class @Moonriver # extends @Classmethods
   #---------------------------------------------------------------------------------------------------------
   @C = GUY.lft.freeze
     symbol: symbol
-    defaults:
-      modifications:
-        once_before:  symbol.misfit
-        first:        symbol.misfit
-        last:         symbol.misfit
-        once_after:   symbol.misfit
 
   #---------------------------------------------------------------------------------------------------------
   constructor: ( raw_pipeline ) ->
@@ -141,12 +147,13 @@ class @Moonriver # extends @Classmethods
 
   #---------------------------------------------------------------------------------------------------------
   _get_transform: ( raw_transform ) ->
-    modifications = { @constructor.C.defaults.modifications..., }
     if ( type_of raw_transform ) is 'modifications'
-      Object.assign modifications, raw_transform.modifications
+      modifications = raw_transform.modifications
       transform     = @_get_transform_2 raw_transform.transform
     else
+      modifications = ( new Modifications -> ).modifications
       transform     = @_get_transform_2 raw_transform
+    #.......................................................................................................
     return { modifications, transform..., }
 
   #---------------------------------------------------------------------------------------------------------
