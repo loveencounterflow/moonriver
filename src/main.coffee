@@ -204,7 +204,6 @@ class Segment
           and ( not @modifiers.do_once_before ) and ( not @modifiers.do_once_after )
         return null
     #...................................................................................................
-    # call        = call.bind segment
     @send = ( d ) =>
       switch d
         when symbol.drop  then  null
@@ -217,7 +216,6 @@ class Segment
           @output.push d
       return null
     #...................................................................................................
-    # send            = send.bind segment
     @send.symbol      = symbol
     @send.over        = => @send symbol.over
     @send.exit        = => @send symbol.exit
@@ -436,10 +434,7 @@ class Moonriver
     ###
     #.......................................................................................................
     loop
-      # whisper '^534-1^', '-----------------------------'
       for segment, idx in @segments
-        # urge '^534-2^', idx, @toString idx
-        # debug '^534-2^', idx, segment
         #...................................................................................................
         # if ( segment.is_over or not segment.is_listener )
         if segment.is_over
@@ -452,7 +447,6 @@ class Moonriver
           segment.output.push segment.input.shift() while segment.input.length > 0
           continue
         #...................................................................................................
-        # if segment.is_source then debug '^592^', { has_input_data: segment._has_input_data}
         if segment.is_source
             ### If current segment is a source, trigger the transform with a discardable `drop` value: ###
           if segment._has_input_data
@@ -463,7 +457,6 @@ class Moonriver
         else
           ### Otherwise, call transform with next value from input queue, if any; when in operational mode
           `breadth`, repeat until input queue is empty: ###
-          # debug '^309-4^', segment.input
           while segment.input.length > 0
             segment.call segment.input.shift()
             break if cfg.mode is 'depth'
