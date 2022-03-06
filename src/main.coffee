@@ -36,7 +36,10 @@ add_length_prop = ( target, key ) ->
     set: ( x )  -> @[ key ].length = x
 
 #-----------------------------------------------------------------------------------------------------------
-pluck = ( o, k ) -> R = o[ k ]; delete o[ k ]; return R
+pluck = ( o, k, fallback = undefined ) ->
+  R = o[ k ]
+  delete o[ k ]
+  return if R is undefined then fallback else R
 
 
 #===========================================================================================================
