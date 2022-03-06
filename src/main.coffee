@@ -171,33 +171,33 @@ class Segment
     { is_sender
       is_source
       is_repeatable
-      modifications
+      modifiers
       transform     } = @_get_transform raw_transform
     @arity            = transform.length
-    # @is_listener       = not ( modifications.do_once_before or modifications.do_once_after )
-    @modifications    = {} ### !!!!!!!!!!!!!!!!!!!!!!!!!! ###
+    # @is_listener       = not ( modifiers.do_once_before or modifiers.do_once_after )
+    @modifiers    = {} ### !!!!!!!!!!!!!!!!!!!!!!!!!! ###
     @is_sender        = is_sender
     @is_source        = is_source
     @is_repeatable    = is_repeatable
     #...................................................................................................
     if @is_sender
-      if @modifications.do_once_after
+      if @modifiers.do_once_after
         throw new Error "^moonriver@2^ transforms with modifier once_after cannot be senders"
       @call = ( d, _ ) =>
         @send.call_count++
-        if ( @send.call_count is 1 ) and @modifications.do_first
-          @transform @modifications.first, @send
+        if ( @send.call_count is 1 ) and @modifiers.do_first
+          @transform @modifiers.first, @send
         @transform d, @send
         return null
     #...................................................................................................
     else
       @call = ( d, forward = true ) =>
         @send.call_count++
-        if ( @send.call_count is 1 ) and @modifications.do_first
-          @transform @modifications.first
+        if ( @send.call_count is 1 ) and @modifiers.do_first
+          @transform @modifiers.first
         @transform d
         @send d if forward \
-          and ( not @modifications.do_once_before ) and ( not @modifications.do_once_after )
+          and ( not @modifiers.do_once_before ) and ( not @modifiers.do_once_after )
         return null
     #...................................................................................................
     # call        = call.bind segment
@@ -221,9 +221,9 @@ class Segment
     # GUY.props.hide segment, 'send', send
     # GUY.props.hide segment, 'call', call
     # @pipeline.push        segment
-    # @on_once_before.push  segment if modifications.do_once_before
-    # @on_once_after.push   segment if modifications.do_once_after
-    # @on_last.push         segment if modifications.do_last
+    # @on_once_before.push  segment if modifiers.do_once_before
+    # @on_once_after.push   segment if modifiers.do_once_after
+    # @on_last.push         segment if modifiers.do_last
     # @sources.push         segment if is_source
     # @inputs.push    input
     return transform
@@ -232,14 +232,14 @@ class Segment
   #
   #---------------------------------------------------------------------------------------------------------
   _get_transform: ( raw_transform ) ->
-    if ( type_of raw_transform ) is 'XXXXXXXXXXXXXXXXXtransform_with_modifications'
-      modifications = raw_transform.modifications
-      transform     = @_get_transform_2 raw_transform.transform
+    if ( type_of raw_transform ) is 'modified_transform'
+      modifiers = raw_transform.modifiers
+      transform = @_get_transform_2 raw_transform.transform
     else
-      modifications = {}
-      transform     = @_get_transform_2 raw_transform
+      modifiers = {}
+      transform = @_get_transform_2 raw_transform
     #.......................................................................................................
-    return { modifications, transform..., }
+    return { modifiers, transform..., }
 
   #---------------------------------------------------------------------------------------------------------
   _get_transform_2: ( raw_transform ) ->
@@ -336,7 +336,35 @@ class Segment
 #===========================================================================================================
 #
 #-----------------------------------------------------------------------------------------------------------
+class Modified_transform
+
+  #---------------------------------------------------------------------------------------------------------
+  @C = GUY.lft.freeze
+    # known_modifications: new Set [ 'once_before', 'first', 'last', 'once_after', ]
+    known_modifications: new Set [ 'is_source', ]
+
+  #---------------------------------------------------------------------------------------------------------
+  constructor: ( modifiers..., transform ) ->
+    @modifiers                = Object.assign {}, modifiers...
+    for key of @modifiers
+      continue if @constructor.C.known_modifications.has key
+      throw new Error "^moonriver@1^ unknown modifiers key #{rpr key}"
+    # @modifiers.do_once_before = true if @modifiers.once_before  isnt undefined
+    # @modifiers.do_first       = true if @modifiers.first        isnt undefined
+    # @modifiers.do_last        = true if @modifiers.last         isnt undefined
+    # @modifiers.do_once_after  = true if @modifiers.once_after   isnt undefined
+    @modifiers.is_source      = modifiers.is_source if modifiers.is_source?
+    @transform                = transform
+    return undefined
+
+
+#===========================================================================================================
+#
+#-----------------------------------------------------------------------------------------------------------
 class Moonriver
+
+  #---------------------------------------------------------------------------------------------------------
+  @$: ( modifiers..., transform ) -> new Modified_transform modifiers..., transform
 
   #---------------------------------------------------------------------------------------------------------
   constructor: ( transforms = null ) ->
@@ -400,7 +428,7 @@ class Moonriver
     #.......................................................................................................
     ###
     for segment in @on_once_before
-      segment.call segment.modifications.once_before
+      segment.call segment.modifiers.once_before
     ###
     #.......................................................................................................
     loop
@@ -456,12 +484,12 @@ class Moonriver
     # for segment in @on_last
     #   continue if segment.is_over or segment.exit
     #   segment.is_over = true
-    #   segment.call segment.modifications.last, false
+    #   segment.call segment.modifiers.last, false
     # #.......................................................................................................
     # for segment in @on_once_after
     #   continue if segment.is_over or segment.exit
     #   segment.is_over = true
-    #   segment.call segment.modifications.once_after, false
+    #   segment.call segment.modifiers.once_after, false
     #.......................................................................................................
     return null
 
