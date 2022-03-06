@@ -283,7 +283,7 @@ class Segment
     generator = null
     return genfΔ = ( d, send ) ->
       generator ?= generatorfunction()
-      send d
+      send d unless d is symbol.drop
       { value
         done  } = generator.next()
       ### NOTE silently discards value of `return` where present in keeping with JS `for of` loops ###
@@ -295,7 +295,7 @@ class Segment
   #---------------------------------------------------------------------------------------------------------
   _source_from_generator: ( generator ) ->
     return genΔ = ( d, send ) ->
-      send d
+      send d unless d is symbol.drop
       { value
         done  } = generator.next()
       ### NOTE silently discards value of `return` where present in keeping with JS `for of` loops ###
@@ -308,7 +308,7 @@ class Segment
     last_idx  = list.length - 1
     idx       = -1
     return listΔ = ( d, send ) ->
-      send d
+      send d unless d is symbol.drop
       idx++
       if idx > last_idx
         idx = -1
