@@ -1,6 +1,6 @@
 {
   "name": "moonriver",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "Synchronous and asynchronous streams",
   "main": "lib/main.js",
   "scripts": {
