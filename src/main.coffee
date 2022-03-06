@@ -278,7 +278,7 @@ class Segment
   #---------------------------------------------------------------------------------------------------------
   _source_from_generatorfunction: ( generatorfunction ) ->
     generator = null
-    return generatorfunction_source = ( d, send ) ->
+    return genfΔ = ( d, send ) ->
       generator ?= generatorfunction()
       send d
       { value
@@ -291,7 +291,7 @@ class Segment
 
   #---------------------------------------------------------------------------------------------------------
   _source_from_generator: ( generator ) ->
-    return generator_source = ( d, send ) ->
+    return genΔ = ( d, send ) ->
       send d
       { value
         done  } = generator.next()
@@ -304,7 +304,7 @@ class Segment
   _source_from_list: ( list ) ->
     last_idx  = list.length - 1
     idx       = -1
-    return list_source = ( d, send ) ->
+    return listΔ = ( d, send ) ->
       send d
       idx++
       if idx > last_idx
@@ -403,7 +403,7 @@ class Moonriver
     loop
       whisper '^534-1^', '-----------------------------'
       for segment, idx in @segments
-        # urge '^534-2^', idx, @
+        urge '^534-2^', idx, @toString idx
         # debug '^534-2^', idx, segment
         #...................................................................................................
         # if ( segment.is_over or not segment.is_listener )
@@ -419,7 +419,7 @@ class Moonriver
         # if segment.is_source then debug '^592^', { has_input_data: segment._has_input_data}
         if segment.is_source and not segment._has_input_data
           ### If current segment is a source and no inputs are waiting to be sent, trigger the transform by
-          calling  with a discardable `drop` value: ###
+          calling with a discardable `drop` value: ###
           segment.call symbol.drop
         #...................................................................................................
         else
@@ -467,9 +467,7 @@ class Moonriver
   #=========================================================================================================
   #
   #---------------------------------------------------------------------------------------------------------
-  toString:               -> rpr @segments
-  [UTIL.inspect.custom]:  -> @toString()
-
+  [UTIL.inspect.custom]: -> @toString()
 
   #---------------------------------------------------------------------------------------------------------
   toString: ( current_idx ) ->
