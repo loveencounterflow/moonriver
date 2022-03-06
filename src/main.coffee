@@ -21,12 +21,13 @@ types                     = new ( require 'intertype' ).Intertype()
 # { Moonriver }             = require '../../../apps/moonriver'
 UTIL                      = require 'util'
 misfit                    = Symbol 'misfit'
+
+#-----------------------------------------------------------------------------------------------------------
 symbol                    = GUY.lft.freeze
   drop:       Symbol.for 'drop'   # this value will not go to output
   exit:       Symbol.for 'exit'   # exit pipeline processing
   # done:       Symbol.for 'done' # done for this iteration
   over:       Symbol.for 'over'   # do not call again in this round
-
 
 #-----------------------------------------------------------------------------------------------------------
 add_length_prop = ( target, key ) ->
@@ -405,7 +406,7 @@ class Moonriver
     loop
       whisper '^534-1^', '-----------------------------'
       for segment, idx in @segments
-        urge '^534-2^', idx, @toString idx
+        # urge '^534-2^', idx, @toString idx
         # debug '^534-2^', idx, segment
         #...................................................................................................
         # if ( segment.is_over or not segment.is_listener )
