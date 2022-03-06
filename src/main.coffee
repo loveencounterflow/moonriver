@@ -129,9 +129,10 @@ class Duct
 class Segment
 
   #---------------------------------------------------------------------------------------------------------
-  constructor: ( raw_transform ) ->
+  constructor: ( raw_transform, idx ) ->
   # constructor: ( modifiers..., raw_transform ) ->
   #   throw new Error "^segment@1^ modifiers not implemented" if modifiers.length > 0
+    @idx              = idx
     @input            = null
     @output           = null
     @modifiers        = null
@@ -205,8 +206,9 @@ class Segment
         when symbol.over  then  @set_is_over true
         when symbol.exit  then  @has_exited = true
         else
-          throw new Error "^moonriver@3^ cannot send values after pipeline has terminated;" \
-            + "error occurred in transform idx #{idx} (#{rpr segment.transform.name})" if @is_over
+          if @is_over
+            throw new Error "^moonriver@3^ cannot send values after pipeline has terminated;" \
+              + "error occurred in segment idx #{@idx} (#{rpr @_name_of_transform()})"
           @output.push d
       return null
     #...................................................................................................
@@ -358,7 +360,7 @@ class Moonriver
 
   #---------------------------------------------------------------------------------------------------------
   push: ( transform ) ->
-    segment = new Segment transform
+    segment = new Segment transform, @segments.length
     if ( last_segment = @last_segment )?
       segment.set_input last_segment.output
       last_segment.output.set_oblivious false
