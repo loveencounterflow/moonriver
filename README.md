@@ -128,6 +128,9 @@ mr.drive()
 
 * consider to make modifiers `last` and `once_after` mutually exclusive
 * consider to mark `first`, `last` etc. on `send()`
+* turn more attributes into fiddle-proof managed properties
+* use callback-based messaging for `is_over` so no more iteration over sources to find which ones have
+  finished (NB any transform can announce `over`)
 
 
 
