@@ -170,6 +170,11 @@ class Segment
     @_is_over = onoff
     return null
 
+  #---------------------------------------------------------------------------------------------------------
+  _transfer: ->
+    @output.push @input.shift() while @input.length > 0
+    return null
+
   #=========================================================================================================
   #
   #---------------------------------------------------------------------------------------------------------
@@ -447,14 +452,14 @@ class Moonriver
           ### TAINT taking non-listeners out of the pipeline would speed this up but also somehwat
           complicate the construction ###
           ### TAINT code duplication ###
-          segment.output.push segment.input.shift() while segment.input.length > 0
+          segment._transfer()
           continue
         #...................................................................................................
         if segment.is_source
             ### If current segment is a source, trigger the transform with a discardable `drop` value: ###
           if segment._has_input_data
             ### TAINT code duplication ###
-            segment.output.push segment.input.shift() while segment.input.length > 0
+            segment._transfer()
           segment.call symbol.drop
         #...................................................................................................
         else
