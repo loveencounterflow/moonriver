@@ -415,13 +415,16 @@ class Moonriver
           ### TAINT rewrite to single step operation using Array::splice() ###
           ### TAINT taking non-listeners out of the pipeline would speed this up but also somehwat
           complicate the construction ###
+          ### TAINT code duplication ###
           segment.output.push segment.input.shift() while segment.input.length > 0
           continue
         #...................................................................................................
         # if segment.is_source then debug '^592^', { has_input_data: segment._has_input_data}
-        if segment.is_source and not segment._has_input_data
-          ### If current segment is a source and no inputs are waiting to be sent, trigger the transform by
-          calling with a discardable `drop` value: ###
+        if segment.is_source
+            ### If current segment is a source, trigger the transform with a discardable `drop` value: ###
+          if segment._has_input_data
+            ### TAINT code duplication ###
+            segment.output.push segment.input.shift() while segment.input.length > 0
           segment.call symbol.drop
         #...................................................................................................
         else
