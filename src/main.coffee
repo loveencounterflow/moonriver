@@ -471,51 +471,22 @@ class Moonriver
   [UTIL.inspect.custom]:  -> @toString()
 
 
-#===========================================================================================================
-#
-#-----------------------------------------------------------------------------------------------------------
-demo_2 = ->
-  mr1 = new Moonriver()
-  mr2 = new Moonriver()
-  #.........................................................................................................
-  mr1.push [ 1, 4, ]
-  mr1.push [ 2, 5, 7, ]
-  mr1.push [ 3, 6, ]
-  mr1.push ( d ) -> yield e for e in Array.from 'abc'
-  # mr1.push show      = ( d ) -> help CND.reverse '^332-1^', d
-  mr1.push show     = ( d ) -> help CND.reverse '^332-2^', d
-  # mr1.push tee      = ( d, send ) -> mr2.send d; send d
-  # mr1.push multiply = ( d, send ) -> send d * 100
-  # mr1.push tee      = ( d, send ) -> mr2.send d; send d
-  # mr1.push show     = ( d ) -> urge CND.reverse '^332-2^', d
-  # #.........................................................................................................
-  # mr2.push add      = ( d, send ) -> send d + 300
-  # mr2.push show     = ( d ) -> info CND.reverse '^332-3^', d
-  # #.........................................................................................................
-  # mr1.drive()
-  ### can send additional inputs: ###
-  help '^343-1^', mr1
-  help '^343-1^', mr2
-  # mr1.send Symbol.for 'exit'
-  mr1.send Symbol.for 'drop'
-  # mr1.send 100
-  help '^343-2^', mr1
-  # mr1.send 200
-  # help '^343-3^', mr1
-  # mr1.drive { continue: true, }
-  # help '^343-4^', mr1
-  return null
+  #---------------------------------------------------------------------------------------------------------
+  toString: ( current_idx ) ->
+    parts       = []
+    joiner      = CND.grey ' ▶︎ '
+    prv_output  = null
+    for segment, idx in @segments
+      parts.push CND.green rpr segment.input unless segment.input is prv_output
+      parts.push \
+        if idx is current_idx then CND.reverse  CND.gold segment._name_of_transform() \
+        else                                    CND.gold segment._name_of_transform()
+      parts.push CND.green rpr segment.output
+      prv_output = segment.output
+    return parts.join joiner
+    # return parts.join ' — '
 
 
-############################################################################################################
-if module is require.main then do =>
-  demo_2()
-  # f = -> return @a
-  # d = { a: 42, f, }
-  # e = GUY.lft.freeze d
-  # info d.f()
-  # info e.f()
-  # info f == d.f == e.f
 
 
 
