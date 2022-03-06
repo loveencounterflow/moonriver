@@ -421,7 +421,7 @@ class Moonriver
     ### TAINT validate `cfg` ###
     throw new Error "^moonriver@9^ pipeline is not repeatable" unless @_on_drive_start()
     return null if @segments.length is 0
-    defaults        = { mode: 'depth', continue: false, }
+    defaults        = { mode: 'breadth', continue: false, }
     cfg             = { defaults..., cfg..., }
     segment.set_is_over false for segment in @segments unless cfg.continue
     do_exit         = false
