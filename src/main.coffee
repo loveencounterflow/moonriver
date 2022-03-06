@@ -178,9 +178,10 @@ class Segment
       transform     } = @_get_transform raw_transform
     @arity            = transform.length
     # @is_listener       = not ( modifiers.do_once_before or modifiers.do_once_after )
-    @modifiers    = {} ### !!!!!!!!!!!!!!!!!!!!!!!!!! ###
+    ### TAINT do not treat modifier `is_source` different from others ###
+    @is_source        = is_source or ( pluck modifiers, 'is_source', false )
+    @modifiers        = modifiers
     @is_sender        = is_sender
-    @is_source        = is_source
     @is_repeatable    = is_repeatable
     #...................................................................................................
     if @is_sender
