@@ -351,7 +351,7 @@ class Modified_transform
   #---------------------------------------------------------------------------------------------------------
   @C = GUY.lft.freeze
     # known_modifications: new Set [ 'once_before', 'first', 'last', 'once_after', ]
-    known_modifications: new Set [ 'is_source', ]
+    known_modifications: new Set [ 'is_source', 'once_after_last', ]
 
   #---------------------------------------------------------------------------------------------------------
   constructor: ( modifiers..., transform ) ->
@@ -363,8 +363,9 @@ class Modified_transform
     # @modifiers.do_first       = true if @modifiers.first        isnt undefined
     # @modifiers.do_last        = true if @modifiers.last         isnt undefined
     # @modifiers.do_once_after  = true if @modifiers.once_after   isnt undefined
-    @modifiers.is_source      = modifiers.is_source if modifiers.is_source?
-    @transform                = transform
+    @modifiers.once_after_last  = modifiers.once_after_last if modifiers.once_after_last?
+    @modifiers.is_source        = modifiers.is_source if modifiers.is_source?
+    @transform                  = transform
     return undefined
 
 
@@ -378,6 +379,7 @@ class Moonriver
 
   #---------------------------------------------------------------------------------------------------------
   constructor: ( transforms = null ) ->
+    @XXX_count      = 0
     @data_count     = 0
     @segments       = []
     @turns          = 0
@@ -385,7 +387,8 @@ class Moonriver
     @sources        = []
     # @on_last        = []
     # @on_once_before = []
-    # @on_once_after  = []
+    ### TAINT not a good name for a collection of segments ###
+    @on_once_after_last  = []
     @user           = {} ### user area for sharing state between transforms, etc ###
     add_length_prop @, 'segments'
     @push transform for transform from transforms if transforms?
@@ -400,13 +403,19 @@ class Moonriver
   #---------------------------------------------------------------------------------------------------------
   push: ( transform ) ->
     segment = new Segment transform, @segments.length
-    if ( last_segment = @last_segment )?
-      segment.set_input last_segment.output
-      last_segment.output.set_oblivious false
+    if segment.modifiers.once_after_last is true
+      @push moal_helper = ( d, send ) -> send d
+      @on_once_after_last.push segment
+      # segment.set_input new Duct { on_change: @on_change, }
+      segment.set_output @last_segment.input
     else
-      segment.set_input new Duct { on_change: @on_change, }
-    segment.set_output new Duct { on_change: @on_change, is_oblivious: true, }
-    @segments.push  segment
+      if ( last_segment = @last_segment )?
+        segment.set_input last_segment.output
+        last_segment.output.set_oblivious false
+      else
+        segment.set_input new Duct { on_change: @on_change, }
+      segment.set_output new Duct { on_change: @on_change, is_oblivious: true, }
+      @segments.push  segment
     @sources.push   segment if segment.is_source
     return null
 
@@ -428,12 +437,28 @@ class Moonriver
 
   #---------------------------------------------------------------------------------------------------------
   drive: ( cfg ) ->
-    ### TAINT validate `cfg` ###
     throw new Error "^moonriver@9^ pipeline is not repeatable" unless @_on_drive_start()
-    return null if @segments.length is 0
-    defaults        = { mode: 'breadth', continue: false, }
+    R = @_drive cfg
+    for segment in @on_once_after_last
+      # debug '^398^', segment.idx; xxx
+      segment.call symbol.drop
+      # R = @send symbol.drop
+      @_drive { continue: true, first_idx: segment.idx, }
+    return R
+
+  #---------------------------------------------------------------------------------------------------------
+  _drive: ( cfg ) ->
+    ### TAINT validate `cfg` ###
+    defaults        = { mode: 'breadth', continue: false, first_idx: 0, last_idx: -1, }
     cfg             = { defaults..., cfg..., }
-    segment.set_is_over false for segment in @segments unless cfg.continue
+    first_idx       = cfg.first_idx
+    last_idx        = cfg.last_idx
+    last_idx        = if last_idx >= 0 then last_idx else @segments.length + last_idx
+    ### TAINT check for last_idx >= first_idx, last_idx < segments.length and so on ###
+    return null if @segments.length is 0
+    unless cfg.continue
+      segment.set_is_over false for segment in @segments
+      segment.set_is_over false for segment in @on_once_after_last
     do_exit         = false
     #.......................................................................................................
     ###
@@ -442,7 +467,10 @@ class Moonriver
     ###
     #.......................................................................................................
     loop
-      for segment, idx in @segments
+      for idx in [ first_idx .. last_idx ]
+        segment = @segments[ idx ]
+        # debug '^443^', ( @toString idx ), { XXX_count: @XXX_count, idx, data_count: @data_count, }, segment
+        @XXX_count++; process.exit 111 if @XXX_count > 500
         #...................................................................................................
         # if ( segment.is_over or not segment.is_listener )
         if segment.is_over
@@ -501,7 +529,7 @@ class Moonriver
   #---------------------------------------------------------------------------------------------------------
   send: ( d ) ->
     @segments[ 0 ].input.push d unless d is symbol.drop
-    @drive { continue: true, }
+    @_drive { continue: true, }
 
   #=========================================================================================================
   #
