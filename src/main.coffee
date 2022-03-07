@@ -219,7 +219,7 @@ class Segment
         when symbol.exit  then  @has_exited = true
         else
           if @is_over
-            throw new Error "^moonriver@3^ cannot send values after pipeline has terminated;" \
+            throw new Error "^moonriver@3^ cannot send values after pipeline has terminated; " \
               + "error occurred in segment idx #{@idx} (#{rpr @_name_of_transform()})"
           @output.push d
       return null
