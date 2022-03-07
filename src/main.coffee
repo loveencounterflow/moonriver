@@ -440,10 +440,9 @@ class Moonriver
     throw new Error "^moonriver@9^ pipeline is not repeatable" unless @_on_drive_start()
     R = @_drive cfg
     for segment in @on_once_after_last
-      # debug '^398^', segment.idx; xxx
       segment.call symbol.drop
-      # R = @send symbol.drop
-      @_drive { continue: true, first_idx: segment.idx, }
+      # @_drive { continue: true, first_idx: segment.idx, }
+      @_drive { continue: true, }
     return R
 
   #---------------------------------------------------------------------------------------------------------
