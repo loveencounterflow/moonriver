@@ -368,19 +368,22 @@ class Modified_transform
 
   #---------------------------------------------------------------------------------------------------------
   @C = GUY.lft.freeze
-    # known_modifications: new Set [ 'once_before', 'first', 'last', 'once_after', ]
-    known_modifications: new Set [ 'is_source', 'once_after_last', ]
+    known_modifications: new Set [ 'is_source', 'once_after_last', 'once_before_first', ]
 
   #---------------------------------------------------------------------------------------------------------
   constructor: ( modifiers..., transform ) ->
-    @modifiers                = Object.assign {}, modifiers...
+    defaults    =
+      is_source:          false
+      once_before_first:  false
+      once_after_last:    false
+    @modifiers  = { defaults..., ( Object.assign {}, modifiers... )..., }
     validate.mrv_modifiers @modifiers
     for key of @modifiers
       continue if @constructor.C.known_modifications.has key
       throw new Error "^moonriver@7^ unknown modifiers key #{rpr key}"
     # @modifiers.do_first       = true if @modifiers.first        isnt undefined
     # @modifiers.do_last        = true if @modifiers.last         isnt undefined
-    @transform                  = transform
+    @transform = transform
     return undefined
 
 
@@ -394,16 +397,17 @@ class Moonriver
 
   #---------------------------------------------------------------------------------------------------------
   constructor: ( transforms = null ) ->
-    @data_count     = 0
-    @segments       = []
-    @turns          = 0
-    @inputs         = []
-    @sources        = []
+    @data_count           = 0
+    @segments             = []
+    @turns                = 0
+    @inputs               = []
+    @sources              = []
     # @on_last        = []
     # @on_once_before = []
     ### TAINT not a good name for a collection of segments ###
-    @on_once_after_last  = []
-    @user           = {} ### user area for sharing state between transforms, etc ###
+    @on_once_before_first = []
+    @on_once_after_last   = []
+    @user                 = {} ### user area for sharing state between transforms, etc ###
     add_length_prop @, 'segments'
     @push transform for transform from transforms if transforms?
     #.......................................................................................................
@@ -417,11 +421,15 @@ class Moonriver
   #---------------------------------------------------------------------------------------------------------
   push: ( transform ) ->
     segment = new Segment transform, @segments.length
-    if segment.modifiers.once_after_last is true
+    #.......................................................................................................
+    if segment.modifiers.once_before_first
+      @push moal_helper = ( d, send ) -> send d
+      @on_once_before_first.push segment
+    #.......................................................................................................
+    else if segment.modifiers.once_after_last
       @push moal_helper = ( d, send ) -> send d
       @on_once_after_last.push segment
-      # segment.set_input new Duct { on_change: @on_change, }
-      segment.set_output @last_segment.input
+    #.......................................................................................................
     else
       if ( last_segment = @last_segment )?
         segment.set_input last_segment.output
@@ -430,6 +438,7 @@ class Moonriver
         segment.set_input new Duct { on_change: @on_change, }
       segment.set_output new Duct { on_change: @on_change, is_oblivious: true, }
       @segments.push segment
+    #.......................................................................................................
     @sources.push segment if segment.is_source
     return segment
 
@@ -448,10 +457,17 @@ class Moonriver
   #---------------------------------------------------------------------------------------------------------
   drive: ( cfg ) ->
     throw new Error "^moonriver@8^ pipeline is not repeatable" unless @sources_are_repeatable
+    @turns++
+    for collection in [ @segments, @on_once_before_first, @on_once_after_last, ]
+      for segment in collection
+        segment.set_call_count  0
+        segment.set_is_over     false
+    #.......................................................................................................
+    for segment in @on_once_before_first
+      segment.call symbol.drop; R = @_drive { continue: true, }
+    R = @_drive cfg
     for segment in @on_once_after_last
-      segment.call symbol.drop
-      # @_drive { continue: true, first_idx: segment.idx, }
-      @_drive { continue: true, }
+      segment.call symbol.drop; R = @_drive { continue: true, }
     return R
 
   #---------------------------------------------------------------------------------------------------------
