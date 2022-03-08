@@ -102,9 +102,9 @@ class Duct
     return R
 
   #---------------------------------------------------------------------------------------------------------
-  pop: ( fallback = symbols.misfit ) ->
+  pop: ( fallback = symbol.misfit ) ->
     if @d.length is 0
-      return fallback unless fallback is symbols.misfit
+      return fallback unless fallback is symbol.misfit
       throw new Error "^moonriver@3^ cannot pop() from empty list"
     R = @d.pop()
     @_on_change()
@@ -118,9 +118,9 @@ class Duct
     return R
 
   #---------------------------------------------------------------------------------------------------------
-  shift: ( fallback = symbols.misfit ) ->
+  shift: ( fallback = symbol.misfit ) ->
     if @d.length is 0
-      return fallback unless fallback is symbols.misfit
+      return fallback unless fallback is symbol.misfit
       throw new Error "^moonriver@4^ cannot shift() from empty list"
     return null if @is_oblivious
     R = @d.shift()
