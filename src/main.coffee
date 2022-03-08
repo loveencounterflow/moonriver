@@ -381,7 +381,6 @@ class Moonriver
 
   #---------------------------------------------------------------------------------------------------------
   constructor: ( transforms = null ) ->
-    @XXX_count      = 0
     @data_count     = 0
     @segments       = []
     @turns          = 0
@@ -471,7 +470,6 @@ class Moonriver
       for idx in [ first_idx .. last_idx ]
         segment = @segments[ idx ]
         # debug '^443^', ( @toString idx ), { XXX_count: @XXX_count, idx, data_count: @data_count, }, segment
-        @XXX_count++; process.exit 111 if @XXX_count > 500
         #...................................................................................................
         # if ( segment.is_over or not segment.is_listener )
         if segment.is_over
