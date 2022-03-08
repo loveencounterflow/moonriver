@@ -261,15 +261,15 @@ class Segment
     switch type = type_of raw_transform
       when 'function'
         switch ( arity = raw_transform.length )
-          when 0
-            throw new Error "^moonriver@2^ zero-arity transform not implemented"
           when 1
             is_sender = modifiers.once_after_last is true
             transform = raw_transform
           when 2
+            if modifiers.once_after_last is true
+              throw new Error "^moonriver@2^ transform with arity 2 not implemented for modifier once_after_last"
             transform = raw_transform
           else
-            throw new Error "^moonriver@3^ expected function with arity 2 got one with arity #{arity}"
+            throw new Error "^moonriver@3^ transform with arity #{arity} not implemented"
       when 'generatorfunction'
         is_source       = true
         transform       = @_source_from_generatorfunction raw_transform
