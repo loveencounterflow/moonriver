@@ -90,7 +90,7 @@ class Duct
   #---------------------------------------------------------------------------------------------------------
   set_oblivious: ( onoff ) ->
     validate.boolean onoff
-    throw new Error "^XXX@1^ cannot set to oblivious unless duct is empty" if onoff and @length > 0
+    throw new Error "^moonriver@2^ cannot set to oblivious unless duct is empty" if onoff and @length > 0
     @is_oblivious = onoff
     return null
 
@@ -105,7 +105,7 @@ class Duct
   pop: ( fallback = symbols.misfit ) ->
     if @d.length is 0
       return fallback unless fallback is symbols.misfit
-      throw new Error "^XXX@1^ cannot pop() from empty list"
+      throw new Error "^moonriver@3^ cannot pop() from empty list"
     R = @d.pop()
     @_on_change()
     return R
@@ -121,7 +121,7 @@ class Duct
   shift: ( fallback = symbols.misfit ) ->
     if @d.length is 0
       return fallback unless fallback is symbols.misfit
-      throw new Error "^XXX@1^ cannot shift() from empty list"
+      throw new Error "^moonriver@4^ cannot shift() from empty list"
     return null if @is_oblivious
     R = @d.shift()
     @_on_change()
@@ -240,7 +240,7 @@ class Segment
         when symbol.exit  then  @has_exited = true
         else
           if @is_over
-            throw new Error "^moonriver@1^ cannot send values after pipeline has terminated; " \
+            throw new Error "^moonriver@5^ cannot send values after pipeline has terminated; " \
               + "error occurred in segment idx #{@idx} (#{rpr @_name_of_transform()})"
           @output.push d
       return null
@@ -284,16 +284,16 @@ class Segment
             transform = raw_transform
           when 2
             if modifiers.once_before_first or modifiers.once_after_last
-              throw new Error "^moonriver@2^ transform with arity 2 not implemented for modifiers " \
+              throw new Error "^moonriver@6^ transform with arity 2 not implemented for modifiers " \
                 + "once_before_first, once_after_last"
             transform = raw_transform
           else
-            throw new Error "^moonriver@3^ transform with arity #{arity} not implemented"
+            throw new Error "^moonriver@7^ transform with arity #{arity} not implemented"
       when 'generatorfunction'
         is_source       = true
         transform       = @_source_from_generatorfunction raw_transform
         unless ( arity = transform.length ) is 2
-          throw new Error "^moonriver@4^ expected function with arity 2 got one with arity #{arity}"
+          throw new Error "^moonriver@8^ expected function with arity 2 got one with arity #{arity}"
       when 'list'
         is_source       = true
         transform       = @_source_from_list raw_transform
@@ -303,9 +303,9 @@ class Segment
           is_source       = true
           transform       = @_source_from_generator raw_transform
           unless ( arity = transform.length ) is 2
-            throw new Error "^moonriver@5^ expected function with arity 2 got one with arity #{arity}"
+            throw new Error "^moonriver@9^ expected function with arity 2 got one with arity #{arity}"
         else
-          throw new Error "^moonriver@6^ cannot convert a #{type} to a source"
+          throw new Error "^moonriver@10^ cannot convert a #{type} to a source"
     transform = transform.bind @
     return { is_sender, is_source, is_repeatable, transform, }
 
@@ -383,7 +383,7 @@ class Modified_transform
     validate.mrv_modifiers @modifiers
     for key of @modifiers
       continue if @constructor.C.known_modifications.has key
-      throw new Error "^moonriver@7^ unknown modifiers key #{rpr key}"
+      throw new Error "^moonriver@11^ unknown modifiers key #{rpr key}"
     # @modifiers.do_first       = true if @modifiers.first        isnt undefined
     # @modifiers.do_last        = true if @modifiers.last         isnt undefined
     @transform = transform
@@ -455,7 +455,7 @@ class Moonriver
   #
   #---------------------------------------------------------------------------------------------------------
   drive: ( cfg ) ->
-    throw new Error "^moonriver@8^ pipeline is not repeatable" unless @sources_are_repeatable
+    throw new Error "^moonriver@12^ pipeline is not repeatable" unless @sources_are_repeatable
     @turns++
     for collection in [ @segments, @on_once_before_first, @on_once_after_last, ]
       for segment in collection
