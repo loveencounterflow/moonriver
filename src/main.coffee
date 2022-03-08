@@ -466,11 +466,6 @@ class Moonriver
     ### TAINT check for last_idx >= first_idx, last_idx < segments.length and so on ###
     return null if @segments.length is 0
     #.......................................................................................................
-    ###
-    for segment in @on_once_before
-      segment.call segment.modifiers.once_before
-    ###
-    #.......................................................................................................
     loop
       for idx in [ first_idx .. last_idx ]
         segment = @segments[ idx ]
@@ -516,11 +511,6 @@ class Moonriver
     #   continue if segment.is_over or segment.exit
     #   segment.is_over = true
     #   segment.call segment.modifiers.last, false
-    # #.......................................................................................................
-    # for segment in @on_once_after
-    #   continue if segment.is_over or segment.exit
-    #   segment.is_over = true
-    #   segment.call segment.modifiers.once_after, false
     #.......................................................................................................
     return null
 
