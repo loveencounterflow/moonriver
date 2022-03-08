@@ -212,7 +212,6 @@ class Segment
       if @modifiers.once_before_first or @modifiers.once_after_last
         @call = ( d ) =>
           @call_count++
-          @transform @modifiers.first, @send if ( @call_count is 1 ) and @modifiers.do_first
           @transform @send
           return null
       else
