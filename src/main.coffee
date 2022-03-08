@@ -444,15 +444,10 @@ class Moonriver
   #=========================================================================================================
   #
   #---------------------------------------------------------------------------------------------------------
-  _on_drive_start: ->
-    return false unless @sources_are_repeatable
-    @turns++
-    return true
 
   #---------------------------------------------------------------------------------------------------------
   drive: ( cfg ) ->
-    throw new Error "^moonriver@8^ pipeline is not repeatable" unless @_on_drive_start()
-    R     = @_drive cfg
+    throw new Error "^moonriver@8^ pipeline is not repeatable" unless @sources_are_repeatable
     for segment in @on_once_after_last
       segment.call symbol.drop
       # @_drive { continue: true, first_idx: segment.idx, }
@@ -462,7 +457,7 @@ class Moonriver
   #---------------------------------------------------------------------------------------------------------
   _drive: ( cfg ) ->
     ### TAINT validate `cfg` ###
-    defaults        = { mode: 'breadth', continue: false, first_idx: 0, last_idx: -1, }
+    defaults        = { mode: 'breadth', first_idx: 0, last_idx: -1, }
     cfg             = { defaults..., cfg..., }
     first_idx       = cfg.first_idx
     last_idx        = cfg.last_idx
@@ -470,11 +465,6 @@ class Moonriver
     do_exit         = false
     ### TAINT check for last_idx >= first_idx, last_idx < segments.length and so on ###
     return null if @segments.length is 0
-    unless cfg.continue
-      for collection in [ @segments, @on_once_after_last, ]
-        for segment in collection
-          segment.set_call_count  0
-          segment.set_is_over     false
     #.......................................................................................................
     ###
     for segment in @on_once_before
@@ -543,7 +533,7 @@ class Moonriver
   #---------------------------------------------------------------------------------------------------------
   send: ( d ) ->
     @segments[ 0 ].input.push d unless d is symbol.drop
-    @_drive { continue: true, }
+    @_drive()
 
   #=========================================================================================================
   #
