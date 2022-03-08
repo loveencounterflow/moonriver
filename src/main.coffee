@@ -193,20 +193,25 @@ class Segment
     @is_repeatable    = is_repeatable
     #...................................................................................................
     if @is_sender
-      if @modifiers.do_once_after
-        throw new Error "^moonriver@2^ transforms with modifier once_after cannot be senders"
-      @call = ( d, _ ) =>
-        @send.call_count++
-        if ( @send.call_count is 1 ) and @modifiers.do_first
-          @transform @modifiers.first, @send
-        @transform d, @send
-        return null
+      if @modifiers.once_after_last
+        @call = ( d ) =>
+          @send.call_count++
+          @transform @modifiers.first, @send if ( @send.call_count is 1 ) and @modifiers.do_first
+          @transform @send
+          return null
+      else
+        @call = ( d ) =>
+          @send.call_count++
+          @transform @modifiers.first, @send if ( @send.call_count is 1 ) and @modifiers.do_first
+          @transform d, @send
+          return null
     #...................................................................................................
     else
       @call = ( d ) =>
         @send.call_count++
         @transform @modifiers.first if ( @send.call_count is 1 ) and @modifiers.do_first
         @transform d
+        @send d
         return null
     #...................................................................................................
     @send = ( d ) =>
