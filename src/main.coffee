@@ -20,10 +20,10 @@ types                     = new ( require 'intertype' ).Intertype()
   validate }              = types
 # { Moonriver }             = require '../../../apps/moonriver'
 UTIL                      = require 'util'
-misfit                    = Symbol 'misfit'
 
 #-----------------------------------------------------------------------------------------------------------
 symbol                    = GUY.lft.freeze
+  misfit:     Symbol.for 'misfit' # indicates missing value
   drop:       Symbol.for 'drop'   # this value will not go to output
   exit:       Symbol.for 'exit'   # exit pipeline processing
   # done:       Symbol.for 'done' # done for this iteration
@@ -59,7 +59,6 @@ class Duct
 
   #---------------------------------------------------------------------------------------------------------
   @C: GUY.lft.freeze
-    misfit:       misfit
     defaults:
       constructor:
         on_change:    null
@@ -99,9 +98,9 @@ class Duct
     return R
 
   #---------------------------------------------------------------------------------------------------------
-  pop: ( fallback = misfit ) ->
+  pop: ( fallback = symbols.misfit ) ->
     if @d.length is 0
-      return fallback unless fallback is misfit
+      return fallback unless fallback is symbols.misfit
       throw new Error "^XXX@1^ cannot pop() from empty list"
     R = @d.pop()
     @_on_change()
@@ -115,9 +114,9 @@ class Duct
     return R
 
   #---------------------------------------------------------------------------------------------------------
-  shift: ( fallback = misfit ) ->
+  shift: ( fallback = symbols.misfit ) ->
     if @d.length is 0
-      return fallback unless fallback is misfit
+      return fallback unless fallback is symbols.misfit
       throw new Error "^XXX@1^ cannot shift() from empty list"
     return null if @is_oblivious
     R = @d.shift()
