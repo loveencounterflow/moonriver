@@ -203,13 +203,10 @@ class Segment
         return null
     #...................................................................................................
     else
-      @call = ( d, forward = true ) =>
+      @call = ( d ) =>
         @send.call_count++
-        if ( @send.call_count is 1 ) and @modifiers.do_first
-          @transform @modifiers.first
+        @transform @modifiers.first if ( @send.call_count is 1 ) and @modifiers.do_first
         @transform d
-        @send d if forward \
-          and ( not @modifiers.do_once_before ) and ( not @modifiers.do_once_after )
         return null
     #...................................................................................................
     @send = ( d ) =>
