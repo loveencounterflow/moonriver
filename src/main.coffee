@@ -221,14 +221,12 @@ class Segment
       else
         @call = ( d ) =>
           @call_count++
-          @transform @modifiers.first, @send if ( @call_count is 1 ) and @modifiers.do_first
           @transform d, @send
           return null
     #...................................................................................................
     else
       @call = ( d ) =>
         @call_count++
-        @transform @modifiers.first if ( @call_count is 1 ) and @modifiers.do_first
         @transform d
         @send d
         return null
@@ -248,14 +246,6 @@ class Segment
     @send.symbol      = symbol
     @send.over        = => @send symbol.over
     @send.exit        = => @send symbol.exit
-    # GUY.props.hide segment, 'send', send
-    # GUY.props.hide segment, 'call', call
-    # @pipeline.push        segment
-    # @on_once_before.push  segment if modifiers.do_once_before
-    # @on_once_after.push   segment if modifiers.do_once_after
-    # @on_last.push         segment if modifiers.do_last
-    # @sources.push         segment if is_source
-    # @inputs.push    input
     return transform
 
   #=========================================================================================================
@@ -371,7 +361,10 @@ class Modified_transform
 
   #---------------------------------------------------------------------------------------------------------
   @C = GUY.lft.freeze
-    known_modifications: new Set [ 'is_source', 'once_after_last', 'once_before_first', ]
+    known_modifications: new Set [
+      'is_source',
+      'first', 'last',
+      'once_after_last', 'once_before_first', ]
 
   #---------------------------------------------------------------------------------------------------------
   constructor: ( modifiers..., transform ) ->
@@ -379,13 +372,23 @@ class Modified_transform
       is_source:          false
       once_before_first:  false
       once_after_last:    false
+      first:              symbol.misfit
+      last:               symbol.misfit
     @modifiers  = { defaults..., ( Object.assign {}, modifiers... )..., }
     validate.mrv_modifiers @modifiers
     for key of @modifiers
       continue if @constructor.C.known_modifications.has key
       throw new Error "^moonriver@11^ unknown modifiers key #{rpr key}"
-    # @modifiers.do_first       = true if @modifiers.first        isnt undefined
-    # @modifiers.do_last        = true if @modifiers.last         isnt undefined
+    if @modifiers.first is symbol.misfit
+      @modifiers.first = false
+    else
+      ( @modifiers.values ?= {} ).first = @modifiers.first
+      @modifiers.first = true
+    if @modifiers.last is symbol.misfit
+      @modifiers.last = false
+    else
+      ( @modifiers.values ?= {} ).last = @modifiers.last
+      @modifiers.last = true
     @transform = transform
     return undefined
 
@@ -405,8 +408,8 @@ class Moonriver
     @turns                = 0
     @inputs               = []
     @sources              = []
-    # @on_last        = []
-    # @on_once_before = []
+    @on_first             = []
+    @on_last              = []
     ### TAINT not a good name for a collection of segments ###
     @on_once_before_first = []
     @on_once_after_last   = []
@@ -440,7 +443,9 @@ class Moonriver
       segment.set_output new Duct { on_change: @on_change, is_oblivious: true, }
       @segments.push segment
     #.......................................................................................................
-    @sources.push segment if segment.is_source
+    @sources.push  segment if segment.is_source
+    @on_last.push  segment if segment.modifiers.last
+    @on_first.push segment if segment.modifiers.first
     return segment
 
   #---------------------------------------------------------------------------------------------------------
@@ -463,10 +468,24 @@ class Moonriver
         segment.set_is_over     false
     #.......................................................................................................
     for segment in @on_once_before_first
-      segment.call symbol.drop; R = @_drive { continue: true, }
+      segment.call symbol.drop
+      R = @_drive { continue: true, }
+    #.......................................................................................................
+    for segment in @on_first
+      # continue if segment.is_over ### (???) ###
+      segment.call segment.modifiers.values.first
+      R = @_drive { continue: true, }
+    #.......................................................................................................
     R = @_drive cfg
+    #.......................................................................................................
+    for segment in @on_last
+      # continue if segment.is_over ### (???) ###
+      segment.call segment.modifiers.values.last
+      R = @_drive { continue: true, }
+    #.......................................................................................................
     for segment in @on_once_after_last
-      segment.call symbol.drop; R = @_drive { continue: true, }
+      segment.call symbol.drop
+      R = @_drive { continue: true, }
     return R
 
   #---------------------------------------------------------------------------------------------------------
@@ -518,14 +537,6 @@ class Moonriver
       ### When all sources have called it quits and no more input queues have data, end processing: ###
       ### TAINT collect stats in above loop ###
       break if ( @data_count is 0 ) and ( @sources.every ( source ) -> source.is_over )
-    # #.......................................................................................................
-    # ### Call all transforms that have the `last` modifier, then all transforms with the `once_after`
-    # modifier, skipping those that have signalled `over` or `exit`: ###
-    # ### TAINT make `last` and `once_after` mutually exclusive ###
-    # for segment in @on_last
-    #   continue if segment.is_over or segment.exit
-    #   segment.is_over = true
-    #   segment.call segment.modifiers.last, false
     #.......................................................................................................
     return null
 
