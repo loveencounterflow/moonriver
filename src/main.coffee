@@ -219,7 +219,7 @@ class Segment
         when symbol.exit  then  @has_exited = true
         else
           if @is_over
-            throw new Error "^moonriver@3^ cannot send values after pipeline has terminated; " \
+            throw new Error "^moonriver@1^ cannot send values after pipeline has terminated; " \
               + "error occurred in segment idx #{@idx} (#{rpr @_name_of_transform()})"
           @output.push d
       return null
@@ -260,19 +260,19 @@ class Segment
       when 'function'
         switch ( arity = raw_transform.length )
           when 0
-            throw new Error "^moonriver@4^ zero-arity transform not implemented"
+            throw new Error "^moonriver@2^ zero-arity transform not implemented"
           when 1
             is_sender = false
             transform = raw_transform
           when 2
             transform = raw_transform
           else
-            throw new Error "^moonriver@5^ expected function with arity 2 got one with arity #{arity}"
+            throw new Error "^moonriver@3^ expected function with arity 2 got one with arity #{arity}"
       when 'generatorfunction'
         is_source       = true
         transform       = @_source_from_generatorfunction raw_transform
         unless ( arity = transform.length ) is 2
-          throw new Error "^moonriver@6^ expected function with arity 2 got one with arity #{arity}"
+          throw new Error "^moonriver@4^ expected function with arity 2 got one with arity #{arity}"
       when 'list'
         is_source       = true
         transform       = @_source_from_list raw_transform
@@ -282,9 +282,9 @@ class Segment
           is_source       = true
           transform       = @_source_from_generator raw_transform
           unless ( arity = transform.length ) is 2
-            throw new Error "^moonriver@7^ expected function with arity 2 got one with arity #{arity}"
+            throw new Error "^moonriver@5^ expected function with arity 2 got one with arity #{arity}"
         else
-          throw new Error "^moonriver@8^ cannot convert a #{type} to a source"
+          throw new Error "^moonriver@6^ cannot convert a #{type} to a source"
     transform = transform.bind @
     return { is_sender, is_source, is_repeatable, transform, }
 
@@ -358,7 +358,7 @@ class Modified_transform
     @modifiers                = Object.assign {}, modifiers...
     for key of @modifiers
       continue if @constructor.C.known_modifications.has key
-      throw new Error "^moonriver@1^ unknown modifiers key #{rpr key}"
+      throw new Error "^moonriver@7^ unknown modifiers key #{rpr key}"
     # @modifiers.do_once_before = true if @modifiers.once_before  isnt undefined
     # @modifiers.do_first       = true if @modifiers.first        isnt undefined
     # @modifiers.do_last        = true if @modifiers.last         isnt undefined
@@ -437,7 +437,7 @@ class Moonriver
 
   #---------------------------------------------------------------------------------------------------------
   drive: ( cfg ) ->
-    throw new Error "^moonriver@9^ pipeline is not repeatable" unless @_on_drive_start()
+    throw new Error "^moonriver@8^ pipeline is not repeatable" unless @_on_drive_start()
     R = @_drive cfg
     for segment in @on_once_after_last
       segment.call symbol.drop
