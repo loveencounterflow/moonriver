@@ -507,13 +507,7 @@ class Moonriver
       #.....................................................................................................
       ### When all sources have called it quits and no more input queues have data, end processing: ###
       ### TAINT collect stats in above loop ###
-      if @sources.every ( source ) -> source.is_over
-        if @data_count is 0
-        # unless @inputs.some ( input ) -> input.length > 0
-          # debug '^453453^', "recognized pipeline exhausted"
-          # debug '^453453^', @segments[ 2 ].send Symbol.for 'before_last'
-          # continue
-          break
+      break if ( @data_count is 0 ) and ( @sources.every ( source ) -> source.is_over )
     # #.......................................................................................................
     # ### Call all transforms that have the `last` modifier, then all transforms with the `once_after`
     # modifier, skipping those that have signalled `over` or `exit`: ###
