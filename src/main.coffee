@@ -140,6 +140,7 @@ class Segment
   # constructor: ( modifiers..., raw_transform ) ->
   #   throw new Error "^segment@1^ modifiers not implemented" if modifiers.length > 0
     @idx              = idx
+    @call_count       = 0
     @input            = null
     @output           = null
     @modifiers        = null
@@ -156,18 +157,24 @@ class Segment
 
   #---------------------------------------------------------------------------------------------------------
   set_input: ( duct ) ->
-    @input  = duct
+    @input = duct
     return null
 
   #---------------------------------------------------------------------------------------------------------
   set_output: ( duct ) ->
-    @output  = duct
+    @output = duct
     return null
 
   #---------------------------------------------------------------------------------------------------------
   set_is_over: ( onoff ) ->
     validate.boolean onoff
     @_is_over = onoff
+    return null
+
+  #---------------------------------------------------------------------------------------------------------
+  set_call_count: ( call_count ) ->
+    validate.cardinal call_count
+    @call_count = call_count
     return null
 
   #---------------------------------------------------------------------------------------------------------
@@ -195,21 +202,21 @@ class Segment
     if @is_sender
       if @modifiers.once_after_last
         @call = ( d ) =>
-          @send.call_count++
-          @transform @modifiers.first, @send if ( @send.call_count is 1 ) and @modifiers.do_first
+          @call_count++
+          @transform @modifiers.first, @send if ( @call_count is 1 ) and @modifiers.do_first
           @transform @send
           return null
       else
         @call = ( d ) =>
-          @send.call_count++
-          @transform @modifiers.first, @send if ( @send.call_count is 1 ) and @modifiers.do_first
+          @call_count++
+          @transform @modifiers.first, @send if ( @call_count is 1 ) and @modifiers.do_first
           @transform d, @send
           return null
     #...................................................................................................
     else
       @call = ( d ) =>
-        @send.call_count++
-        @transform @modifiers.first if ( @send.call_count is 1 ) and @modifiers.do_first
+        @call_count++
+        @transform @modifiers.first if ( @call_count is 1 ) and @modifiers.do_first
         @transform d
         @send d
         return null
@@ -229,7 +236,6 @@ class Segment
     @send.symbol      = symbol
     @send.over        = => @send symbol.over
     @send.exit        = => @send symbol.exit
-    @send.call_count  = 0
     # GUY.props.hide segment, 'send', send
     # GUY.props.hide segment, 'call', call
     # @pipeline.push        segment
@@ -439,7 +445,7 @@ class Moonriver
   #---------------------------------------------------------------------------------------------------------
   drive: ( cfg ) ->
     throw new Error "^moonriver@8^ pipeline is not repeatable" unless @_on_drive_start()
-    R = @_drive cfg
+    R     = @_drive cfg
     for segment in @on_once_after_last
       segment.call symbol.drop
       # @_drive { continue: true, first_idx: segment.idx, }
@@ -454,12 +460,14 @@ class Moonriver
     first_idx       = cfg.first_idx
     last_idx        = cfg.last_idx
     last_idx        = if last_idx >= 0 then last_idx else @segments.length + last_idx
+    do_exit         = false
     ### TAINT check for last_idx >= first_idx, last_idx < segments.length and so on ###
     return null if @segments.length is 0
     unless cfg.continue
-      segment.set_is_over false for segment in @segments
-      segment.set_is_over false for segment in @on_once_after_last
-    do_exit         = false
+      for collection in [ @segments, @on_once_after_last, ]
+        for segment in collection
+          segment.set_call_count  0
+          segment.set_is_over     false
     #.......................................................................................................
     ###
     for segment in @on_once_before
