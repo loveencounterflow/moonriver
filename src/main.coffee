@@ -45,6 +45,16 @@ pluck = ( o, k, fallback = undefined ) ->
 #===========================================================================================================
 #
 #-----------------------------------------------------------------------------------------------------------
+types.declare 'mrv_modifiers', tests:
+  "@isa.object x":                        ( x ) -> @isa.object x
+  "@isa.boolean x.is_source":             ( x ) -> @isa.boolean x.is_source
+  "@isa.boolean x.once_before_first":     ( x ) -> @isa.boolean x.once_before_first
+  "@isa.boolean x.once_after_last":       ( x ) -> @isa.boolean x.once_after_last
+
+
+#===========================================================================================================
+#
+#-----------------------------------------------------------------------------------------------------------
 class Duct
 
   #---------------------------------------------------------------------------------------------------------
@@ -364,15 +374,12 @@ class Modified_transform
   #---------------------------------------------------------------------------------------------------------
   constructor: ( modifiers..., transform ) ->
     @modifiers                = Object.assign {}, modifiers...
+    validate.mrv_modifiers @modifiers
     for key of @modifiers
       continue if @constructor.C.known_modifications.has key
       throw new Error "^moonriver@7^ unknown modifiers key #{rpr key}"
-    # @modifiers.do_once_before = true if @modifiers.once_before  isnt undefined
     # @modifiers.do_first       = true if @modifiers.first        isnt undefined
     # @modifiers.do_last        = true if @modifiers.last         isnt undefined
-    # @modifiers.do_once_after  = true if @modifiers.once_after   isnt undefined
-    @modifiers.once_after_last  = modifiers.once_after_last if modifiers.once_after_last?
-    @modifiers.is_source        = modifiers.is_source if modifiers.is_source?
     @transform                  = transform
     return undefined
 
