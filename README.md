@@ -117,12 +117,16 @@ mr.drive()
   * *not* called if pipeline should be empty;
   * **NB** transforms modified with `last` can send values, but not after the point the transform has been
     called with the associated value for `last` as the pipeline has already finished by then.
-* `once_after`:
-  * called exactly once;
-  * called with the associated value;
-  * called *after* any data is sent down pipeline;
-  * *always* called, even if pipeline should be empty;
-  * **NB** transforms modified with `once_after` *must* take a single argument and can never send values.
+* `once_after_last`:
+  * a boolean;
+  * transform must be unary with signature `( send ) ->`, so no data passed in
+  * transform to be called exactly once per turn *after* all other data is sent down pipeline;
+  * *always* called, even if pipeline should be empty.
+
+
+* Modes
+  * `drive()` can use modes `breadth`, `depth`; proper ordering of data items only guaranteed in mode
+    `breadth` (the default)
 
 ## To Do
 
