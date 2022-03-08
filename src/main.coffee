@@ -36,10 +36,14 @@ add_length_prop = ( target, key ) ->
     set: ( x )  -> @[ key ].length = x
 
 #-----------------------------------------------------------------------------------------------------------
-pluck = ( o, k, fallback = undefined ) ->
+pluck = ( o, k, fallback = symbol.misfit ) ->
   R = o[ k ]
   delete o[ k ]
-  return if R is undefined then fallback else R
+  if R is undefined
+    return fallback unless fallback is symbol.misfit
+    throw new Error "^moonriver@1^ unknown property #{rpr k}"
+  return R
+
 
 
 #===========================================================================================================
