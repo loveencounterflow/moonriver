@@ -422,9 +422,9 @@ class Moonriver
       else
         segment.set_input new Duct { on_change: @on_change, }
       segment.set_output new Duct { on_change: @on_change, is_oblivious: true, }
-      @segments.push  segment
-    @sources.push   segment if segment.is_source
-    return null
+      @segments.push segment
+    @sources.push segment if segment.is_source
+    return segment
 
   #---------------------------------------------------------------------------------------------------------
   on_change: ( delta ) =>
