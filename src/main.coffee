@@ -259,7 +259,7 @@ class Segment
           when 0
             throw new Error "^moonriver@2^ zero-arity transform not implemented"
           when 1
-            is_sender = false
+            is_sender = modifiers.once_after_last is true
             transform = raw_transform
           when 2
             transform = raw_transform
