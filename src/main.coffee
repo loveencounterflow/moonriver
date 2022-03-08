@@ -423,13 +423,11 @@ class Moonriver
   push: ( transform ) ->
     segment = new Segment transform, @segments.length
     #.......................................................................................................
-    if segment.modifiers.once_before_first
-      @push moal_helper = ( d, send ) -> send d
+    if segment.modifiers.once_before_first or segment.modifiers.once_after_last
+      if segment.modifiers.once_before_first then @push bfirst = ( d, send ) -> send d
+      else                                        @push alast  = ( d, send ) -> send d
+      segment.set_output @last_segment.input
       @on_once_before_first.push segment
-    #.......................................................................................................
-    else if segment.modifiers.once_after_last
-      @push moal_helper = ( d, send ) -> send d
-      @on_once_after_last.push segment
     #.......................................................................................................
     else
       if ( last_segment = @last_segment )?
