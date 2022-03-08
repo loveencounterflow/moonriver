@@ -281,8 +281,9 @@ class Segment
             is_sender = modifiers.once_after_last is true
             transform = raw_transform
           when 2
-            if modifiers.once_after_last is true
-              throw new Error "^moonriver@2^ transform with arity 2 not implemented for modifier once_after_last"
+            if modifiers.once_before_first or modifiers.once_after_last
+              throw new Error "^moonriver@2^ transform with arity 2 not implemented for modifiers " \
+                + "once_before_first, once_after_last"
             transform = raw_transform
           else
             throw new Error "^moonriver@3^ transform with arity #{arity} not implemented"
@@ -452,8 +453,6 @@ class Moonriver
 
   #=========================================================================================================
   #
-  #---------------------------------------------------------------------------------------------------------
-
   #---------------------------------------------------------------------------------------------------------
   drive: ( cfg ) ->
     throw new Error "^moonriver@8^ pipeline is not repeatable" unless @sources_are_repeatable
