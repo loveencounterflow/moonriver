@@ -244,15 +244,15 @@ class Segment
   _get_transform: ( raw_transform ) ->
     if ( type_of raw_transform ) is 'modified_transform'
       modifiers = raw_transform.modifiers
-      transform = @_get_transform_2 raw_transform.transform
+      transform = @_get_transform_2 raw_transform.transform, modifiers
     else
       modifiers = {}
-      transform = @_get_transform_2 raw_transform
+      transform = @_get_transform_2 raw_transform, modifiers
     #.......................................................................................................
     return { modifiers, transform..., }
 
   #---------------------------------------------------------------------------------------------------------
-  _get_transform_2: ( raw_transform ) ->
+  _get_transform_2: ( raw_transform, modifiers ) ->
     is_source     = false
     is_sender     = true
     is_repeatable = true
