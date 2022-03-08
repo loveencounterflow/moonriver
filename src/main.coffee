@@ -210,7 +210,7 @@ class Segment
     @is_repeatable    = is_repeatable
     #...................................................................................................
     if @is_sender
-      if @modifiers.once_after_last
+      if @modifiers.once_before_first or @modifiers.once_after_last
         @call = ( d ) =>
           @call_count++
           @transform @modifiers.first, @send if ( @call_count is 1 ) and @modifiers.do_first

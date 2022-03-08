@@ -100,7 +100,7 @@ mr.drive()
 
 #### Modifiers
 
-* `once_before`:
+* `once_before_first`:
   * called exactly once;
   * called with the associated value;
   * called *before* any data is sent down pipeline;
@@ -130,7 +130,7 @@ mr.drive()
 
 ## To Do
 
-* consider to make modifiers `last` and `once_after` mutually exclusive
+* make modifiers `first`, `last` mutually exclusive with both `once_before_first` `once_after_last`
 * consider to mark `first`, `last` etc. on `send()`
 * turn more attributes into fiddle-proof managed properties
 * use callback-based messaging for `is_over` so no more iteration over sources to find which ones have
