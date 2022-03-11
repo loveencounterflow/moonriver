@@ -135,7 +135,7 @@ mr.drive()
 * turn more attributes into fiddle-proof managed properties
 * use callback-based messaging for `is_over` so no more iteration over sources to find which ones have
   finished (NB any transform can announce `over`)
-
+* validate input to `new Moonriver()`
 
 
 
