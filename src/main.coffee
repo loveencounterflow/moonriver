@@ -155,10 +155,12 @@ class Duct
 class Segment
 
   #---------------------------------------------------------------------------------------------------------
-  constructor: ( raw_transform, idx ) ->
+  constructor: ( moonriver, raw_transform, idx, protocol = null ) ->
   # constructor: ( modifiers..., raw_transform ) ->
   #   throw new Error "^segment@1^ modifiers not implemented" if modifiers.length > 0
+    @moonriver        = moonriver
     validate_optional.list protocol
+    @protocol         = protocol
     @idx              = idx
     @call_count       = 0
     @input            = null
@@ -238,7 +240,7 @@ class Segment
         @send d
         return null
     #...................................................................................................
-    @send = ( d ) =>
+    send = ( d ) =>
       switch d
         when symbol.drop  then  null
         when symbol.over  then  @set_is_over true
@@ -249,6 +251,16 @@ class Segment
               + "error occurred in segment idx #{@idx} (#{rpr @_name_of_transform()})"
           @output.push d
       return null
+    #...................................................................................................
+    if @protocol?
+      @send = ( d ) =>
+        send d
+        p         = { idx: @idx, call_count: @call_count, turns: @moonriver.turns, d, }
+        p[ idx ]  = ( if idx is @idx then d else null ) for idx in [ 0 ... @moonriver.length ]
+        @protocol.push p 
+        return null
+    else
+      @send = send
     #...................................................................................................
     @send.symbol      = symbol
     @send.over        = => @send symbol.over
@@ -415,10 +427,11 @@ class Moonriver
   @$: ( modifiers..., transform ) -> new Modified_transform modifiers..., transform
 
   #---------------------------------------------------------------------------------------------------------
-  constructor: ( transforms = null ) ->
+  constructor: ( cfg ) ->
     @types                = types
     cfg                   = { @constructor.C.defaults.constructor..., cfg..., }
     @types.validate.mirage_cfg cfg
+    @protocol             = pluck cfg, 'protocol', null
     @cfg                  = GUY.lft.freeze cfg
     @data_count           = 0
     @segments             = []
@@ -443,7 +456,7 @@ class Moonriver
 
   #---------------------------------------------------------------------------------------------------------
   push: ( transform ) ->
-    segment = new Segment transform, @segments.length
+    segment = new Segment @, transform, @segments.length, @protocol
     #.......................................................................................................
     if segment.modifiers.once_before_first or segment.modifiers.once_after_last
       if segment.modifiers.once_before_first then @push bfirst = ( d, send ) -> send d
