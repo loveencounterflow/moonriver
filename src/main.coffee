@@ -17,7 +17,8 @@ GUY                       = require 'guy'
 types                     = new ( require 'intertype' ).Intertype()
 { isa
   type_of
-  validate }              = types
+  validate
+  validate_optional }     = types
 # { Moonriver }             = require '../../../apps/moonriver'
 UTIL                      = require 'util'
 
@@ -54,6 +55,11 @@ types.declare 'mrv_modifiers', tests:
   "@isa.boolean x.is_source":             ( x ) -> @isa.boolean x.is_source
   "@isa.boolean x.once_before_first":     ( x ) -> @isa.boolean x.once_before_first
   "@isa.boolean x.once_after_last":       ( x ) -> @isa.boolean x.once_after_last
+
+#-----------------------------------------------------------------------------------------------------------
+types.declare 'mirage_cfg', tests:
+  "@isa.object x":                        ( x ) -> @isa.object x
+  "@isa_optional.list x.protocol":        ( x ) -> @isa_optional.list x.protocol
 
 
 #===========================================================================================================
@@ -152,6 +158,7 @@ class Segment
   constructor: ( raw_transform, idx ) ->
   # constructor: ( modifiers..., raw_transform ) ->
   #   throw new Error "^segment@1^ modifiers not implemented" if modifiers.length > 0
+    validate_optional.list protocol
     @idx              = idx
     @call_count       = 0
     @input            = null
@@ -399,10 +406,20 @@ class Modified_transform
 class Moonriver
 
   #---------------------------------------------------------------------------------------------------------
+  @C: GUY.lft.freeze
+    defaults:
+      constructor:
+        protocol:    null
+
+  #---------------------------------------------------------------------------------------------------------
   @$: ( modifiers..., transform ) -> new Modified_transform modifiers..., transform
 
   #---------------------------------------------------------------------------------------------------------
   constructor: ( transforms = null ) ->
+    @types                = types
+    cfg                   = { @constructor.C.defaults.constructor..., cfg..., }
+    @types.validate.mirage_cfg cfg
+    @cfg                  = GUY.lft.freeze cfg
     @data_count           = 0
     @segments             = []
     @turns                = 0
@@ -415,7 +432,7 @@ class Moonriver
     @on_once_after_last   = []
     @user                 = {} ### user area for sharing state between transforms, etc ###
     add_length_prop @, 'segments'
-    @push transform for transform from transforms if transforms?
+    # @push transform for transform from transforms if transforms?
     #.......................................................................................................
     GUY.props.def @, 'sources_are_repeatable',  get: => @sources.every ( x ) -> x.is_repeatable
     GUY.props.def @, 'can_repeat',              get: => @turns is 0 or @is_repeatable
