@@ -501,11 +501,6 @@ class Moonriver
       segment.call symbol.drop
       R = @_drive { continue: true, }
     #.......................................................................................................
-    for segment in @on_first
-      # continue if segment.is_over ### (???) ###
-      segment.call segment.modifiers.values.first
-      R = @_drive { continue: true, }
-    #.......................................................................................................
     R = @_drive cfg
     #.......................................................................................................
     for segment in @on_last
@@ -545,6 +540,9 @@ class Moonriver
           ### TAINT code duplication ###
           segment._transfer()
           continue
+        #...................................................................................................
+        if ( segment.modifiers.first ? false ) and ( segment.call_count is 0 )
+          segment.call segment.modifiers.values.first
         #...................................................................................................
         if segment.is_source
             ### If current segment is a source, trigger the transform with a discardable `drop` value: ###
