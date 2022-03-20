@@ -242,10 +242,10 @@ class Segment
           return null
     #...................................................................................................
     else
-      @call = ( d ) =>
+      @call = ( d, forward = true ) =>
         @call_count++
         @transform d
-        @send d
+        @send d if forward
         return null
     #...................................................................................................
     send = ( d ) =>
@@ -524,7 +524,7 @@ class Moonriver
     #.......................................................................................................
     for segment in @on_last
       # continue if segment.is_over ### (???) ###
-      segment.call segment.modifiers.values.last
+      segment.call segment.modifiers.values.last, false ### forward ###
       R = @_drive cfg
     #.......................................................................................................
     for segment in @on_once_after_last
@@ -558,7 +558,7 @@ class Moonriver
           continue
         #...................................................................................................
         if ( segment.modifiers.first ? false ) and ( segment.call_count is 0 )
-          segment.call segment.modifiers.values.first
+          segment.call segment.modifiers.values.first, false ### forward ###
         #...................................................................................................
         if segment.is_source
             ### If current segment is a source, trigger the transform with a discardable `drop` value: ###
