@@ -265,7 +265,7 @@ class Segment
         send d
         p         = { idx: @idx, call_count: @call_count, turns: @moonriver.turns, d, }
         p[ idx ]  = ( if idx is @idx then d else null ) for idx in [ 0 ... @moonriver.length ]
-        @protocol.push p 
+        @protocol.push p
         return null
     else
       @send = send
@@ -505,7 +505,7 @@ class Moonriver
   drive: ( cfg ) ->
     throw new Error "^moonriver@12^ pipeline is not repeatable" unless @sources_are_repeatable
     @turns++
-    cfg = { @constructor.C.defaults.drive_cfg..., cfg..., } 
+    cfg = { @constructor.C.defaults.drive_cfg..., cfg..., }
     @types.validate.drive_cfg cfg
     unless cfg.resume
       for collection in [ @segments, @on_once_before_first, @on_once_after_last, ]
@@ -541,7 +541,7 @@ class Moonriver
     loop
       for idx in [ first_idx .. last_idx ]
         segment = @segments[ idx ]
-        # debug '^443^', ( @toString idx ), { XXX_count: @XXX_count, idx, data_count: @data_count, }, segment
+        # debug '^443^', ( @toString idx ), segment.modifiers?.once_after_last, segment.modifiers?.once_before_first
         #...................................................................................................
         # if ( segment.is_over or not segment.is_listener )
         if segment.is_over
