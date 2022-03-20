@@ -61,6 +61,14 @@ types.declare 'mirage_cfg', tests:
   "@isa.object x":                        ( x ) -> @isa.object x
   "@isa_optional.list x.protocol":        ( x ) -> @isa_optional.list x.protocol
 
+#-----------------------------------------------------------------------------------------------------------
+types.declare 'drive_cfg', tests:
+  "@isa.object x":                        ( x ) -> @isa.object x
+  "@isa.integer x.first_idx":             ( x ) -> @isa.integer x.first_idx
+  "@isa.integer x.last_idx":              ( x ) -> @isa.integer x.last_idx
+  "x.mode in [ 'breadth', 'depth', ]":    ( x ) -> x.mode in [ 'breadth', 'depth', ]
+  "@isa.boolean x.resume":                ( x ) -> @isa.boolean x.resume
+
 
 #===========================================================================================================
 #
@@ -422,6 +430,11 @@ class Moonriver
     defaults:
       constructor:
         protocol:    null
+      drive_cfg:
+        mode:         'breadth'
+        first_idx:    0
+        last_idx:     -1
+        resume:       false
 
   #---------------------------------------------------------------------------------------------------------
   @$: ( modifiers..., transform ) -> new Modified_transform modifiers..., transform
@@ -492,32 +505,32 @@ class Moonriver
   drive: ( cfg ) ->
     throw new Error "^moonriver@12^ pipeline is not repeatable" unless @sources_are_repeatable
     @turns++
-    for collection in [ @segments, @on_once_before_first, @on_once_after_last, ]
-      for segment in collection
-        segment.set_call_count  0
-        segment.set_is_over     false
+    cfg = { @constructor.C.defaults.drive_cfg..., cfg..., } 
+    @types.validate.drive_cfg cfg
+    unless cfg.resume
+      for collection in [ @segments, @on_once_before_first, @on_once_after_last, ]
+        for segment in collection
+          segment.set_call_count  0
+          segment.set_is_over     false
     #.......................................................................................................
     for segment in @on_once_before_first
       segment.call symbol.drop
-      R = @_drive { continue: true, }
+      R = @_drive cfg
     #.......................................................................................................
     R = @_drive cfg
     #.......................................................................................................
     for segment in @on_last
       # continue if segment.is_over ### (???) ###
       segment.call segment.modifiers.values.last
-      R = @_drive { continue: true, }
+      R = @_drive cfg
     #.......................................................................................................
     for segment in @on_once_after_last
       segment.call symbol.drop
-      R = @_drive { continue: true, }
+      R = @_drive cfg
     return R
 
   #---------------------------------------------------------------------------------------------------------
   _drive: ( cfg ) ->
-    ### TAINT validate `cfg` ###
-    defaults        = { mode: 'breadth', first_idx: 0, last_idx: -1, }
-    cfg             = { defaults..., cfg..., }
     first_idx       = cfg.first_idx
     last_idx        = cfg.last_idx
     last_idx        = if last_idx >= 0 then last_idx else @segments.length + last_idx
@@ -571,7 +584,8 @@ class Moonriver
   #---------------------------------------------------------------------------------------------------------
   send: ( d ) ->
     @segments[ 0 ].input.push d unless d is symbol.drop
-    @_drive()
+    return @_drive @constructor.C.defaults.drive_cfg
+
 
   #=========================================================================================================
   #
