@@ -242,11 +242,17 @@ class Segment
           return null
     #...................................................................................................
     else
-      @call = ( d, forward = true ) =>
-        @call_count++
-        @transform d
-        @send d if forward
-        return null
+      if @modifiers.once_before_first or @modifiers.once_after_last
+        @call = ( d ) =>
+          @call_count++
+          @transform()
+          return null
+      else
+        @call = ( d, forward = true ) =>
+          @call_count++
+          @transform d
+          @send d if forward
+          return null
     #...................................................................................................
     send = ( d ) =>
       switch d
@@ -296,6 +302,11 @@ class Segment
     switch type = type_of raw_transform
       when 'function'
         switch ( arity = raw_transform.length )
+          when 0
+            unless modifiers.once_before_first or modifiers.once_after_last
+              throw new Error "^moonriver@7^ transform with arity #{arity} not implemented"
+            is_sender = false
+            transform = raw_transform
           when 1
             is_sender = modifiers.once_before_first or modifiers.once_after_last
             transform = raw_transform
