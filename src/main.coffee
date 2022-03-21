@@ -544,6 +544,7 @@ class Moonriver
     loop
       for idx in [ first_idx .. last_idx ]
         segment = @segments[ idx ]
+        return null if segment.has_exited
         # debug '^443^', ( @toString idx ), segment.modifiers?.once_after_last, segment.modifiers?.once_before_first
         #...................................................................................................
         # if ( segment.is_over or not segment.is_listener )
