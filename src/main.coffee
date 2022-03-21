@@ -297,7 +297,7 @@ class Segment
       when 'function'
         switch ( arity = raw_transform.length )
           when 1
-            is_sender = modifiers.once_after_last is true
+            is_sender = modifiers.once_before_first or modifiers.once_after_last
             transform = raw_transform
           when 2
             if modifiers.once_before_first or modifiers.once_after_last
