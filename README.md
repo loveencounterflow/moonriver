@@ -130,12 +130,13 @@ mr.drive()
 
 ## To Do
 
-* make modifiers `first`, `last` mutually exclusive with both `once_before_first` `once_after_last`
-* consider to mark `first`, `last` etc. on `send()`
-* turn more attributes into fiddle-proof managed properties
-* use callback-based messaging for `is_over` so no more iteration over sources to find which ones have
+* **[–]** make modifiers `first`, `last` mutually exclusive with both `once_before_first` `once_after_last`
+* **[–]** consider to mark `first`, `last` etc. on `send()`
+* **[–]** turn more attributes into fiddle-proof managed properties
+* **[–]** use callback-based messaging for `is_over` so no more iteration over sources to find which ones have
   finished (NB any transform can announce `over`)
-* validate input to `new Moonriver()`
+* **[–]** validate input to `new Moonriver()`
+* **[–]** do not send any value into transforms modified as `once_before_first`, `once_after_last`
 
 
 
