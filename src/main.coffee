@@ -325,6 +325,9 @@ class Segment
       when 'list'
         is_source       = true
         transform       = @_source_from_list raw_transform
+      # when 'readstream'
+      #   is_source       = true
+      #   transform       = @_source_from_readstream raw_transform
       else
         if ( type is 'generator' ) or ( isa.function raw_transform[ Symbol.iterator ] )
           is_repeatable   = false
@@ -361,6 +364,13 @@ class Segment
       return send value unless done
       send.over()
       return null
+
+  # #---------------------------------------------------------------------------------------------------------
+  # _source_from_readstream: ( readstream ) ->
+  #   readlines = ( require 'streaming-lines' ).readlines
+  #   return streamΔ = ( d, send ) ->
+  #     debug '^25323^', d
+  #     await readlines __filename, ( line ) => info '^354^', line; send line
 
   #---------------------------------------------------------------------------------------------------------
   _source_from_list: ( list ) ->
