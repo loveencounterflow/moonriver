@@ -16,6 +16,7 @@
     - [The Remit Method `$()`](#the-remit-method-)
       - [Modifiers](#modifiers)
   - [To Do](#to-do)
+  - [Is Done](#is-done)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
@@ -137,6 +138,11 @@ mr.drive()
   finished (NB any transform can announce `over`)
 * **[–]** validate input to `new Moonriver()`
 * **[–]** do not send any value into transforms modified as `once_before_first`, `once_after_last`
+* **[–]** review usage of `is_repeatable` in `drive()`
+
+## Is Done
+
+* **[+]** sort-of fixed behavior of `is_repeatable` in `drive()`
 
 
 
