@@ -457,6 +457,7 @@ class Moonriver
     @types.validate.mirage_cfg cfg
     @protocol             = pluck cfg, 'protocol', null
     @cfg                  = GUY.lft.freeze cfg
+    @has_run              = false
     @data_count           = 0
     @segments             = []
     @turns                = 0
@@ -517,7 +518,9 @@ class Moonriver
   #
   #---------------------------------------------------------------------------------------------------------
   drive: ( cfg ) ->
-    throw new Error "^moonriver@12^ pipeline is not repeatable" unless @sources_are_repeatable
+    if @has_run and @sources_are_repeatable
+      throw new Error "^moonriver@12^ pipeline is not repeatable"
+    @has_run = true
     @turns++
     cfg = { @constructor.C.defaults.drive_cfg..., cfg..., }
     @types.validate.drive_cfg cfg
