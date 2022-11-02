@@ -66,11 +66,12 @@ types.declare 'mirage_cfg', tests:
 
 #-----------------------------------------------------------------------------------------------------------
 types.declare 'drive_cfg', tests:
-  "@isa.object x":                        ( x ) -> @isa.object x
-  "@isa.integer x.first_idx":             ( x ) -> @isa.integer x.first_idx
-  "@isa.integer x.last_idx":              ( x ) -> @isa.integer x.last_idx
-  "x.mode in [ 'breadth', 'depth', ]":    ( x ) -> x.mode in [ 'breadth', 'depth', ]
-  "@isa.boolean x.resume":                ( x ) -> @isa.boolean x.resume
+  "@isa.object x":                                  ( x ) -> @isa.object x
+  "@isa.integer x.first_idx":                       ( x ) -> @isa.integer x.first_idx
+  "@isa.integer x.last_idx":                        ( x ) -> @isa.integer x.last_idx
+  "x.mode in [ 'breadth', 'depth', ]":              ( x ) -> x.mode in [ 'breadth', 'depth', ]
+  "@isa.boolean x.resume":                          ( x ) -> @isa.boolean x.resume
+  "( x.laps is Infinity ) or @isa.cardinal x.laps": ( x ) -> ( x.laps is Infinity ) or @isa.cardinal x.laps
 
 
 #===========================================================================================================
@@ -459,6 +460,7 @@ class Moonriver
         first_idx:    0
         last_idx:     -1
         resume:       false
+        laps:         Infinity
 
   #---------------------------------------------------------------------------------------------------------
   @$: ( modifiers..., transform ) -> new Modified_transform modifiers..., transform
@@ -568,7 +570,12 @@ class Moonriver
     ### TAINT check for last_idx >= first_idx, last_idx < segments.length and so on ###
     return null if @segments.length is 0
     #.......................................................................................................
+    lap_count = 0
     loop
+      lap_count++
+      if lap_count > cfg.laps
+        lap_count = 0
+        break
       for idx in [ first_idx .. last_idx ]
         segment = @segments[ idx ]
         return null if segment.has_exited
@@ -604,6 +611,8 @@ class Moonriver
         #...................................................................................................
         ### Stop processing if the `exit` signal has been received: ###
         if segment.exit then do_exit = true; break
+        # debug '^7457567^', { idx, }
+        # if idx is last_idx then do_exit = true; break
       break if do_exit
       #.....................................................................................................
       ### When all sources have called it quits and no more input queues have data, end processing: ###
