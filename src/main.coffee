@@ -3,23 +3,26 @@
 
 
 ############################################################################################################
-CND                       = require 'cnd'
-rpr                       = CND.rpr
-badge                     = 'MOONRIVER'
-debug                     = CND.get_logger 'debug',     badge
-warn                      = CND.get_logger 'warn',      badge
-info                      = CND.get_logger 'info',      badge
-urge                      = CND.get_logger 'urge',      badge
-help                      = CND.get_logger 'help',      badge
-whisper                   = CND.get_logger 'whisper',   badge
-echo                      = CND.echo.bind CND
 GUY                       = require 'guy'
+{ alert
+  debug
+  help
+  info
+  plain
+  praise
+  urge
+  warn
+  whisper }               = GUY.trm.get_loggers 'MOONRIVER'
+{ rpr
+  inspect
+  echo
+  log     }               = GUY.trm
+#...........................................................................................................
 types                     = new ( require 'intertype' ).Intertype()
 { isa
   type_of
   validate
   validate_optional }     = types
-# { Moonriver }             = require '../../../apps/moonriver'
 UTIL                      = require 'util'
 
 #-----------------------------------------------------------------------------------------------------------
@@ -623,14 +626,14 @@ class Moonriver
   #---------------------------------------------------------------------------------------------------------
   toString: ( current_idx ) ->
     parts       = []
-    joiner      = CND.grey ' ▶︎ '
+    joiner      = GUY.trm.grey ' ▶︎ '
     prv_output  = null
     for segment, idx in @segments
-      parts.push CND.green rpr segment.input unless segment.input is prv_output
+      parts.push GUY.trm.green rpr segment.input unless segment.input is prv_output
       parts.push \
-        if idx is current_idx then CND.reverse  CND.gold segment._name_of_transform() \
-        else                                    CND.gold segment._name_of_transform()
-      parts.push CND.green rpr segment.output
+        if idx is current_idx then GUY.trm.reverse  GUY.trm.gold segment._name_of_transform() \
+        else                                    GUY.trm.gold segment._name_of_transform()
+      parts.push GUY.trm.green rpr segment.output
       prv_output = segment.output
     return parts.join joiner
     # return parts.join ' — '
