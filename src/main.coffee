@@ -531,7 +531,7 @@ class Moonriver
   #
   #---------------------------------------------------------------------------------------------------------
   drive: ( cfg ) ->
-    if @has_run and @sources_are_repeatable
+    if @has_run and not @sources_are_repeatable
       throw new Error "^moonriver@12^ pipeline is not repeatable"
     @has_run = true
     @turns++
