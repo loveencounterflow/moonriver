@@ -22,8 +22,7 @@
   },
   "homepage": "https://github.com/loveencounterflow/moonriver#readme",
   "dependencies": {
-    "cnd": "^9.2.2",
-    "guy": "4.1.1",
+    "guy": "11.13.0",
     "intertype": "^7.7.0"
   }
 }

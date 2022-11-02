@@ -1,36 +1,30 @@
 lockfileVersion: 5.4
 
 specifiers:
-  cnd: ^9.2.2
-  guy: 4.1.1
+  guy: 11.13.0
   intertype: ^7.7.0
 
 dependencies:
-  cnd: 9.2.2
-  guy: 4.1.1
+  guy: 11.13.0
   intertype: 7.7.0
 
 packages:
 
-  /cnd/9.2.2:
-    resolution: {integrity: sha512-F+/H+7luk4fZkvN0+MT0I2nwn80YM/EtfMttNUFxENR50XJH4g0KgQevzeyEJ8B6t6l8Tb4Xti6QAksa8DmePA==}
-    hasBin: true
-    dependencies:
-      jsx-number-format: 0.1.4
-    dev: false
-
-  /guy/4.1.1:
-    resolution: {integrity: sha512-UbgOt6JBt+OVR7FJ8Rj9B6M5o6Hllmsu8YDn3Vv6A5J8sI7JhfXOsDbdo60QpvbU8ocSk7/bUrn5KgpcokwxPw==}
+  /guy/11.13.0:
+    resolution: {integrity: sha512-IgEGJqibhhwf2/XynDwIjQUGr6rTGpEXQQuLhpNPH6+jyphFnZkZFLhrvRhI7jp/tjlrb54eqLMGUEUURoKNPw==}
     peerDependencies:
-      exit-hook: 2.2.1
+      acorn: ^8.7.1
+      acorn-loose: ^8.3.0
+      acorn-walk: ^8.2.0
+      astring: ^1.8.3
+      tmp: ^0.2.1
     dependencies:
-      cnd: 9.2.2
-      intertype: 7.6.7
+      intertype-legacy: 7.7.1
       letsfreezethat: 3.1.0
     dev: false
 
-  /intertype/7.6.7:
-    resolution: {integrity: sha512-vBgYabqxX3fLa9f0Z3QeXgYszadAGdAHXdLcdQc5ZxZSG5CmbJCdYcudZLYtgmNo8epQag8zzyg7wwx+OD5J8g==}
+  /intertype-legacy/7.7.1:
+    resolution: {integrity: sha512-Bj3k9bCu8vA6JLIvnCrJXOdkecgY5wtCmORclJ87uq22N53swREHT5bezSeK5TwcxgSJEDg2wEfcn4kNr9Qv8A==}
     dependencies:
       multimix: 5.0.0
     dev: false
@@ -39,10 +33,6 @@ packages:
     resolution: {integrity: sha512-Sv923oXpq9In8/CuxP5KAKc3FIETOEl23ltwSfLOnn/8V8A5pDRlxWo0vhaA6p7WybRMgeZXsE4Etw98tWUMPA==}
     dependencies:
       multimix: 5.0.0
-    dev: false
-
-  /jsx-number-format/0.1.4:
-    resolution: {integrity: sha512-uPc/Q90XqZoRE7Cu1OLFQB2cSrA2Dy8+okzPOtML8vbagNFDSipbndIPme+q0odBjEhL+wf3WH3Wo52was4Tsg==}
     dev: false
 
   /letsfreezethat/3.1.0:
