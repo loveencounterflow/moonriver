@@ -491,6 +491,7 @@ class Moonriver
     GUY.props.def @, 'can_repeat',              get: => @turns is 0 or @is_repeatable
     GUY.props.def @, 'first_segment',           get: => @segments[ 0 ]
     GUY.props.def @, 'last_segment',            get: => @segments[ @segments.length - 1 ]
+    GUY.props.def @, 'is_over',                 get: => @sources.every ( source ) -> source.is_over
     #.......................................................................................................
     return undefined
 
@@ -521,6 +522,13 @@ class Moonriver
     @on_first.push segment if segment.modifiers.first
     return segment
 
+  # #---------------------------------------------------------------------------------------------------------
+  # _pop: ->
+  #   @sources.pop()
+  #   if ( last_segment = @last_segment )?
+  #     last_segment.output.set_oblivious true
+  #   return null
+
   #---------------------------------------------------------------------------------------------------------
   on_change: ( delta ) =>
     @data_count += delta
@@ -531,6 +539,43 @@ class Moonriver
 
   #=========================================================================================================
   #
+  #---------------------------------------------------------------------------------------------------------
+  walk: ( cfg ) ->
+    if @has_run and not @sources_are_repeatable
+      throw new Error "^moonriver@12^ pipeline is not repeatable"
+    @has_run = true
+    @turns++
+    cfg = { @constructor.C.defaults.drive_cfg..., cfg..., }
+    @types.validate.drive_cfg cfg
+    return null unless ( last_segment = @last_segment )?
+    last_segment.output.set_oblivious false
+    collector = last_segment.output
+    @push ( d ) -> collector.push d
+    try
+      for collection in [ @segments, @on_once_before_first, @on_once_after_last, ]
+        for segment in collection
+          segment.set_call_count  0
+          segment.set_is_over     false
+      #.......................................................................................................
+      for segment in @on_once_before_first
+        segment.call symbol.drop
+        @_drive cfg; yield d for d in collector; collector.length = 0
+      #.......................................................................................................
+      @_drive cfg; yield d for d in collector; collector.length = 0
+      #.......................................................................................................
+      for segment in @on_last
+        # continue if segment.is_over ### (???) ###
+        segment.call segment.modifiers.values.last, false ### forward ###
+        @_drive cfg; yield d for d in collector; collector.length = 0
+      #.......................................................................................................
+      for segment in @on_once_after_last
+        segment.call symbol.drop
+        @_drive cfg; yield d for d in collector; collector.length = 0
+    finally
+      last_segment.output.set_oblivious true
+      # @_pop()
+    return null
+
   #---------------------------------------------------------------------------------------------------------
   drive: ( cfg ) ->
     if @has_run and not @sources_are_repeatable
