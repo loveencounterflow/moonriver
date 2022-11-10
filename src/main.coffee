@@ -12,690 +12,279 @@ GUY                       = require 'guy'
   praise
   urge
   warn
-  whisper }               = GUY.trm.get_loggers 'MOONRIVER'
+  whisper }               = GUY.trm.get_loggers 'MOONRIVER/NG'
 { rpr
   inspect
   echo
   log     }               = GUY.trm
 #...........................................................................................................
-types                     = new ( require 'intertype' ).Intertype()
-{ isa
-  type_of
-  validate
-  validate_optional }     = types
-UTIL                      = require 'util'
-
-#-----------------------------------------------------------------------------------------------------------
-symbol                    = GUY.lft.freeze
-  misfit:     Symbol.for 'misfit' # indicates missing value
-  drop:       Symbol.for 'drop'   # this value will not go to output
-  exit:       Symbol.for 'exit'   # exit pipeline processing
-  # done:       Symbol.for 'done' # done for this iteration
-  over:       Symbol.for 'over'   # do not call again in this round
-
-#-----------------------------------------------------------------------------------------------------------
-add_length_prop = ( target, key ) ->
-  GUY.props.def target, 'length',
-    get:        -> @[ key ].length
-    set: ( x )  -> @[ key ].length = x
-
-#-----------------------------------------------------------------------------------------------------------
-pluck = ( o, k, fallback = symbol.misfit ) ->
-  R = o[ k ]
-  delete o[ k ]
-  if R is undefined
-    return fallback unless fallback is symbol.misfit
-    throw new Error "^moonriver@1^ unknown property #{rpr k}"
-  return R
-
+types                     = null
+UTIL                      = require 'node:util'
+{ hide
+  def }                   = GUY.props
+nameit                    = ( name, f ) -> def f, 'name', { value: name, }
+stf_prefix                = '_source_transform_from_'
 
 
 #===========================================================================================================
-#
-#-----------------------------------------------------------------------------------------------------------
-types.declare 'mrv_modifiers', tests:
-  "@isa.object x":                        ( x ) -> @isa.object x
-  "@isa.boolean x.is_source":             ( x ) -> @isa.boolean x.is_source
-  "@isa.boolean x.once_before_first":     ( x ) -> @isa.boolean x.once_before_first
-  "@isa.boolean x.once_after_last":       ( x ) -> @isa.boolean x.once_after_last
+get_types = ->
+  return types if types?
+  types = new ( require 'intertype' ).Intertype()
 
-#-----------------------------------------------------------------------------------------------------------
-types.declare 'mirage_cfg', tests:
-  "@isa.object x":                        ( x ) -> @isa.object x
-  "@isa_optional.list x.protocol":        ( x ) -> @isa_optional.list x.protocol
+  #---------------------------------------------------------------------------------------------------------
+  source_fitting_types  = new Set do =>
+    ( name.replace stf_prefix, '' \
+      for name in ( Object.getOwnPropertyNames Segment:: ) \ ### thx to https://stackoverflow.com/a/31055009/7568091 ###
+        when name.startsWith stf_prefix )
 
-#-----------------------------------------------------------------------------------------------------------
-types.declare 'drive_cfg', tests:
-  "@isa.object x":                                  ( x ) -> @isa.object x
-  "@isa.integer x.first_idx":                       ( x ) -> @isa.integer x.first_idx
-  "@isa.integer x.last_idx":                        ( x ) -> @isa.integer x.last_idx
-  "x.mode in [ 'breadth', 'depth', ]":              ( x ) -> x.mode in [ 'breadth', 'depth', ]
-  "@isa.boolean x.resume":                          ( x ) -> @isa.boolean x.resume
-  "( x.laps is Infinity ) or @isa.cardinal x.laps": ( x ) -> ( x.laps is Infinity ) or @isa.cardinal x.laps
+  #---------------------------------------------------------------------------------------------------------
+  types.declare.mr_source_fitting ( x ) -> source_fitting_types.has @type_of x
+
+  #---------------------------------------------------------------------------------------------------------
+  types.declare.mr_nonsource_fitting ( x ) ->
+    return false unless @isa.function x
+    return false unless 1 <= x.length <= 2
+    return true
+
+  #---------------------------------------------------------------------------------------------------------
+  types.declare.mr_reporting_collector ( x ) -> x instanceof Reporting_collector
+  types.declare.mr_collector 'list.or.mr_reporting_collector'
+  types.declare.mr_fitting 'mr_nonsource_fitting.or.mr_source_fitting'
+
+  #---------------------------------------------------------------------------------------------------------
+  types.declare.mr_segment_cfg
+    fields:
+      input:    'mr_collector'
+      output:   'mr_collector'
+      fitting:  'mr_fitting'
+    default:
+      input:    null
+      output:   null
+      fitting:  null
+    # create: ( x ) ->
+    #   return x unless @isa.optional.object x
+    #   R         = x
+    #   return R
+
+  #---------------------------------------------------------------------------------------------------------
+  return types
 
 
 #===========================================================================================================
-#
-#-----------------------------------------------------------------------------------------------------------
-class Duct
-
-  #---------------------------------------------------------------------------------------------------------
-  @C: GUY.lft.freeze
-    defaults:
-      constructor:
-        on_change:    null
-        is_oblivious: false
-
-  #---------------------------------------------------------------------------------------------------------
-  constructor: ( cfg ) ->
-    cfg           = { @constructor.C.defaults.constructor..., cfg..., }
-    @is_oblivious = pluck cfg, 'is_oblivious'
-    @on_change    = pluck cfg, 'on_change'
-    @cfg          = GUY.lft.freeze @cfg
-    @d            = []
-    @transform    = null ### transform to be called when data arrives ###
-    @prv_length   = 0
-    add_length_prop @, 'd'
-    return undefined
-
-  #---------------------------------------------------------------------------------------------------------
-  _on_change: ->
-    delta       = @length - @prv_length
-    @prv_length = @length
-    @on_change? delta
-    return null
-
-  #---------------------------------------------------------------------------------------------------------
-  set_oblivious: ( onoff ) ->
-    validate.boolean onoff
-    throw new Error "^moonriver@2^ cannot set to oblivious unless duct is empty" if onoff and @length > 0
-    @is_oblivious = onoff
-    return null
-
-  #---------------------------------------------------------------------------------------------------------
-  push: ( x ) ->
-    return null if @is_oblivious
-    R = @d.push x
-    @_on_change()
-    return R
-
-  #---------------------------------------------------------------------------------------------------------
-  pop: ( fallback = symbol.misfit ) ->
-    if @d.length is 0
-      return fallback unless fallback is symbol.misfit
-      throw new Error "^moonriver@3^ cannot pop() from empty list"
-    R = @d.pop()
-    @_on_change()
-    return R
-
-  #---------------------------------------------------------------------------------------------------------
-  unshift: ( x ) ->
-    return null if @is_oblivious
-    R = @d.unshift x
-    @_on_change()
-    return R
-
-  #---------------------------------------------------------------------------------------------------------
-  shift: ( fallback = symbol.misfit ) ->
-    if @d.length is 0
-      return fallback unless fallback is symbol.misfit
-      throw new Error "^moonriver@4^ cannot shift() from empty list"
-    return null if @is_oblivious
-    R = @d.shift()
-    @_on_change()
-    return R
-
-  #---------------------------------------------------------------------------------------------------------
-  clear: ->
-    @d.length = 0
-    @_on_change()
-    return null
-
-  #---------------------------------------------------------------------------------------------------------
-  [Symbol.iterator]: -> yield d for d in @d; return null
-
-  #---------------------------------------------------------------------------------------------------------
-  toString:               ->
-    return '[X]' if @is_oblivious
-    return ( rpr @d ) # + ' ➡︎ ' + ( @transform?.name ? './.' )
-  [UTIL.inspect.custom]:  -> @toString()
-
-
-#===========================================================================================================
-#
-#-----------------------------------------------------------------------------------------------------------
 class Segment
 
   #---------------------------------------------------------------------------------------------------------
-  constructor: ( moonriver, raw_transform, idx, protocol = null ) ->
-  # constructor: ( modifiers..., raw_transform ) ->
-  #   throw new Error "^segment@1^ modifiers not implemented" if modifiers.length > 0
-    @moonriver        = moonriver
-    validate_optional.list protocol
-    @protocol         = protocol
-    @idx              = idx
-    @call_count       = 0
-    @input            = null
-    @output           = null
-    @modifiers        = null
-    @arity            = null
-    @_is_over         = false
-    @has_exited       = false
-    # @is_listener      = false
-    @is_sender        = false
-    @is_source        = false
-    @transform        = @_transform_from_raw_transform raw_transform
-    GUY.props.def @, '_has_input_data', get: => @input.length > 0
-    GUY.props.def @, 'is_over',         get: => @_is_over
+  constructor: ( cfg ) ->
+    hide @, 'types',      get_types()
+    @types.create.mr_segment_cfg cfg
+    @input          = cfg.input
+    @output         = cfg.output
+    @has_finished   = null
+    @transform_type = null
+    hide @, 'transform',  @_as_transform cfg.fitting
+    hide @, '_send', send = ( d ) => @output.push d; d ### 'inner' send method ###
     return undefined
 
   #---------------------------------------------------------------------------------------------------------
-  set_input: ( duct ) ->
-    @input = duct
-    return null
+  _as_transform: ( fitting ) ->
+    ###
 
-  #---------------------------------------------------------------------------------------------------------
-  set_output: ( duct ) ->
-    @output = duct
-    return null
+    * `fitting`: a value that may be used as (the central part of) a transform in a pipeline. This may be a
+      function of arity 2 (a transducer), a list (a source) &c.
+    * `transform`: one of the serial elements that constitute a pipeline. While a `fitting` may be of
+      various types, a `transform` is always a function. `transform`s have a `type` attribute which takes
+      one of the following values:
+      * `source`: a `transform` that does not take any arguments and will yield one value per call
+      * `observer`: a `transform` that takes one argument (the current value) and does not send any values
+        into the pipeline; the value an observer gets called with will be the same value that the next
+        transformer will be called with. Note that if an observer receives a mutable value it can modify it
+        and thereby affect one data item at a time.
+      * `transducer`: a `transform` that takes two arguments, the current data item and a `send()` function
+        that can be used any number of times to send values to the ensuing transform.
 
-  #---------------------------------------------------------------------------------------------------------
-  set_is_over: ( onoff ) ->
-    validate.boolean onoff
-    @_is_over = onoff
-    return null
-
-  #---------------------------------------------------------------------------------------------------------
-  set_call_count: ( call_count ) ->
-    validate.cardinal call_count
-    @call_count = call_count
-    return null
-
-  #---------------------------------------------------------------------------------------------------------
-  _transfer: ->
-    @output.push @input.shift() while @input.length > 0
-    return null
-
-  #=========================================================================================================
-  #
-  #---------------------------------------------------------------------------------------------------------
-  _transform_from_raw_transform: ( raw_transform ) ->
-    { is_sender
-      is_source
-      is_repeatable
-      modifiers
-      transform     } = @_get_transform raw_transform
-    @arity            = transform.length
-    # @is_listener       = not ( modifiers.do_once_before or modifiers.do_once_after )
-    ### TAINT do not treat modifier `is_source` different from others ###
-    @is_source        = is_source or ( pluck modifiers, 'is_source', false )
-    @modifiers        = modifiers
-    @is_sender        = is_sender
-    @is_repeatable    = is_repeatable
-    #...................................................................................................
-    if @is_sender
-      if @modifiers.once_before_first or @modifiers.once_after_last
-        @call = ( d ) =>
-          @call_count++
-          @transform @send
-          return null
-      else
-        @call = ( d ) =>
-          @call_count++
-          @transform d, @send
-          return null
-    #...................................................................................................
-    else
-      if @modifiers.once_before_first or @modifiers.once_after_last
-        @call = ( d ) =>
-          @call_count++
-          @transform()
-          return null
-      else
-        @call = ( d, forward = true ) =>
-          @call_count++
-          @transform d
-          @send d if forward
-          return null
-    #...................................................................................................
-    send = ( d ) =>
-      switch d
-        when symbol.drop  then  null
-        when symbol.over  then  @set_is_over true
-        when symbol.exit  then  @has_exited = true
-        else
-          if @is_over
-            throw new Error "^moonriver@5^ cannot send values after pipeline has terminated; " \
-              + "error occurred in segment idx #{@idx} (#{rpr @_name_of_transform()})"
-          @output.push d
-      return null
-    #...................................................................................................
-    if @protocol?
-      @send = ( d ) =>
-        send d
-        p         = { idx: @idx, call_count: @call_count, turns: @moonriver.turns, d, }
-        p[ idx ]  = ( if idx is @idx then d else null ) for idx in [ 0 ... @moonriver.length ]
-        @protocol.push p
-        return null
-    else
-      @send = send
-    #...................................................................................................
-    @send.symbol      = symbol
-    @send.over        = => @send symbol.over
-    @send.exit        = => @send symbol.exit
-    return transform
-
-  #=========================================================================================================
-  #
-  #---------------------------------------------------------------------------------------------------------
-  _get_transform: ( raw_transform ) ->
-    if ( type_of raw_transform ) is 'modified_transform'
-      modifiers = raw_transform.modifiers
-      transform = @_get_transform_2 raw_transform.transform, modifiers
-    else
-      modifiers = {}
-      transform = @_get_transform_2 raw_transform, modifiers
+    ###
+    if @types.isa.mr_source_fitting fitting
+      R               = @_get_source_transform fitting
+      @transform_type = 'source'
     #.......................................................................................................
-    return { modifiers, transform..., }
+    else
+      R = fitting
+      switch arity = R.length ? 0
+        when 1 then @transform_type = 'observer'
+        when 2 then @transform_type = 'transducer'
+        else throw new Error "fittings with arity #{arity} not implemented"
+    #.......................................................................................................
+    nameit 'ƒ', R if R.name is ''
+    return R
+
+
+  #=========================================================================================================
+  # SOURCE TRANSFORMS
+  #---------------------------------------------------------------------------------------------------------
+  _get_source_transform: ( source ) ->
+    type = @types.type_of source
+    unless ( method = @[ stf_prefix + type ] )?
+      throw new Error "unable to convert a #{type} to a transform"
+    @has_finished = false
+    return nameit type, method.call @, source
 
   #---------------------------------------------------------------------------------------------------------
-  _get_transform_2: ( raw_transform, modifiers ) ->
-    is_source     = false
-    is_sender     = true
-    is_repeatable = true
-    switch type = type_of raw_transform
-      when 'function'
-        switch ( arity = raw_transform.length )
-          when 0
-            unless modifiers.once_before_first or modifiers.once_after_last
-              throw new Error "^moonriver@7^ transform with arity #{arity} not implemented"
-            is_sender = false
-            transform = raw_transform
-          when 1
-            is_sender = modifiers.once_before_first or modifiers.once_after_last
-            transform = raw_transform
-          when 2
-            if modifiers.once_before_first or modifiers.once_after_last
-              throw new Error "^moonriver@6^ transform with arity 2 not implemented for modifiers " \
-                + "once_before_first, once_after_last"
-            transform = raw_transform
-          else
-            throw new Error "^moonriver@7^ transform with arity #{arity} not implemented"
-      when 'generatorfunction'
-        is_source       = true
-        transform       = @_source_from_generatorfunction raw_transform
-        unless ( arity = transform.length ) is 2
-          throw new Error "^moonriver@8^ expected function with arity 2 got one with arity #{arity}"
-      when 'list'
-        is_source       = true
-        transform       = @_source_from_list raw_transform
-      # when 'readstream'
-      #   is_source       = true
-      #   transform       = @_source_from_readstream raw_transform
-      else
-        if ( type is 'generator' ) or ( isa.function raw_transform[ Symbol.iterator ] )
-          is_repeatable   = false
-          is_source       = true
-          transform       = @_source_from_generator raw_transform
-          unless ( arity = transform.length ) is 2
-            throw new Error "^moonriver@9^ expected function with arity 2 got one with arity #{arity}"
-        else
-          throw new Error "^moonriver@10^ cannot convert a #{type} to a source"
-    transform = transform.bind @
-    return { is_sender, is_source, is_repeatable, transform, }
-
-  #---------------------------------------------------------------------------------------------------------
-  _source_from_generatorfunction: ( generatorfunction ) ->
-    generator = null
-    return genfΔ = ( d, send ) ->
-      generator ?= generatorfunction()
-      send d unless d is symbol.drop
-      { value
-        done  } = generator.next()
-      ### NOTE silently discards value of `return` where present in keeping with JS `for of` loops ###
-      return send value unless done
-      generator = null
-      send.over()
+  [ stf_prefix + 'generator' ]: ( source ) ->
+    @has_finished = false
+    return ( send ) =>
+      return null if @has_finished
+      dsc           = source.next()
+      @has_finished = dsc.done
+      send dsc.value unless @has_finished
       return null
 
   #---------------------------------------------------------------------------------------------------------
-  _source_from_generator: ( generator ) ->
-    return genΔ = ( d, send ) ->
-      send d unless d is symbol.drop
-      { value
-        done  } = generator.next()
-      ### NOTE silently discards value of `return` where present in keeping with JS `for of` loops ###
-      return send value unless done
-      send.over()
+  [ stf_prefix + 'text' ]: ( source ) ->
+    letter_re     = /./uy
+    @has_finished = false
+    return ( send ) =>
+      return null if @has_finished
+      unless ( match = source.match letter_re )?
+        @has_finished = true
+        return null
+      send match[ 0 ]
       return null
-
-  # #---------------------------------------------------------------------------------------------------------
-  # _source_from_readstream: ( readstream ) ->
-  #   readlines = ( require 'streaming-lines' ).readlines
-  #   return streamΔ = ( d, send ) ->
-  #     debug '^25323^', d
-  #     await readlines __filename, ( line ) => info '^354^', line; send line
 
   #---------------------------------------------------------------------------------------------------------
-  _source_from_list: ( list ) ->
-    last_idx  = list.length - 1
-    idx       = -1
-    return listΔ = ( d, send ) ->
-      send d unless d is symbol.drop
-      idx++
-      if idx > last_idx
-        idx = -1
-        return send.over()
-      send list[ idx ]
-      return null
+  [ stf_prefix + 'generatorfunction'  ]: ( source ) -> @_get_source_transform source()
+  [ stf_prefix + 'arrayiterator'      ]: ( source ) -> @[ stf_prefix + 'generator' ] source
+  [ stf_prefix + 'setiterator'        ]: ( source ) -> @[ stf_prefix + 'generator' ] source
+  [ stf_prefix + 'mapiterator'        ]: ( source ) -> @[ stf_prefix + 'generator' ] source
+  [ stf_prefix + 'list'               ]: ( source ) -> @_get_source_transform source.values()
+  [ stf_prefix + 'object'             ]: ( source ) -> @_get_source_transform -> yield [ k, v, ] for k, v of source
+  [ stf_prefix + 'set'                ]: ( source ) -> @_get_source_transform source.values()
+  [ stf_prefix + 'map'                ]: ( source ) -> @_get_source_transform source.entries()
+
 
   #=========================================================================================================
   #
   #---------------------------------------------------------------------------------------------------------
-  _name_of_transform: ->
-    return '???'    unless @transform?
-    return '(anon)' unless @transform.name?
-    return @transform.name.replace /^bound /, ''
+  ### 'outer' send method ###
+  send: ( d ) -> @input.push d; d
+
+  #---------------------------------------------------------------------------------------------------------
+  process: ->
+    if @transform_type is 'source'
+      @_send @input.shift() while @input.length > 0 ### TAINT could be done with `.splice()` ###
+      return 0 if @transform.has_finished
+      @transform @_send
+      return 1
+    if @input.length > 0
+      d = @input.shift()
+      switch @transform_type
+        when 'observer'
+          @transform  d
+          @_send      d
+        when 'transducer'
+          @transform d, @_send
+        else
+          throw new Error "internal error: unknown transform type #{rpr @transform_type}"
+      return 1
+    return 0
+
+  #---------------------------------------------------------------------------------------------------------
+  [UTIL.inspect.custom]:  -> @toString()
+  toString:               -> "#{rpr @input} ▶ #{@transform.name} ▶ #{rpr @output}"
+
+
+#===========================================================================================================
+class Reporting_collector
+
+  #---------------------------------------------------------------------------------------------------------
+  constructor: ( callback ) ->
+    hide @, 'callback', callback
+    hide @, 'd',        []
+    GUY.props.def @,  'length',   get: -> @d.length
+    return undefined
+
+  #---------------------------------------------------------------------------------------------------------
+  push:     ( d ) -> @callback +1; @d.push d
+  unshift:  ( d ) -> @callback +1; @d.unshift d
+  pop:            -> @callback -1; @d.pop()
+  shift:          -> @callback -1; @d.shift()
+
+  #---------------------------------------------------------------------------------------------------------
+  [UTIL.inspect.custom]:  -> @toString()
+  toString:               -> rpr @d
+
+
+#===========================================================================================================
+class Pipeline
+
+  #---------------------------------------------------------------------------------------------------------
+  constructor: ( cfg ) ->
+    cfg                 = { {}..., cfg..., }
+    # cfg                 = types.create.mr_pipeline_cfg cfg
+    @datacount          = 0
+    @input              = @_new_collector()
+    @output             = [] ### pipeline output buffer does not participate in datacount ###
+    @segments           = []
+    @on_before_step     = cfg.on_before_step ? null
+    @on_after_step      = cfg.on_after_step  ? null
+    @on_before_process  = cfg.on_before_process ? null
+    @on_after_process   = cfg.on_after_process  ? null
+    hide  @, 'types',         get_types()
+    hide  @, 'sources',       []
+    def   @, 'has_finished',  get: -> ( @datacount < 1 ) and @sources.every ( s ) -> s.has_finished
+    return undefined
+
+  #---------------------------------------------------------------------------------------------------------
+  _new_collector:                   -> new Reporting_collector ( delta ) => @datacount += delta
+  send:                       ( d ) -> @input.push d; d
+  run:                              -> ( d for d from @walk() )
+
+  #---------------------------------------------------------------------------------------------------------
+  push: ( fitting ) ->
+    if ( count = @segments.length ) is 0
+      input               = @input
+    else
+      prv_segment         = @segments[ count - 1 ]
+      prv_segment.output  = @_new_collector()
+      input               = prv_segment.output
+    try R = new Segment { input, fitting, output: @output, } catch error
+      throw new Error "unable to convert a #{@types.type_of fitting} into a segment\n" + error.message
+    @segments.push  R
+    @sources.push   R if R.transform_type is 'source'
+    return R
+
+  #---------------------------------------------------------------------------------------------------------
+  process: ->
+    @on_before_process() if @on_before_process?
+    for segment, segment_idx in @segments
+      @on_before_step segment_idx if @on_before_step?
+      segment.process()
+      @on_after_step segment_idx if @on_after_step?
+    @on_after_process() if @on_after_process?
+    return null
+
+  #---------------------------------------------------------------------------------------------------------
+  walk: ->
+    loop
+      @process()
+      yield d for d in @output
+      @output.length = 0
+      # yield @output.shift() while @output.length > 0
+      break if @has_finished
+    return null
 
   #---------------------------------------------------------------------------------------------------------
   [UTIL.inspect.custom]:  -> @toString()
   toString:               ->
-    parts = []
-    parts.push ( rpr @input ) + ' ➡︎ '
-    parts.push @_name_of_transform() + ' ➡︎ ' + ( rpr @output )
-    return parts.join ' '
-
-
-#===========================================================================================================
-#
-#-----------------------------------------------------------------------------------------------------------
-class Modified_transform
-
-  #---------------------------------------------------------------------------------------------------------
-  @C = GUY.lft.freeze
-    known_modifications: new Set [
-      'is_source',
-      'first', 'last',
-      'once_after_last', 'once_before_first', ]
-
-  #---------------------------------------------------------------------------------------------------------
-  constructor: ( modifiers..., transform ) ->
-    defaults    =
-      is_source:          false
-      once_before_first:  false
-      once_after_last:    false
-      first:              symbol.misfit
-      last:               symbol.misfit
-    @modifiers  = { defaults..., ( Object.assign {}, modifiers... )..., }
-    validate.mrv_modifiers @modifiers
-    for key of @modifiers
-      continue if @constructor.C.known_modifications.has key
-      throw new Error "^moonriver@11^ unknown modifiers key #{rpr key}"
-    if @modifiers.first is symbol.misfit
-      @modifiers.first = false
-    else
-      ( @modifiers.values ?= {} ).first = @modifiers.first
-      @modifiers.first = true
-    if @modifiers.last is symbol.misfit
-      @modifiers.last = false
-    else
-      ( @modifiers.values ?= {} ).last = @modifiers.last
-      @modifiers.last = true
-    @transform = transform
-    return undefined
-
-
-#===========================================================================================================
-#
-#-----------------------------------------------------------------------------------------------------------
-class Moonriver
-
-  #---------------------------------------------------------------------------------------------------------
-  @C: GUY.lft.freeze
-    defaults:
-      constructor:
-        protocol:    null
-      drive_cfg:
-        mode:         'breadth'
-        first_idx:    0
-        last_idx:     -1
-        resume:       false
-        laps:         Infinity
-
-  #---------------------------------------------------------------------------------------------------------
-  @$: ( modifiers..., transform ) -> new Modified_transform modifiers..., transform
-
-  #---------------------------------------------------------------------------------------------------------
-  constructor: ( cfg ) ->
-    @types                = types
-    cfg                   = { @constructor.C.defaults.constructor..., cfg..., }
-    @types.validate.mirage_cfg cfg
-    @protocol             = pluck cfg, 'protocol', null
-    @cfg                  = GUY.lft.freeze cfg
-    @has_run              = false
-    @data_count           = 0
-    @segments             = []
-    @turns                = 0
-    @inputs               = []
-    @sources              = []
-    @on_first             = []
-    @on_last              = []
-    ### TAINT not a good name for a collection of segments ###
-    @on_once_before_first = []
-    @on_once_after_last   = []
-    @user                 = {} ### user area for sharing state between transforms, etc ###
-    add_length_prop @, 'segments'
-    # @push transform for transform from transforms if transforms?
-    #.......................................................................................................
-    GUY.props.def @, 'sources_are_repeatable',  get: => @sources.every ( x ) -> x.is_repeatable
-    GUY.props.def @, 'can_repeat',              get: => @turns is 0 or @is_repeatable
-    GUY.props.def @, 'first_segment',           get: => @segments[ 0 ]
-    GUY.props.def @, 'last_segment',            get: => @segments[ @segments.length - 1 ]
-    GUY.props.def @, 'is_over',                 get: => @sources.every ( source ) -> source.is_over
-    #.......................................................................................................
-    return undefined
-
-  #---------------------------------------------------------------------------------------------------------
-  push: ( transform ) ->
-    segment = new Segment @, transform, @segments.length, @protocol
-    #.......................................................................................................
-    if segment.modifiers.once_before_first or segment.modifiers.once_after_last
-      if segment.modifiers.once_before_first
-        @push bfirst = ( d, send ) -> send d
-        @on_once_before_first.push segment
-      else
-        @push alast  = ( d, send ) -> send d
-        @on_once_after_last.push segment
-      segment.set_output @last_segment.input
-    #.......................................................................................................
-    else
-      if ( last_segment = @last_segment )?
-        segment.set_input last_segment.output
-        last_segment.output.set_oblivious false
-      else
-        segment.set_input new Duct { on_change: @on_change, }
-      segment.set_output new Duct { on_change: @on_change, is_oblivious: true, }
-      @segments.push segment
-    #.......................................................................................................
-    @sources.push  segment if segment.is_source
-    @on_last.push  segment if segment.modifiers.last
-    @on_first.push segment if segment.modifiers.first
-    return segment
-
-  # #---------------------------------------------------------------------------------------------------------
-  # _pop: ->
-  #   @sources.pop()
-  #   if ( last_segment = @last_segment )?
-  #     last_segment.output.set_oblivious true
-  #   return null
-
-  #---------------------------------------------------------------------------------------------------------
-  on_change: ( delta ) =>
-    @data_count += delta
-    return null
-
-  #---------------------------------------------------------------------------------------------------------
-  [Symbol.iterator]: -> yield segment for segment in @segments; return null
-
-  #=========================================================================================================
-  #
-  #---------------------------------------------------------------------------------------------------------
-  walk: ( cfg ) ->
-    if @has_run and not @sources_are_repeatable
-      throw new Error "^moonriver@12^ pipeline is not repeatable"
-    @has_run = true
-    @turns++
-    cfg = { @constructor.C.defaults.drive_cfg..., cfg..., }
-    @types.validate.drive_cfg cfg
-    return null unless ( last_segment = @last_segment )?
-    last_segment.output.set_oblivious false
-    collector = last_segment.output
-    @push ( d ) -> collector.push d
-    try
-      for collection in [ @segments, @on_once_before_first, @on_once_after_last, ]
-        for segment in collection
-          segment.set_call_count  0
-          segment.set_is_over     false
-      #.......................................................................................................
-      for segment in @on_once_before_first
-        segment.call symbol.drop
-        @_drive cfg; yield d for d in collector; collector.length = 0
-      #.......................................................................................................
-      @_drive cfg; yield d for d in collector; collector.length = 0
-      #.......................................................................................................
-      for segment in @on_last
-        # continue if segment.is_over ### (???) ###
-        segment.call segment.modifiers.values.last, false ### forward ###
-        @_drive cfg; yield d for d in collector; collector.length = 0
-      #.......................................................................................................
-      for segment in @on_once_after_last
-        segment.call symbol.drop
-        @_drive cfg; yield d for d in collector; collector.length = 0
-    finally
-      last_segment.output.set_oblivious true
-      # @_pop()
-    return null
-
-  #---------------------------------------------------------------------------------------------------------
-  drive: ( cfg ) ->
-    if @has_run and not @sources_are_repeatable
-      throw new Error "^moonriver@12^ pipeline is not repeatable"
-    @has_run = true
-    @turns++
-    cfg = { @constructor.C.defaults.drive_cfg..., cfg..., }
-    @types.validate.drive_cfg cfg
-    unless cfg.resume
-      for collection in [ @segments, @on_once_before_first, @on_once_after_last, ]
-        for segment in collection
-          segment.set_call_count  0
-          segment.set_is_over     false
-    #.......................................................................................................
-    for segment in @on_once_before_first
-      segment.call symbol.drop
-      R = @_drive cfg
-    #.......................................................................................................
-    R = @_drive cfg
-    #.......................................................................................................
-    for segment in @on_last
-      # continue if segment.is_over ### (???) ###
-      segment.call segment.modifiers.values.last, false ### forward ###
-      R = @_drive cfg
-    #.......................................................................................................
-    for segment in @on_once_after_last
-      segment.call symbol.drop
-      R = @_drive cfg
-    return R
-
-  #---------------------------------------------------------------------------------------------------------
-  _drive: ( cfg ) ->
-    first_idx       = cfg.first_idx
-    last_idx        = cfg.last_idx
-    last_idx        = if last_idx >= 0 then last_idx else @segments.length + last_idx
-    do_exit         = false
-    ### TAINT check for last_idx >= first_idx, last_idx < segments.length and so on ###
-    return null if @segments.length is 0
-    #.......................................................................................................
-    lap_count = 0
-    loop
-      lap_count++
-      if lap_count > cfg.laps
-        lap_count = 0
-        break
-      for idx in [ first_idx .. last_idx ]
-        segment = @segments[ idx ]
-        return null if segment.has_exited
-        # debug '^443^', ( @toString idx ), segment.modifiers?.once_after_last, segment.modifiers?.once_before_first
-        #...................................................................................................
-        # if ( segment.is_over or not segment.is_listener )
-        if segment.is_over
-          ### If current segment has signalled it's gone out of business for this lap or is not a listener
-          in the first place, route all data on its input queue to its output queue: ###
-          ### TAINT rewrite to single step operation using Array::splice() ###
-          ### TAINT taking non-listeners out of the pipeline would speed this up but also somehwat
-          complicate the construction ###
-          ### TAINT code duplication ###
-          segment._transfer()
-          continue
-        #...................................................................................................
-        if ( segment.modifiers.first ? false ) and ( segment.call_count is 0 )
-          segment.call segment.modifiers.values.first, false ### forward ###
-        #...................................................................................................
-        if segment.is_source
-            ### If current segment is a source, trigger the transform with a discardable `drop` value: ###
-          if segment._has_input_data
-            ### TAINT code duplication ###
-            segment._transfer()
-          segment.call symbol.drop
-        #...................................................................................................
-        else
-          ### Otherwise, call transform with next value from input queue, if any; when in operational mode
-          `breadth`, repeat until input queue is empty: ###
-          while segment.input.length > 0
-            segment.call segment.input.shift()
-            break if cfg.mode is 'depth'
-        #...................................................................................................
-        ### Stop processing if the `exit` signal has been received: ###
-        if segment.exit then do_exit = true; break
-        # debug '^7457567^', { idx, }
-        # if idx is last_idx then do_exit = true; break
-      break if do_exit
-      #.....................................................................................................
-      ### When all sources have called it quits and no more input queues have data, end processing: ###
-      ### TAINT collect stats in above loop ###
-      break if ( @data_count is 0 ) and ( @sources.every ( source ) -> source.is_over )
-    #.......................................................................................................
-    return null
-
-  #---------------------------------------------------------------------------------------------------------
-  send: ( d ) ->
-    @segments[ 0 ].input.push d unless d is symbol.drop
-    return @_drive @constructor.C.defaults.drive_cfg
-
-
-  #=========================================================================================================
-  #
-  #---------------------------------------------------------------------------------------------------------
-  [UTIL.inspect.custom]: -> @toString()
-
-  #---------------------------------------------------------------------------------------------------------
-  toString: ( current_idx ) ->
-    parts       = []
-    joiner      = GUY.trm.grey ' ▶︎ '
-    prv_output  = null
-    for segment, idx in @segments
-      parts.push GUY.trm.green rpr segment.input unless segment.input is prv_output
-      parts.push \
-        if idx is current_idx then GUY.trm.reverse  GUY.trm.gold segment._name_of_transform() \
-        else                                    GUY.trm.gold segment._name_of_transform()
-      parts.push GUY.trm.green rpr segment.output
-      prv_output = segment.output
-    return parts.join joiner
-    # return parts.join ' — '
-
-
+    R = []
+    for segment in @segments
+      R.push rpr segment.input
+      R.push '▶'
+      R.push segment.transform.name
+      R.push '▶'
+    R.push rpr @output
+    return R.join ' '
 
 
 ############################################################################################################
-module.exports = { Moonriver, Segment, Duct, }
-
+module.exports = { Segment, Reporting_collector, Pipeline, }
 
