@@ -11,6 +11,8 @@
 
 - [MoonRiver](#moonriver)
   - [Async Pipelines](#async-pipelines)
+  - [Common Tasks](#common-tasks)
+    - [Iterate over Lines of a File](#iterate-over-lines-of-a-file)
   - [To Do](#to-do)
   - [Is Done](#is-done)
 
@@ -60,17 +62,30 @@ demo_3b = ->
   return null
 ```
 
+## Common Tasks
+
+### Iterate over Lines of a File
+
+* Can use `GUY.fs.walk_lines()` which gives you a synchronous iterator over lines of a (UTF-8-encoded) file:
+
+```coffee
+p = new Pipeline()
+p.push GUY.fs.walk_lines __filename
+p.push $do_something_with_one_line()
+p.run()
+```
+
 ## To Do
 
 * **[–]** documentation
 * **[–]** implement modifiers `first`, `last` (and `once_before_first` `once_after_last`?)
-* **[–]** async sources, transducers
 * **[–]** move source documentation from `Segment._as_transform()`
 
 
 ## Is Done
 
 * **[+]** v2 MVP
+* **[+]** async sources, transducers
 
 
 
