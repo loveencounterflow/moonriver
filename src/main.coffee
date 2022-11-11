@@ -252,7 +252,19 @@ class Pipeline
     R.push rpr @output
     return R.join ' '
 
+class Async_pipeline extends Pipeline
+  run:                              -> ( d for await d from @walk() )
+
+  #---------------------------------------------------------------------------------------------------------
+  walk: ->
+    loop
+      @process()
+      yield ( if d instanceof Promise then await d else d ) for d in @output
+      @output.length = 0
+      # yield @output.shift() while @output.length > 0
+      break if @has_finished
+    return null
 
 ############################################################################################################
-module.exports = { Segment, Reporting_collector, Pipeline, }
+module.exports = { Segment, Reporting_collector, Pipeline, Async_pipeline, }
 
