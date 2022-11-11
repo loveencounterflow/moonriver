@@ -29,6 +29,30 @@ stf                       = ( name ) -> stf_prefix + ( if Array.isArray name the
 
 
 #===========================================================================================================
+class Reporting_collector
+
+  #---------------------------------------------------------------------------------------------------------
+  constructor: ( callback ) ->
+    hide @, 'callback', callback
+    hide @, 'd',        []
+    GUY.props.def @,  'length',   get: -> @d.length
+    return undefined
+
+  #---------------------------------------------------------------------------------------------------------
+  push:     ( d ) -> @callback +1; @d.push d
+  unshift:  ( d ) -> @callback +1; @d.unshift d
+  pop:            -> @callback -1; @d.pop()
+  shift:          -> @callback -1; @d.shift()
+
+  #---------------------------------------------------------------------------------------------------------
+  [UTIL.inspect.custom]:  -> @toString()
+  toString:               -> rpr @d
+
+
+
+############################################################################################################
+# SYNC
+#===========================================================================================================
 class Segment
 
   #---------------------------------------------------------------------------------------------------------
@@ -156,54 +180,6 @@ class Segment
   [UTIL.inspect.custom]:  -> @toString()
   toString:               -> "#{rpr @input} ▶ #{@transform.name} ▶ #{rpr @output}"
 
-class Async_segment extends Segment
-
-  #---------------------------------------------------------------------------------------------------------
-  @my_type:       'mr_async_segment_cfg'
-  @fittying_type: 'mr_async_source_fitting'
-
-  #---------------------------------------------------------------------------------------------------------
-  process: ->
-    if @transform_type is 'source'
-      @_send @input.shift() while @input.length > 0 ### TAINT could be done with `.splice()` ###
-      return 0 if @transform.has_finished
-      @transform @_send
-      return 1
-    if @input.length > 0
-      d = @input.shift()
-      d = await d if d instanceof Promise
-      switch @transform_type
-        when 'observer'
-          @transform  d
-          @_send      d
-        when 'transducer'
-          @transform d, @_send
-        else
-          throw new Error "^mr.e#3^ internal error: unknown transform type #{rpr @transform_type}"
-      return 1
-    return 0
-
-
-#===========================================================================================================
-class Reporting_collector
-
-  #---------------------------------------------------------------------------------------------------------
-  constructor: ( callback ) ->
-    hide @, 'callback', callback
-    hide @, 'd',        []
-    GUY.props.def @,  'length',   get: -> @d.length
-    return undefined
-
-  #---------------------------------------------------------------------------------------------------------
-  push:     ( d ) -> @callback +1; @d.push d
-  unshift:  ( d ) -> @callback +1; @d.unshift d
-  pop:            -> @callback -1; @d.pop()
-  shift:          -> @callback -1; @d.shift()
-
-  #---------------------------------------------------------------------------------------------------------
-  [UTIL.inspect.custom]:  -> @toString()
-  toString:               -> rpr @d
-
 
 #===========================================================================================================
 class Pipeline
@@ -302,6 +278,37 @@ class Pipeline
       R.push '▶'
     R.push rpr @output
     return R.join ' '
+
+
+############################################################################################################
+# ASYNC
+#===========================================================================================================
+class Async_segment extends Segment
+
+  #---------------------------------------------------------------------------------------------------------
+  @my_type:       'mr_async_segment_cfg'
+  @fittying_type: 'mr_async_source_fitting'
+
+  #---------------------------------------------------------------------------------------------------------
+  process: ->
+    if @transform_type is 'source'
+      @_send @input.shift() while @input.length > 0 ### TAINT could be done with `.splice()` ###
+      return 0 if @transform.has_finished
+      @transform @_send
+      return 1
+    if @input.length > 0
+      d = @input.shift()
+      d = await d if d instanceof Promise
+      switch @transform_type
+        when 'observer'
+          @transform  d
+          @_send      d
+        when 'transducer'
+          @transform d, @_send
+        else
+          throw new Error "^mr.e#3^ internal error: unknown transform type #{rpr @transform_type}"
+      return 1
+    return 0
 
 
 #===========================================================================================================
