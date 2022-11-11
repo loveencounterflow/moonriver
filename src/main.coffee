@@ -25,6 +25,7 @@ UTIL                      = require 'node:util'
 nameit                    = ( name, f ) -> def f, 'name', { value: name, }
 { stf_prefix
   get_types }             = require './types'
+stf                       = ( [ name ] ) -> stf_prefix + name
 
 
 #===========================================================================================================
@@ -88,7 +89,7 @@ class Segment
     return R
 
   #---------------------------------------------------------------------------------------------------------
-  [ stf_prefix + 'generator' ]: ( source ) ->
+  [stf'generator']: ( source ) ->
     @has_finished = false
     return ( send ) =>
       return null if @has_finished
@@ -98,7 +99,7 @@ class Segment
       return null
 
   #---------------------------------------------------------------------------------------------------------
-  [ stf_prefix + 'text' ]: ( source ) ->
+  [stf'text']: ( source ) ->
     letter_re     = /./uy
     @has_finished = false
     return nameit '√txt', ( send ) =>
@@ -110,14 +111,14 @@ class Segment
       return null
 
   #---------------------------------------------------------------------------------------------------------
-  [ stf_prefix + 'generatorfunction'  ]: ( source ) -> @_get_source_transform source()
-  [ stf_prefix + 'arrayiterator'      ]: ( source ) -> @[ stf_prefix + 'generator' ] source
-  [ stf_prefix + 'setiterator'        ]: ( source ) -> @[ stf_prefix + 'generator' ] source
-  [ stf_prefix + 'mapiterator'        ]: ( source ) -> @[ stf_prefix + 'generator' ] source
-  [ stf_prefix + 'list'               ]: ( source ) -> nameit '√lst', @[ stf_prefix + 'generator' ] source.values()
-  [ stf_prefix + 'object'             ]: ( source ) -> nameit '√obj', @[ stf_prefix + 'generator' ] ( -> yield [ k, v, ] for k, v of source )()
-  [ stf_prefix + 'set'                ]: ( source ) -> nameit '√set', @[ stf_prefix + 'generator' ] source.values()
-  [ stf_prefix + 'map'                ]: ( source ) -> nameit '√map', @[ stf_prefix + 'generator' ] source.entries()
+  [stf'generatorfunction']: ( source ) -> @_get_source_transform source()
+  [stf'arrayiterator']:     ( source ) -> @[stf'generator'] source
+  [stf'setiterator']:       ( source ) -> @[stf'generator'] source
+  [stf'mapiterator']:       ( source ) -> @[stf'generator'] source
+  [stf'list']:              ( source ) -> nameit '√lst', @[stf'generator'] source.values()
+  [stf'object']:            ( source ) -> nameit '√obj', @[stf'generator'] ( -> yield [ k, v, ] for k, v of source )()
+  [stf'set']:               ( source ) -> nameit '√set', @[stf'generator'] source.values()
+  [stf'map']:               ( source ) -> nameit '√map', @[stf'generator'] source.entries()
 
 
   #=========================================================================================================
