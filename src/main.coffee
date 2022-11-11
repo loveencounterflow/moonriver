@@ -185,6 +185,7 @@ class Pipeline
     @on_after_step      = cfg.on_after_step  ? null
     @on_before_process  = cfg.on_before_process ? null
     @on_after_process   = cfg.on_after_process  ? null
+    hide  @, '$',             nameit '$', @_remit.bind @
     hide  @, 'types',         get_types()
     hide  @, 'sources',       []
     def   @, 'has_finished',  get: -> ( @datacount < 1 ) and @sources.every ( s ) -> s.has_finished
@@ -196,7 +197,8 @@ class Pipeline
   run:                              -> ( d for d from @walk() )
 
   #---------------------------------------------------------------------------------------------------------
-  push: ( fitting ) ->
+  # _remit: ( modifiers, fitting ) ->
+  _remit: ( fitting ) ->
     if ( count = @segments.length ) is 0
       input               = @input
     else
@@ -205,6 +207,11 @@ class Pipeline
       input               = prv_segment.output
     try R = new Segment { input, fitting, output: @output, } catch error
       throw new Error "unable to convert a #{@types.type_of fitting} into a segment\n" + error.message
+    return R
+
+  #---------------------------------------------------------------------------------------------------------
+  push: ( P... ) ->
+    R = @_remit P...
     @segments.push  R
     @sources.push   R if R.transform_type is 'source'
     return R
