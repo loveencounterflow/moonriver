@@ -310,6 +310,21 @@ class Async_segment extends Segment
       return 1
     return 0
 
+  #---------------------------------------------------------------------------------------------------------
+  [stf'asyncgenerator']: ( source ) -> ( send ) =>
+    return null if @has_finished
+    dsc           = await source.next()
+    @has_finished = dsc.done
+    send dsc.value unless @has_finished
+    return null
+
+  #---------------------------------------------------------------------------------------------------------
+  [stf'readstream']: ( source ) ->
+    { Receiver }  = require 'jfee'
+    rcv           = Receiver.from_readstream source, { bare: true, }
+    return nameit '√readstream', @[stf'asyncgenerator'] rcv
+
+
 
 #===========================================================================================================
 class Async_pipeline extends Pipeline
