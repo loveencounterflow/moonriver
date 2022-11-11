@@ -26,6 +26,7 @@ nameit                    = ( name, f ) -> def f, 'name', { value: name, }
 { stf_prefix
   get_types }             = require './types'
 stf                       = ( name ) -> stf_prefix + ( if Array.isArray name then name[ 0 ] else name )
+transforms                = require './transforms'
 
 
 #===========================================================================================================
@@ -358,5 +359,11 @@ class Async_pipeline extends Pipeline
 
 
 ############################################################################################################
-module.exports = { Segment, Async_segment, Reporting_collector, Pipeline, Async_pipeline, }
+module.exports = {
+  Pipeline
+  Segment
+  Async_pipeline
+  Async_segment
+  Reporting_collector
+  transforms }
 

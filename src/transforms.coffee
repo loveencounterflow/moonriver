@@ -20,3 +20,15 @@
     advance()
     buffer[ max ] = d
     send { buffer..., } unless buffer[ 0 ] is empty
+
+#-----------------------------------------------------------------------------------------------------------
+@$split_lines = ->
+  SL  = require 'intertext-splitlines'
+  ctx = SL.new_context()
+  return split_lines = ( d, send ) ->
+    for line from SL.walk_lines ctx, d
+      send line
+    return null
+
+
+
