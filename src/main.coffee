@@ -32,9 +32,13 @@ stf                       = ( name ) -> stf_prefix + ( if Array.isArray name the
 class Segment
 
   #---------------------------------------------------------------------------------------------------------
+  @my_type:       'mr_sync_segment_cfg'
+  @fittying_type: 'mr_sync_source_fitting'
+
+  #---------------------------------------------------------------------------------------------------------
   constructor: ( cfg ) ->
     hide @, 'types',      get_types()
-    @types.create.mr_segment_cfg cfg
+    @types.create[ @constructor.my_type ] cfg
     @input          = cfg.input
     @output         = cfg.output
     @has_finished   = null
@@ -62,7 +66,7 @@ class Segment
       * `observer`s and `transducer`s are collectively called `duct`s as ooposed to `source`s
 
     ###
-    if @types.isa.mr_source_fitting fitting
+    if @types.isa[ @constructor.fittying_type ] fitting
       R               = @_get_source_transform fitting
       @transform_type = 'source'
     #.......................................................................................................
@@ -153,6 +157,10 @@ class Segment
   toString:               -> "#{rpr @input} ▶ #{@transform.name} ▶ #{rpr @output}"
 
 class Async_segment extends Segment
+
+  #---------------------------------------------------------------------------------------------------------
+  @my_type:       'mr_async_segment_cfg'
+  @fittying_type: 'mr_async_source_fitting'
 
   #---------------------------------------------------------------------------------------------------------
   process: ->
