@@ -75,6 +75,22 @@ p.push $do_something_with_one_line()
 p.run()
 ```
 
+* using a NodeJS `ReadableStream` with Transform `$split_lines()`:
+
+```coffee
+FS                  = require 'node:fs'
+{ Async_pipeline, \
+  transforms: T,  } = require '../../../apps/moonriver'
+p = new Async_pipeline()
+p.push FS.createReadStream __filename # , { highWaterMark: 50, }
+p.push T.$split_lines()
+p.push show = ( d ) -> whisper 'Ⅱ', rpr d
+await p.run()
+```
+
+**NB** this stream is asynchronous because of the `ReadableStream`; `$split_lines()` is synchronous.
+
+
 ## To Do
 
 * **[–]** documentation
