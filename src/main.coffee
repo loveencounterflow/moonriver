@@ -209,7 +209,8 @@ class Pipeline
       prv_segment.output  = @_new_collector()
       input               = prv_segment.output
     try R = new Segment { input, fitting, output: @output, } catch error
-      throw new Error "unable to convert a #{@types.type_of fitting} into a segment\n" + error.message
+      error.message = error.message + "\n\n^mr.e#4^ unable to convert a #{@types.type_of fitting} into a segment"
+      throw error
     return R
 
   #---------------------------------------------------------------------------------------------------------
