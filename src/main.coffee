@@ -25,7 +25,7 @@ UTIL                      = require 'node:util'
 nameit                    = ( name, f ) -> def f, 'name', { value: name, }
 { stf_prefix
   get_types }             = require './types'
-stf                       = ( [ name ] ) -> stf_prefix + name
+stf                       = ( name ) -> stf_prefix + ( if Array.isArray name then name[ 0 ] else name )
 
 
 #===========================================================================================================
@@ -81,7 +81,7 @@ class Segment
   #---------------------------------------------------------------------------------------------------------
   _get_source_transform: ( source ) ->
     type = @types.type_of source
-    unless ( method = @[ stf_prefix + type ] )?
+    unless ( method = @[stf type] )?
       throw new Error "unable to convert a #{type} to a transform"
     @has_finished = false
     R = method.call @, source
