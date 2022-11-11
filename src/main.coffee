@@ -151,6 +151,29 @@ class Segment
   [UTIL.inspect.custom]:  -> @toString()
   toString:               -> "#{rpr @input} ▶ #{@transform.name} ▶ #{rpr @output}"
 
+class Async_segment extends Segment
+
+  #---------------------------------------------------------------------------------------------------------
+  process: ->
+    if @transform_type is 'source'
+      @_send @input.shift() while @input.length > 0 ### TAINT could be done with `.splice()` ###
+      return 0 if @transform.has_finished
+      @transform @_send
+      return 1
+    if @input.length > 0
+      d = @input.shift()
+      d = await d if d instanceof Promise
+      switch @transform_type
+        when 'observer'
+          @transform  d
+          @_send      d
+        when 'transducer'
+          @transform d, @_send
+        else
+          throw new Error "^mr.e#3^ internal error: unknown transform type #{rpr @transform_type}"
+      return 1
+    return 0
+
 
 #===========================================================================================================
 class Reporting_collector
@@ -175,6 +198,9 @@ class Reporting_collector
 
 #===========================================================================================================
 class Pipeline
+
+  #---------------------------------------------------------------------------------------------------------
+  @segment_class: Segment
 
   #---------------------------------------------------------------------------------------------------------
   constructor: ( cfg ) ->
@@ -209,7 +235,7 @@ class Pipeline
       prv_segment         = @segments[ count - 1 ]
       prv_segment.output  = @_new_collector()
       input               = prv_segment.output
-    try R = new Segment { input, fitting, output: @output, } catch error
+    try R = new @constructor.segment_class { input, fitting, output: @output, } catch error
       error.message = error.message + "\n\n^mr.e#4^ unable to convert a #{@types.type_of fitting} into a segment"
       throw error
     return R
@@ -272,13 +298,28 @@ class Pipeline
 #===========================================================================================================
 class Async_pipeline extends Pipeline
 
+  #---------------------------------------------------------------------------------------------------------
+  @segment_class: Async_segment
+
+  #=========================================================================================================
+  # PROCESSING
+  #---------------------------------------------------------------------------------------------------------
+  process: ->
+    @on_before_process() if @on_before_process?
+    for segment, segment_idx in @segments
+      @on_before_step segment_idx if @on_before_step?
+      await segment.process()
+      @on_after_step segment_idx if @on_after_step?
+    @on_after_process() if @on_after_process?
+    return null
+
   #=========================================================================================================
   # CLI REPRESENTATION
   #---------------------------------------------------------------------------------------------------------
   run: -> ( d for await d from @walk() )
   walk: ->
     loop
-      @process()
+      await @process()
       yield ( if d instanceof Promise then await d else d ) for d in @output
       @output.length = 0
       break if @has_finished
