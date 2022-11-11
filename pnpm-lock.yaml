@@ -2,11 +2,11 @@ lockfileVersion: 5.4
 
 specifiers:
   guy: 11.13.0
-  intertype: '0.105'
+  intertype: 0.106.0
 
 dependencies:
   guy: 11.13.0
-  intertype: 0.105.1
+  intertype: 0.106.0
 
 packages:
 
@@ -51,8 +51,8 @@ packages:
       multimix: 5.0.0
     dev: false
 
-  /intertype/0.105.1:
-    resolution: {integrity: sha512-FfQfpmIrVGP16P1rIWG2lw9RjyOJyJnwSbbLYpE+R8I7Sdd1Gub0ACzTk5opEZ+3Re0hB/0CxdhuY3wnJr7JjQ==}
+  /intertype/0.106.0:
+    resolution: {integrity: sha512-DWDd36rP6Yw7QMWagpYzB4jniJW57xWnamTHU0Bc9x67H76xWkyB3pnyKEOLtbYZzHmu0ZvF+NGJaypAt7QjxQ==}
     dependencies:
       guy: 11.12.0
       intertype-legacy: 7.7.1

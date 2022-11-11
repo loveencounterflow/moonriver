@@ -23,6 +23,6 @@
   "homepage": "https://github.com/loveencounterflow/moonriver#readme",
   "dependencies": {
     "guy": "11.13.0",
-    "intertype": "0.105"
+    "intertype": "0.106.0"
   }
 }
