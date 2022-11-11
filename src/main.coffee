@@ -101,7 +101,7 @@ class Segment
   [ stf_prefix + 'text' ]: ( source ) ->
     letter_re     = /./uy
     @has_finished = false
-    return nameit 'Σtxt', ( send ) =>
+    return nameit '√txt', ( send ) =>
       return null if @has_finished
       unless ( match = source.match letter_re )?
         @has_finished = true
@@ -114,10 +114,10 @@ class Segment
   [ stf_prefix + 'arrayiterator'      ]: ( source ) -> @[ stf_prefix + 'generator' ] source
   [ stf_prefix + 'setiterator'        ]: ( source ) -> @[ stf_prefix + 'generator' ] source
   [ stf_prefix + 'mapiterator'        ]: ( source ) -> @[ stf_prefix + 'generator' ] source
-  [ stf_prefix + 'list'               ]: ( source ) -> nameit 'Σlst', @[ stf_prefix + 'generator' ] source.values()
-  [ stf_prefix + 'object'             ]: ( source ) -> nameit 'Σobj', @[ stf_prefix + 'generator' ] ( -> yield [ k, v, ] for k, v of source )()
-  [ stf_prefix + 'set'                ]: ( source ) -> nameit 'Σset', @[ stf_prefix + 'generator' ] source.values()
-  [ stf_prefix + 'map'                ]: ( source ) -> nameit 'Σmap', @[ stf_prefix + 'generator' ] source.entries()
+  [ stf_prefix + 'list'               ]: ( source ) -> nameit '√lst', @[ stf_prefix + 'generator' ] source.values()
+  [ stf_prefix + 'object'             ]: ( source ) -> nameit '√obj', @[ stf_prefix + 'generator' ] ( -> yield [ k, v, ] for k, v of source )()
+  [ stf_prefix + 'set'                ]: ( source ) -> nameit '√set', @[ stf_prefix + 'generator' ] source.values()
+  [ stf_prefix + 'map'                ]: ( source ) -> nameit '√map', @[ stf_prefix + 'generator' ] source.entries()
 
 
   #=========================================================================================================
