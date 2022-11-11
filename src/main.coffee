@@ -70,7 +70,7 @@ class Segment
       switch arity = R.length ? 0
         when 1 then @transform_type = 'observer'
         when 2 then @transform_type = 'transducer'
-        else throw new Error "fittings with arity #{arity} not implemented"
+        else throw new Error "^mr.e#1^ fittings with arity #{arity} not implemented"
     #.......................................................................................................
     nameit 'ƒ', R if R.name is ''
     return R
@@ -82,7 +82,7 @@ class Segment
   _get_source_transform: ( source ) ->
     type = @types.type_of source
     unless ( method = @[stf type] )?
-      throw new Error "unable to convert a #{type} to a transform"
+      throw new Error "^mr.e#2^ unable to convert a #{type} to a transform"
     @has_finished = false
     R = method.call @, source
     return nameit type, R if R.name is ''
@@ -143,7 +143,7 @@ class Segment
         when 'transducer'
           @transform d, @_send
         else
-          throw new Error "internal error: unknown transform type #{rpr @transform_type}"
+          throw new Error "^mr.e#3^ internal error: unknown transform type #{rpr @transform_type}"
       return 1
     return 0
 
