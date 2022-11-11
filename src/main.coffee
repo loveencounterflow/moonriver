@@ -294,17 +294,17 @@ class Async_segment extends Segment
     if @transform_type is 'source'
       @_send @input.shift() while @input.length > 0 ### TAINT could be done with `.splice()` ###
       return 0 if @transform.has_finished
-      @transform @_send
+      await @transform @_send
       return 1
     if @input.length > 0
       d = @input.shift()
       d = await d if d instanceof Promise
       switch @transform_type
         when 'observer'
-          @transform  d
+          await @transform  d
           @_send      d
         when 'transducer'
-          @transform d, @_send
+          await @transform d, @_send
         else
           throw new Error "^mr.e#3^ internal error: unknown transform type #{rpr @transform_type}"
       return 1
