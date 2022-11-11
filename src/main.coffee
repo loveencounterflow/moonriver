@@ -59,6 +59,7 @@ class Segment
         and thereby affect one data item at a time.
       * `transducer`: a `transform` that takes two arguments, the current data item and a `send()` function
         that can be used any number of times to send values to the ensuing transform.
+      * `observer`s and `transducer`s are collectively called `duct`s as ooposed to `source`s
 
     ###
     if @types.isa.mr_source_fitting fitting
