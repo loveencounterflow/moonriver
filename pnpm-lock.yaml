@@ -2,17 +2,28 @@ lockfileVersion: 5.4
 
 specifiers:
   guy: 11.13.0
+  intertext-splitlines: ^1.2.1
   intertype: 0.106.0
+  jfee: ^0.1.4
 
 dependencies:
   guy: 11.13.0
+  intertext-splitlines: 1.2.1
   intertype: 0.106.0
+  jfee: 0.1.4
 
 packages:
 
   /ansi-regex/5.0.1:
     resolution: {integrity: sha512-quJQXlTSUGL2LH9SUXo8VwsY4soanhgo6LNSm84E1LBcE8s3O0wpdiRzyR9z/ZZJMlMWv37qOOb9pdJlMUEKFQ==}
     engines: {node: '>=8'}
+    dev: false
+
+  /cnd/9.2.3:
+    resolution: {integrity: sha512-CdgrCS/KS2p5TvvtpjiG+sCdAkqCDBHcmUBKGGH8owlJ5/DMZAcbJ6PDJFMUOhL+y2jzdDVl0OeMUrh1Fd1LOQ==}
+    hasBin: true
+    dependencies:
+      jsx-number-format: 0.1.5
     dev: false
 
   /emoji-regex/8.0.0:
@@ -45,6 +56,13 @@ packages:
       letsfreezethat: 3.1.0
     dev: false
 
+  /intertext-splitlines/1.2.1:
+    resolution: {integrity: sha512-bnIqoTOk8ie/jE3g4ec7h5ZdjpUNF+ynQ0/oTwn3I973vhCjMtnd9DCp/i1hxVMO55uqDgyYQ42f44Quzc6zXg==}
+    dependencies:
+      cnd: 9.2.3
+      intertype: 7.6.5
+    dev: false
+
   /intertype-legacy/7.7.1:
     resolution: {integrity: sha512-Bj3k9bCu8vA6JLIvnCrJXOdkecgY5wtCmORclJ87uq22N53swREHT5bezSeK5TwcxgSJEDg2wEfcn4kNr9Qv8A==}
     dependencies:
@@ -66,9 +84,26 @@ packages:
       - tmp
     dev: false
 
+  /intertype/7.6.5:
+    resolution: {integrity: sha512-763YK3ezLYy9FkX+cTTg/qwGHteqlaTMiec9a2sVAKm7kXp9e7QkzbyYS6u4CcbLxx12L8bcRbe3SFsPeaJCMA==}
+    dependencies:
+      multimix: 5.0.0
+    dev: false
+
   /is-fullwidth-code-point/3.0.0:
     resolution: {integrity: sha512-zymm5+u+sCsSWyD9qNaejV3DFvhCKclKdizYaJUuHA83RLjb7nSuGnddCHGv0hk+KY7BMAlsWeK4Ueg6EV6XQg==}
     engines: {node: '>=8'}
+    dev: false
+
+  /jfee/0.1.4:
+    resolution: {integrity: sha512-XM3NLlcQGunAXg2c4Os28LWzLjbnrQE7NMwc4q38hgsAbTMIKu1IXceEz4sVXp55fU4Q0c+8+5OgMWxRgnpFNw==}
+    dependencies:
+      cnd: 9.2.3
+      intertype: 7.6.5
+    dev: false
+
+  /jsx-number-format/0.1.5:
+    resolution: {integrity: sha512-eS1SvW5Lm+UQOrpxqtTF6NgPDupYlCV1GXJr+f/1yp+nwQH/4qW6XarwCcdphQjNHrJFC4ko2MgRyRDS/ypqZw==}
     dev: false
 
   /letsfreezethat/3.1.0:
