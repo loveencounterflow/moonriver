@@ -327,5 +327,5 @@ class Async_pipeline extends Pipeline
 
 
 ############################################################################################################
-module.exports = { Segment, Reporting_collector, Pipeline, Async_pipeline, }
+module.exports = { Segment, Async_segment, Reporting_collector, Pipeline, Async_pipeline, }
 
