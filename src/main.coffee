@@ -83,7 +83,9 @@ class Segment
     unless ( method = @[ stf_prefix + type ] )?
       throw new Error "unable to convert a #{type} to a transform"
     @has_finished = false
-    return nameit type, method.call @, source
+    R = method.call @, source
+    return nameit type, R if R.name is ''
+    return R
 
   #---------------------------------------------------------------------------------------------------------
   [ stf_prefix + 'generator' ]: ( source ) ->
@@ -99,7 +101,7 @@ class Segment
   [ stf_prefix + 'text' ]: ( source ) ->
     letter_re     = /./uy
     @has_finished = false
-    return ( send ) =>
+    return nameit 'Σtxt', ( send ) =>
       return null if @has_finished
       unless ( match = source.match letter_re )?
         @has_finished = true
@@ -112,10 +114,10 @@ class Segment
   [ stf_prefix + 'arrayiterator'      ]: ( source ) -> @[ stf_prefix + 'generator' ] source
   [ stf_prefix + 'setiterator'        ]: ( source ) -> @[ stf_prefix + 'generator' ] source
   [ stf_prefix + 'mapiterator'        ]: ( source ) -> @[ stf_prefix + 'generator' ] source
-  [ stf_prefix + 'list'               ]: ( source ) -> @_get_source_transform source.values()
-  [ stf_prefix + 'object'             ]: ( source ) -> @_get_source_transform -> yield [ k, v, ] for k, v of source
-  [ stf_prefix + 'set'                ]: ( source ) -> @_get_source_transform source.values()
-  [ stf_prefix + 'map'                ]: ( source ) -> @_get_source_transform source.entries()
+  [ stf_prefix + 'list'               ]: ( source ) -> nameit 'Σlst', @[ stf_prefix + 'generator' ] source.values()
+  [ stf_prefix + 'object'             ]: ( source ) -> nameit 'Σobj', @[ stf_prefix + 'generator' ] ( -> yield [ k, v, ] for k, v of source )()
+  [ stf_prefix + 'set'                ]: ( source ) -> nameit 'Σset', @[ stf_prefix + 'generator' ] source.values()
+  [ stf_prefix + 'map'                ]: ( source ) -> nameit 'Σmap', @[ stf_prefix + 'generator' ] source.entries()
 
 
   #=========================================================================================================
