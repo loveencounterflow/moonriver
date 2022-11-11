@@ -30,5 +30,14 @@
       send line
     return null
 
+#-----------------------------------------------------------------------------------------------------------
+@$limit = ( n ) ->
+  count = 0
+  return limit = ( d, send ) ->
+    return null if count > n
+    count++
+    send d
+    return null
+
 
 
