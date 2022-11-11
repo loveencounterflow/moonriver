@@ -29,11 +29,12 @@ get_types = ->
   #---------------------------------------------------------------------------------------------------------
   source_fitting_types  = new Set do =>
     ( name.replace stf_prefix, '' \
-      for name in ( Object.getOwnPropertyNames main.Segment:: ) \ ### thx to https://stackoverflow.com/a/31055009/7568091 ###
+      for name in ( GUY.props.keys main.Segment::, { hidden: true, } ) \
         when name.startsWith stf_prefix )
 
   #---------------------------------------------------------------------------------------------------------
   types.declare.mr_source_fitting ( x ) -> source_fitting_types.has @type_of x
+      for name in ( GUY.props.keys main.Async_segment::, { hidden: true, } ) \
 
   #---------------------------------------------------------------------------------------------------------
   types.declare.mr_nonsource_fitting ( x ) ->
