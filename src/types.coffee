@@ -26,6 +26,11 @@ get_types = ->
   types                     = new ( require 'intertype' ).Intertype()
   main                      = require './main'
 
+  # #---------------------------------------------------------------------------------------------------------
+  # types.declare.mr_segment        ( x ) -> x? and ( x instanceof main.Segment ) or ( x instanceof main.Async_segment )
+  # types.declare.mr_sync_segment   ( x ) -> x? and ( x instanceof main.Segment )
+  # types.declare.mr_async_segment  ( x ) -> x? and ( x instanceof main.Async_segment )
+
   #---------------------------------------------------------------------------------------------------------
   sync_source_fitting_types  = new Set do =>
     ( name.replace stf_prefix, '' \
