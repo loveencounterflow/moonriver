@@ -96,6 +96,9 @@ await p.run()
 * **[–]** documentation
 * **[–]** implement modifiers `first`, `last` (and `once_before_first` `once_after_last`?)
 * **[–]** move source documentation from `Segment._as_transform()`
+* **[–]** implement `start()` method that will signal all sources (with `Symbol 'start'`) to reset.
+  Compliant sources that *can* reset themselves to be repeated must respond with `Symbol 'ok'`; all other
+  return values will be interpreted as an error condition.
 
 
 ## Is Done
