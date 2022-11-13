@@ -307,7 +307,7 @@ class Async_segment extends Segment
         when 'transducer'
           await @transform d, @_send
         else
-          throw new Error "^mr.e#3^ internal error: unknown transform type #{rpr @transform_type}"
+          throw new Error "^mr.e#5^ internal error: unknown transform type #{rpr @transform_type}"
       return 1
     return 0
 
