@@ -200,7 +200,7 @@ class Pipeline
     @on_after_step      = cfg.on_after_step  ? null
     @on_before_process  = cfg.on_before_process ? null
     @on_after_process   = cfg.on_after_process  ? null
-    hide  @, '$',             nameit '$', @_remit.bind @
+    # hide  @, '$',             nameit '$', @_remit.bind @
     hide  @, 'types',         get_types()
     hide  @, 'sources',       []
     def   @, 'has_finished',  get: -> ( @datacount < 1 ) and @sources.every ( s ) -> s.has_finished
