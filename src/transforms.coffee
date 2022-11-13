@@ -3,7 +3,7 @@
 
 #-----------------------------------------------------------------------------------------------------------
 @$window = ( min, max, empty = misfit ) ->
-  { $ }         = ( require './main' ).Moonriver
+  { $ }         = require './main'
   last          = Symbol 'last'
   buffer        = {}
   buffer[ nr ]  = empty for nr in [ min .. max ]
