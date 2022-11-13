@@ -49,14 +49,12 @@ get_types = ->
 
   #---------------------------------------------------------------------------------------------------------
   types.declare.mr_sync_nonsource_fitting ( x ) ->
-    return false unless @isa.function x
-    return false unless 1 <= x.length <= 2
+    return false unless @isa.function12 x
     return true
 
   #---------------------------------------------------------------------------------------------------------
   types.declare.mr_async_nonsource_fitting ( x ) ->
-    return false unless @isa.function.or.asyncfunction x
-    return false unless 1 <= x.length <= 2
+    return false unless @isa.function12.or.asyncfunction12 x
     return true
 
   #---------------------------------------------------------------------------------------------------------
@@ -86,6 +84,36 @@ get_types = ->
       input:    null
       output:   null
       fitting:  null
+
+  #---------------------------------------------------------------------------------------------------------
+  types.declare.function0
+    isa:        ( x ) -> ( @isa.function x ) and ( x.length is 0 )
+    default:    ->
+    override:   true
+
+  #---------------------------------------------------------------------------------------------------------
+  types.declare.function1
+    isa:        ( x ) -> ( @isa.function x ) and ( x.length is 1 )
+    default:    ( x ) ->
+    override:   true
+
+  #---------------------------------------------------------------------------------------------------------
+  types.declare.function2
+    isa:        ( x ) -> ( @isa.function x ) and ( x.length is 2 )
+    default:    ( x, y ) ->
+    override:   true
+
+  #---------------------------------------------------------------------------------------------------------
+  types.declare.function12
+    isa:        ( x ) -> ( @isa.function x ) and ( 0 < x.length < 3 )
+    default:    ( x, y ) ->
+    override:   true
+
+  #---------------------------------------------------------------------------------------------------------
+  types.declare.asyncfunction12
+    isa:        ( x ) -> ( @isa.asyncfunction x ) and ( 0 < x.length < 3 )
+    default:    ( x, y ) ->
+    override:   true
 
   #---------------------------------------------------------------------------------------------------------
   return types
