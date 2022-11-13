@@ -312,6 +312,9 @@ class Async_segment extends Segment
     return 0
 
   #---------------------------------------------------------------------------------------------------------
+  [stf'asyncgeneratorfunction']: ( source ) -> @[stf'asyncgenerator'] source()
+
+  #---------------------------------------------------------------------------------------------------------
   [stf'asyncgenerator']: ( source ) -> ( send ) =>
     return null if @has_finished
     dsc           = await source.next()
