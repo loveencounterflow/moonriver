@@ -202,7 +202,7 @@ class Pipeline
     @on_after_process   = cfg.on_after_process  ? null
     # hide  @, '$',             nameit '$', @_remit.bind @
     hide  @, 'types',         get_types()
-    hide  @, 'sources',       []
+    def   @, 'sources',       get: -> Object.freeze ( s for s in @segments when s.transform_type is 'source' )
     def   @, 'has_finished',  get: -> ( @datacount < 1 ) and @sources.every ( s ) -> s.has_finished
     return undefined
 
@@ -230,7 +230,7 @@ class Pipeline
   push: ( P... ) ->
     R = @_remit P...
     @segments.push  R
-    @sources.push   R if R.transform_type is 'source'
+    # @sources.push   R if R.transform_type is 'source'
     return R
 
 
