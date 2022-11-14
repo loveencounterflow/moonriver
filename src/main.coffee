@@ -64,10 +64,12 @@ class Segment
   constructor: ( cfg ) ->
     hide @, 'types',      get_types()
     @types.create[ @constructor.my_type ] cfg
-    @input          = cfg.input
-    @output         = cfg.output
-    @has_finished   = null
-    @transform_type = null
+    @input            = cfg.input
+    @output           = cfg.output
+    @has_finished     = null
+    @transform_type   = null
+    @repeatable       = false
+    @_on_before_walk  = ->
     hide @, 'transform',  @_as_transform cfg.fitting
     hide @, '_send', send = ( d ) => @output.push d; d ### 'inner' send method ###
     return undefined
@@ -88,12 +90,19 @@ class Segment
         and thereby affect one data item at a time.
       * `transducer`: a `transform` that takes two arguments, the current data item and a `send()` function
         that can be used any number of times to send values to the ensuing transform.
-      * `observer`s and `transducer`s are collectively called `duct`s as ooposed to `source`s
+      * `observer`s and `transducer`s are collectively called `duct`s as opposed to `source`s
 
     ###
-    if @types.isa[ @constructor.fittying_type ] fitting
-      R               = @_get_source_transform fitting
-      @transform_type = 'source'
+    #.......................................................................................................
+    if @types.isa.function0 fitting
+      @repeatable       = true
+      @_on_before_walk  = -> @transform = @_get_source_transform fitting()
+      @transform_type   = 'source'
+      R                 = fitting
+    #.......................................................................................................
+    else if ( @types.isa[ @constructor.fittying_type ] fitting )
+      R                 = @_get_source_transform fitting
+      @transform_type   = 'source'
     #.......................................................................................................
     else
       R = fitting
@@ -149,6 +158,7 @@ class Segment
   [stf'object']:            ( source ) -> nameit '√obj', @[stf'generator'] ( -> yield [ k, v, ] for k, v of source )()
   [stf'set']:               ( source ) -> nameit '√set', @[stf'generator'] source.values()
   [stf'map']:               ( source ) -> nameit '√map', @[stf'generator'] source.entries()
+  [stf'function0']:         ( source ) -> source
 
 
   #=========================================================================================================
@@ -258,6 +268,7 @@ class Pipeline
   #---------------------------------------------------------------------------------------------------------
   run: -> ( d for d from @walk() )
   walk: ->
+    segment._on_before_walk() for segment in @segments
     loop
       @process()
       yield d for d in @output
