@@ -81,11 +81,13 @@ get_types = ->
 
   #---------------------------------------------------------------------------------------------------------
   types.declare.mr_sync_source_fitting              ( x ) ->  sync_source_fitting_types.has @type_of x
-  types.declare.mr_async_source_fitting             ( x ) -> async_source_fitting_types.has @type_of x
   types.declare.mr_sync_repeatable_source_fitting   'function0'
-  types.declare.mr_async_repeatable_source_fitting  'function0.or.asyncfunction0'
   types.declare.mr_sync_observer_fitting            'function1'
   types.declare.mr_sync_transducer_fitting          'function2'
+
+  #---------------------------------------------------------------------------------------------------------
+  types.declare.mr_async_source_fitting             ( x ) -> async_source_fitting_types.has @type_of x
+  types.declare.mr_async_repeatable_source_fitting  'function0.or.asyncfunction0'
   types.declare.mr_async_observer_fitting           'function1.or.asyncfunction1'
   types.declare.mr_async_transducer_fitting         'function2.or.asyncfunction2'
 
