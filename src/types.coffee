@@ -32,6 +32,36 @@ get_types = ->
   # types.declare.mr_async_segment  ( x ) -> x? and ( x instanceof main.Async_segment )
 
   #---------------------------------------------------------------------------------------------------------
+  types.declare.function0
+    isa:        ( x ) -> ( @isa.function x ) and ( x.length is 0 )
+    default:    ->
+    override:   true
+
+  #---------------------------------------------------------------------------------------------------------
+  types.declare.function1
+    isa:        ( x ) -> ( @isa.function x ) and ( x.length is 1 )
+    default:    ( x ) ->
+    override:   true
+
+  #---------------------------------------------------------------------------------------------------------
+  types.declare.function2
+    isa:        ( x ) -> ( @isa.function x ) and ( x.length is 2 )
+    default:    ( x, y ) ->
+    override:   true
+
+  #---------------------------------------------------------------------------------------------------------
+  types.declare.function12
+    isa:        ( x ) -> ( @isa.function x ) and ( 0 < x.length < 3 )
+    default:    ( x, y ) ->
+    override:   true
+
+  #---------------------------------------------------------------------------------------------------------
+  types.declare.asyncfunction12
+    isa:        ( x ) -> ( @isa.asyncfunction x ) and ( 0 < x.length < 3 )
+    default:    ( x, y ) ->
+    override:   true
+
+  #---------------------------------------------------------------------------------------------------------
   sync_source_fitting_types  = new Set do =>
     ( name.replace stf_prefix, '' \
       for name in ( GUY.props.keys main.Segment::, { hidden: true, } ) \
@@ -84,36 +114,6 @@ get_types = ->
       input:    null
       output:   null
       fitting:  null
-
-  #---------------------------------------------------------------------------------------------------------
-  types.declare.function0
-    isa:        ( x ) -> ( @isa.function x ) and ( x.length is 0 )
-    default:    ->
-    override:   true
-
-  #---------------------------------------------------------------------------------------------------------
-  types.declare.function1
-    isa:        ( x ) -> ( @isa.function x ) and ( x.length is 1 )
-    default:    ( x ) ->
-    override:   true
-
-  #---------------------------------------------------------------------------------------------------------
-  types.declare.function2
-    isa:        ( x ) -> ( @isa.function x ) and ( x.length is 2 )
-    default:    ( x, y ) ->
-    override:   true
-
-  #---------------------------------------------------------------------------------------------------------
-  types.declare.function12
-    isa:        ( x ) -> ( @isa.function x ) and ( 0 < x.length < 3 )
-    default:    ( x, y ) ->
-    override:   true
-
-  #---------------------------------------------------------------------------------------------------------
-  types.declare.asyncfunction12
-    isa:        ( x ) -> ( @isa.asyncfunction x ) and ( 0 < x.length < 3 )
-    default:    ( x, y ) ->
-    override:   true
 
   #---------------------------------------------------------------------------------------------------------
   return types
