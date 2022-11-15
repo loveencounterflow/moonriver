@@ -119,17 +119,17 @@ await p.run()
 
 * `(async)function`s:
   * nullary `(async)function`: a repeatable source; its return value must be a proper source.
-  * unary `(async)function`s: an observer, to be called as `fn d`, where `d` is the current data item.
-  * binary `(async)function`s: a transducer, to be called as `fn d, send`, where `send()` is a function to
+  * unary `(async)function`: an observer, to be called as `fn d`, where `d` is the current data item.
+  * binary `(async)function`: a transducer, to be called as `fn d, send`, where `send()` is a function to
     be called by the transducer any number of times with any kind of values (but with exactly one value each
     time).
-* `text`s (i.e. `String`s): adds the text's codepoints to the stream.
-* `list`s (i.e. `Array`s): adds the list's elements to the stream.
-* `(async)generatorfunction`s: will be called once to obtain an `(async)generator`, for which see below.
-* `(async)generator`s: adds the generator's yielded values to the stream.
-* `set`s: adds the set's elements to the stream.
-* `objects`s: adds the object's attributes as `[ key, value, ]` pairs to the stream.
-* `maps`s: adds the map's entries as `[ key, value, ]` pairs to the stream.
+* `text` (i.e. `String`): adds the text's codepoints to the stream.
+* `list` (i.e. `Array`): adds the list's elements to the stream.
+* `(async)generatorfunction`: will be called once to obtain an `(async)generator`, for which see below.
+* `(async)generator`: adds the generator's yielded values to the stream.
+* `set`: adds the set's elements to the stream.
+* `objects`: adds the object's attributes as `[ key, value, ]` pairs to the stream.
+* `maps`: adds the map's entries as `[ key, value, ]` pairs to the stream.
 
 ## To Do
 
