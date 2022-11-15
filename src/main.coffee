@@ -68,7 +68,6 @@ class Segment
     @output           = cfg.output
     @has_finished     = null
     @transform_type   = null
-    @repeatable       = false
     @_on_before_walk  = ->
     hide @, 'transform',  @_as_transform cfg.fitting
     hide @, '_send', send = ( d ) => @output.push d; d ### 'inner' send method ###
@@ -95,7 +94,6 @@ class Segment
     ###
     #.......................................................................................................
     if @types.isa.function0 fitting
-      @repeatable       = true
       @_on_before_walk  = -> @transform = @_get_source_transform fitting()
       @transform_type   = 'source'
       R                 = fitting
