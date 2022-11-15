@@ -78,9 +78,9 @@ get_types = ->
   types.declare.mr_async_source_fitting ( x ) -> async_source_fitting_types.has @type_of x
 
   #---------------------------------------------------------------------------------------------------------
-  types.declare.mr_sync_nonsource_fitting ( x ) ->
-    return false unless @isa.function12 x
-    return true
+  types.declare.mr_sync_nonsource_fitting
+    isa:        'function1.or.function2'
+    override:   true
 
   #---------------------------------------------------------------------------------------------------------
   types.declare.mr_async_nonsource_fitting ( x ) ->
