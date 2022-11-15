@@ -366,6 +366,7 @@ class Async_pipeline extends Pipeline
   #---------------------------------------------------------------------------------------------------------
   run: -> ( d for await d from @walk() )
   walk: ->
+    await segment._on_before_walk() for segment in @segments
     loop
       await @process()
       yield ( if d instanceof Promise then await d else d ) for d in @output
