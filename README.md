@@ -13,6 +13,7 @@
   - [Async Pipelines](#async-pipelines)
   - [Common Tasks](#common-tasks)
     - [Iterate over Lines of a File](#iterate-over-lines-of-a-file)
+  - [Glossary](#glossary)
   - [To Do](#to-do)
   - [Is Done](#is-done)
 
@@ -89,6 +90,23 @@ await p.run()
 ```
 
 **NB** this stream is asynchronous because of the `ReadableStream`; `$split_lines()` is synchronous.
+
+## Glossary
+
+* **`fitting`**: a value that may be used as (the central part of) a transform in a pipeline. This may be a
+  function of arity 2 (a transducer), a list (a source) &c.
+* **`transform`**: one of the serial elements that constitute a pipeline. While a `fitting` may be of
+  various types, a `transform` is always a function. `transform`s have a `type` attribute which takes one of
+  the following values:
+  * **`source`**: a `transform` that does not take any arguments and will yield one value per call
+  * **`observer`**: a `transform` that takes one argument (the current value) and does not send any values
+    into the pipeline; the value an observer gets called with will be the same value that the next
+    transformer will be called with. Note that if an observer receives a mutable value it can modify it and
+    thereby affect one data item at a time.
+  * **`transducer`**: a `transform` that takes two arguments, the current data item and a `send()` function
+    that can be used any number of times to send values to the ensuing transform.
+  * **`duct`**: `observer`s and `transducer`s are collectively called `duct`s as opposed to `source`s
+
 
 
 ## To Do
