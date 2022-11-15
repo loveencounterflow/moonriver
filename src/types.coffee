@@ -50,14 +50,14 @@ get_types = ->
     override:   true
 
   #---------------------------------------------------------------------------------------------------------
-  types.declare.function12
-    isa:        ( x ) -> ( @isa.function x ) and ( 0 < x.length < 3 )
-    default:    ( x, y ) ->
+  types.declare.asyncfunction1
+    isa:        ( x ) -> ( @isa.asyncfunction x ) and ( x.length is 1 )
+    default:    ( x ) ->
     override:   true
 
   #---------------------------------------------------------------------------------------------------------
-  types.declare.asyncfunction12
-    isa:        ( x ) -> ( @isa.asyncfunction x ) and ( 0 < x.length < 3 )
+  types.declare.asyncfunction2
+    isa:        ( x ) -> ( @isa.asyncfunction x ) and ( x.length is 2 )
     default:    ( x, y ) ->
     override:   true
 
@@ -79,7 +79,7 @@ get_types = ->
 
   #---------------------------------------------------------------------------------------------------------
   types.declare.mr_async_duct_fitting
-    isa:        'mr_sync_duct_fitting.or.asyncfunction12'
+    isa:        'mr_sync_duct_fitting.or.asyncfunction1.or.asyncfunction2'
     override:   true
 
   #---------------------------------------------------------------------------------------------------------
