@@ -27,6 +27,7 @@ nameit                    = ( name, f ) -> def f, 'name', { value: name, }
   get_types }             = require './types'
 stf                       = ( name ) -> stf_prefix + ( if Array.isArray name then name[ 0 ] else name )
 transforms                = require './transforms'
+noop                      = ->
 
 
 #===========================================================================================================
@@ -68,7 +69,7 @@ class Segment
     @output           = cfg.output
     @has_finished     = null
     @transform_type   = null
-    @_on_before_walk  = ->
+    @_on_before_walk  = noop
     hide @, 'transform',  @_as_transform cfg.fitting
     hide @, '_send', send = ( d ) => @output.push d; d ### 'inner' send method ###
     return undefined
