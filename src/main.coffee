@@ -58,8 +58,9 @@ class Reporting_collector
 class Segment
 
   #---------------------------------------------------------------------------------------------------------
-  @my_type:       'mr_sync_segment_cfg'
-  @fittying_type: 'mr_sync_source_fitting'
+  @my_type:             'mr_sync_segment_cfg'
+  @source_fitting_type: 'mr_sync_source_fitting'
+  @duct_fitting_type:   'mr_sync_duct_fitting'
 
   #---------------------------------------------------------------------------------------------------------
   constructor: ( cfg ) ->
@@ -82,7 +83,7 @@ class Segment
       @transform_type   = 'source'
       R                 = fitting
     #.......................................................................................................
-    else if ( @types.isa[ @constructor.fittying_type ] fitting )
+    else if ( @types.isa[ @constructor.source_fitting_type ] fitting )
       R                 = @_get_source_transform fitting
       @transform_type   = 'source'
     #.......................................................................................................
@@ -280,8 +281,9 @@ class Pipeline
 class Async_segment extends Segment
 
   #---------------------------------------------------------------------------------------------------------
-  @my_type:       'mr_async_segment_cfg'
-  @fittying_type: 'mr_async_source_fitting'
+  @my_type:             'mr_async_segment_cfg'
+  @source_fitting_type: 'mr_async_source_fitting'
+  @duct_fitting_type:   'mr_async_duct_fitting'
 
   #---------------------------------------------------------------------------------------------------------
   process: ->
