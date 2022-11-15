@@ -78,20 +78,20 @@ get_types = ->
   types.declare.mr_async_source_fitting ( x ) -> async_source_fitting_types.has @type_of x
 
   #---------------------------------------------------------------------------------------------------------
-  types.declare.mr_sync_nonsource_fitting
+  types.declare.mr_async_duct_fitting
+    isa:        'mr_sync_duct_fitting.or.asyncfunction12'
+    override:   true
+
+  #---------------------------------------------------------------------------------------------------------
+  types.declare.mr_sync_duct_fitting
     isa:        'function1.or.function2'
     override:   true
 
   #---------------------------------------------------------------------------------------------------------
-  types.declare.mr_async_nonsource_fitting ( x ) ->
-    return false unless @isa.function12.or.asyncfunction12 x
-    return true
-
-  #---------------------------------------------------------------------------------------------------------
   types.declare.mr_reporting_collector ( x ) -> x instanceof main.Reporting_collector
   types.declare.mr_collector 'list.or.mr_reporting_collector'
-  types.declare.mr_sync_fitting 'mr_sync_nonsource_fitting.or.mr_sync_source_fitting'
-  types.declare.mr_async_fitting 'mr_async_nonsource_fitting.or.mr_async_source_fitting'
+  types.declare.mr_sync_fitting 'mr_sync_duct_fitting.or.mr_sync_source_fitting'
+  types.declare.mr_async_fitting 'mr_async_duct_fitting.or.mr_async_source_fitting'
 
   #---------------------------------------------------------------------------------------------------------
   types.declare.mr_sync_segment_cfg
