@@ -58,9 +58,13 @@ class Reporting_collector
 class Segment
 
   #---------------------------------------------------------------------------------------------------------
-  @my_type:             'mr_sync_segment_cfg'
-  @source_fitting_type: 'mr_sync_source_fitting'
-  @duct_fitting_type:   'mr_sync_duct_fitting'
+  @my_type:                         'mr_sync_segment_cfg'
+  @fitting_type:                    'mr_sync_fitting'
+  @source_fitting_type:             'mr_sync_source_fitting'
+  @repeatable_source_fitting_type:  'mr_sync_repeatable_source_fitting'
+  @observer_fitting_type:           'mr_sync_observer_fitting'
+  @transducer_fitting_type:         'mr_sync_transducer_fitting'
+  @duct_fitting_type:               'mr_sync_duct_fitting'
 
   #---------------------------------------------------------------------------------------------------------
   constructor: ( cfg ) ->
@@ -77,24 +81,34 @@ class Segment
 
   #---------------------------------------------------------------------------------------------------------
   _as_transform: ( fitting ) ->
+    clasz = @constructor
+    sigil = null
     #.......................................................................................................
-    if @types.isa.function0 fitting
+    if @types.isa[ clasz.repeatable_source_fitting_type ] fitting
       @_on_before_walk  = -> @transform = @_get_source_transform fitting()
       @transform_type   = 'source'
       R                 = fitting
+      sigil             = '?sr '
     #.......................................................................................................
-    else if ( @types.isa[ @constructor.source_fitting_type ] fitting )
+    else if ( @types.isa[ clasz.source_fitting_type ] fitting )
       R                 = @_get_source_transform fitting
       @transform_type   = 'source'
+      sigil             = '?sn '
     #.......................................................................................................
     else
       R = fitting
-      switch arity = R.length ? 0
-        when 1 then @transform_type = 'observer'
-        when 2 then @transform_type = 'transducer'
-        else throw new Error "^mr.e#1^ fittings with arity #{arity} not implemented"
+      if      @types.isa[ clasz.observer_fitting_type   ] R
+        @transform_type = 'observer'
+        sigil           = '?o'
+      else if @types.isa[ clasz.transducer_fitting_type ] R
+        @transform_type = 'transducer'
+        sigil           = '?t'
+      else
+        throw new Error "^mr.e#1^ fittings with arity #{arity} not implemented"
     #.......................................................................................................
-    nameit 'ƒ', R if R.name is ''
+    name  = if R.name is '' then 'ƒ' else R.name
+    name  = sigil + name
+    nameit name, R
     return R
 
 
@@ -281,9 +295,13 @@ class Pipeline
 class Async_segment extends Segment
 
   #---------------------------------------------------------------------------------------------------------
-  @my_type:             'mr_async_segment_cfg'
-  @source_fitting_type: 'mr_async_source_fitting'
-  @duct_fitting_type:   'mr_async_duct_fitting'
+  @my_type:                         'mr_async_segment_cfg'
+  @fitting_type:                    'mr_async_fitting'
+  @source_fitting_type:             'mr_async_source_fitting'
+  @repeatable_source_fitting_type:  'mr_async_repeatable_source_fitting'
+  @observer_fitting_type:           'mr_async_observer_fitting'
+  @transducer_fitting_type:         'mr_async_transducer_fitting'
+  @duct_fitting_type:               'mr_async_duct_fitting'
 
   #---------------------------------------------------------------------------------------------------------
   process: ->

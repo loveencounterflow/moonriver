@@ -50,6 +50,12 @@ get_types = ->
     override:   true
 
   #---------------------------------------------------------------------------------------------------------
+  types.declare.asyncfunction0
+    isa:        ( x ) -> ( @isa.asyncfunction x ) and ( x.length is 0 )
+    default:    ( x ) ->
+    override:   true
+
+  #---------------------------------------------------------------------------------------------------------
   types.declare.asyncfunction1
     isa:        ( x ) -> ( @isa.asyncfunction x ) and ( x.length is 1 )
     default:    ( x ) ->
@@ -74,8 +80,14 @@ get_types = ->
         when name.startsWith stf_prefix )
 
   #---------------------------------------------------------------------------------------------------------
-  types.declare.mr_sync_source_fitting  ( x ) ->  sync_source_fitting_types.has @type_of x
-  types.declare.mr_async_source_fitting ( x ) -> async_source_fitting_types.has @type_of x
+  types.declare.mr_sync_source_fitting              ( x ) ->  sync_source_fitting_types.has @type_of x
+  types.declare.mr_async_source_fitting             ( x ) -> async_source_fitting_types.has @type_of x
+  types.declare.mr_sync_repeatable_source_fitting   'function0'
+  types.declare.mr_async_repeatable_source_fitting  'function0.or.asyncfunction0'
+  types.declare.mr_sync_observer_fitting            'function1'
+  types.declare.mr_sync_transducer_fitting          'function2'
+  types.declare.mr_async_observer_fitting           'function1.or.asyncfunction1'
+  types.declare.mr_async_transducer_fitting         'function2.or.asyncfunction2'
 
   #---------------------------------------------------------------------------------------------------------
   types.declare.mr_async_duct_fitting
@@ -89,9 +101,9 @@ get_types = ->
 
   #---------------------------------------------------------------------------------------------------------
   types.declare.mr_reporting_collector ( x ) -> x instanceof main.Reporting_collector
-  types.declare.mr_collector 'list.or.mr_reporting_collector'
-  types.declare.mr_sync_fitting 'mr_sync_duct_fitting.or.mr_sync_source_fitting'
-  types.declare.mr_async_fitting 'mr_async_duct_fitting.or.mr_async_source_fitting'
+  types.declare.mr_collector      'list.or.mr_reporting_collector'
+  types.declare.mr_sync_fitting   'mr_sync_duct_fitting.or.mr_sync_source_fitting'
+  types.declare.mr_async_fitting  'mr_async_duct_fitting.or.mr_async_source_fitting'
 
   #---------------------------------------------------------------------------------------------------------
   types.declare.mr_sync_segment_cfg
