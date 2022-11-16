@@ -24,7 +24,7 @@
   "dependencies": {
     "guy": "11.13.0",
     "intertext-splitlines": "^1.2.1",
-    "intertype": "0.107.0",
+    "intertype": "0.109",
     "jfee": "^0.1.4"
   }
 }
