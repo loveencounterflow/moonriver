@@ -3,13 +3,13 @@ lockfileVersion: 5.4
 specifiers:
   guy: 11.13.0
   intertext-splitlines: ^1.2.1
-  intertype: '0.109'
+  intertype: '0.110'
   jfee: ^0.1.4
 
 dependencies:
   guy: 11.13.0
   intertext-splitlines: 1.2.1
-  intertype: 0.109.1
+  intertype: 0.110.0
   jfee: 0.1.4
 
 packages:
@@ -69,8 +69,8 @@ packages:
       multimix: 5.0.0
     dev: false
 
-  /intertype/0.109.1:
-    resolution: {integrity: sha512-7Kj2nx0jS27jG+SOfgQVtFYbSjOjucGCJ8ETk4aqcXupE69FJnsuBzYh10mMpbz0vWhx/8Q0DBOUh06DdksTwA==}
+  /intertype/0.110.0:
+    resolution: {integrity: sha512-SFm7QBqFZOPC5R2d+XKZuprCx0U3dyjpCwzRWBtnWwk+tFrrtNEiSr7FmJ04ABJd2KIIH1h0ztMBXdFlT+vgTg==}
     dependencies:
       guy: 11.12.0
       intertype-legacy: 7.7.1
