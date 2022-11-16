@@ -72,24 +72,30 @@ get_types = ->
     ( name.replace stf_prefix, '' \
       for name in ( GUY.props.keys main.Segment::, { hidden: true, } ) \
         when name.startsWith stf_prefix )
+  sync_source_fitting_types.add 'mr_sync_repeatable_source_fitting'
+  sync_source_fitting_types.add 'function0'
 
   #---------------------------------------------------------------------------------------------------------
   async_source_fitting_types  = new Set do =>
     ( name.replace stf_prefix, '' \
       for name in ( GUY.props.keys main.Async_segment::, { hidden: true, } ) \
         when name.startsWith stf_prefix )
+  async_source_fitting_types.add 'mr_sync_repeatable_source_fitting'
+  async_source_fitting_types.add 'function0'
+  async_source_fitting_types.add 'mr_async_repeatable_source_fitting'
+  async_source_fitting_types.add 'asyncfunction0'
 
   #---------------------------------------------------------------------------------------------------------
   types.declare.mr_sync_source_fitting              ( x ) ->  sync_source_fitting_types.has @type_of x
-  types.declare.mr_sync_repeatable_source_fitting   'function0'
-  types.declare.mr_sync_observer_fitting            'function1'
-  types.declare.mr_sync_transducer_fitting          'function2'
+  types.declare.mr_sync_repeatable_source_fitting   { isa: 'function0', override: true, }
+  types.declare.mr_sync_observer_fitting            { isa: 'function1', override: true, }
+  types.declare.mr_sync_transducer_fitting          { isa: 'function2', override: true, }
 
   #---------------------------------------------------------------------------------------------------------
   types.declare.mr_async_source_fitting             ( x ) -> async_source_fitting_types.has @type_of x
-  types.declare.mr_async_repeatable_source_fitting  'function0.or.asyncfunction0'
-  types.declare.mr_async_observer_fitting           'function1.or.asyncfunction1'
-  types.declare.mr_async_transducer_fitting         'function2.or.asyncfunction2'
+  types.declare.mr_async_repeatable_source_fitting  { isa: 'function0.or.asyncfunction0', override: true, }
+  types.declare.mr_async_observer_fitting           { isa: 'function1.or.asyncfunction1', override: true, }
+  types.declare.mr_async_transducer_fitting         { isa: 'function2.or.asyncfunction2', override: true, }
 
   #---------------------------------------------------------------------------------------------------------
   types.declare.mr_async_duct_fitting
