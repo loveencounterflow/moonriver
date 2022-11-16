@@ -155,7 +155,6 @@ class Segment
   [stf'object']:            ( source ) -> nameit '√obj', @[stf'generator'] ( -> yield [ k, v, ] for k, v of source )()
   [stf'set']:               ( source ) -> nameit '√set', @[stf'generator'] source.values()
   [stf'map']:               ( source ) -> nameit '√map', @[stf'generator'] source.entries()
-  [stf'function0']:         ( source ) -> source
 
 
   #=========================================================================================================
