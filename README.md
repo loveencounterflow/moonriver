@@ -96,24 +96,23 @@ await p.run()
 
 * **`fitting`**: a value that may be used as (the central part of) a transform in a pipeline. This may be a
   function of arity 2 (a transducer), a list (a source) &c.
-* **`transform`**: one of the serial elements that constitute a pipeline. While a `fitting` may be of
-  various types, a `transform` is always a function. `transform`s have a `type` attribute which takes one of
-  the following values:
+* **`segment`**: one of the serial elements that constitute a pipeline. Each segment has a function called
+* a **`transform`**. `transform`s have a `type` attribute which takes one of the following values:
   * **`source`**: a `transform` that does not take any arguments and will yield one value per call. There
     are two kinds of `source`s:
-  * **`repeatable sources`** or **`source factories`** are (synchronous or asynchronous)
-    [nullary](https://en.wikipedia.org/wiki/Arity#Nullary) functions that return a nonrepeatable source
-    when called.
-  * **`nonrepeatable sources`** or **`proper sources`** are all values whose type (as returned by `type =
-    pipeline.types.type_of x`) is recognized by the segment class (i.e. for which there is a method named
-    `Segment::_source_transform_from_$type()`)
-  * **`observer`**: a `transform` that takes one argument (the current value) and does not send any values
-    into the pipeline; the value an observer gets called with will be the same value that the next
-    transformer will be called with. Note that if an observer receives a mutable value it can modify it and
-    thereby affect one data item at a time.
-  * **`transducer`**: a `transform` that takes two arguments, the current data item and a `send()` function
-    that can be used any number of times to send values to the ensuing transform.
-  * **`duct`**: `observer`s and `transducer`s are collectively called `duct`s as opposed to `source`s
+    * **`repeatable sources`** or **`source factories`** are (synchronous or asynchronous)
+      [nullary](https://en.wikipedia.org/wiki/Arity#Nullary) functions that return a nonrepeatable source
+      when called.
+    * **`nonrepeatable sources`** or **`proper sources`** are all values whose type (as returned by `type =
+      pipeline.types.type_of x`) is recognized by the segment class (i.e. for which there is a method named
+      `Segment::_source_transform_from_$type()`)
+  * **`duct`**: `observer`s and `transducer`s are collectively called `duct`s:
+    * **`observer`**: a `transform` that takes one argument (the current value) and does not send any values
+      into the pipeline; the value an observer gets called with will be the same value that the next
+      transformer will be called with. Note that if an observer receives a mutable value it can modify it and
+      thereby affect one data item at a time.
+    * **`transducer`**: a `transform` that takes two arguments, the current data item and a `send()` function
+      that can be used any number of times to send values to the ensuing transform.
 
 ## List of Implemented Transforms
 
