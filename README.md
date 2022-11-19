@@ -98,21 +98,28 @@ await p.run()
   function of arity 2 (a transducer), a list (a source) &c.
 * **`segment`**: one of the serial elements that constitute a pipeline. Each segment has a function called
 * a **`transform`**. `transform`s have a `type` attribute which takes one of the following values:
-  * **`source`**: a `transform` that does not take any arguments and will yield one value per call. There
-    are two kinds of `source`s:
-    * **`repeatable sources`** or **`source factories`** are (synchronous or asynchronous)
-      [nullary](https://en.wikipedia.org/wiki/Arity#Nullary) functions that return a nonrepeatable source
-      when called.
-    * **`nonrepeatable sources`** or **`proper sources`** are all values whose type (as returned by `type =
-      pipeline.types.type_of x`) is recognized by the segment class (i.e. for which there is a method named
-      `Segment::_source_transform_from_$type()`)
-  * **`duct`**: `observer`s and `transducer`s are collectively called `duct`s:
-    * **`observer`**: a `transform` that takes one argument (the current value) and does not send any values
-      into the pipeline; the value an observer gets called with will be the same value that the next
-      transformer will be called with. Note that if an observer receives a mutable value it can modify it and
-      thereby affect one data item at a time.
-    * **`transducer`**: a `transform` that takes two arguments, the current data item and a `send()` function
-      that can be used any number of times to send values to the ensuing transform.
+  * An **`activator`** is a `transform` that provides data items for the pipeline. There are two kinds of
+    `activator`s:
+    * **`producer`s** are (synchronous or asynchronous)
+      [nullary](https://en.wikipedia.org/wiki/Arity#Nullary) functions that return a `source` when called.
+    * **`source`s** in turn are all values whose type (as returned by `type = pipeline.types.type_of x`) is
+      recognized by the segment class (i.e. for which there is a method named
+      `Segment::_source_transform_from_$type()`). Sources include lists, strings, generators, generator
+      functions, maps, sets and so on.
+  * **`duct`s** are fittings that are called if and when a data item is delivered to their position in the
+    pipeline:
+    * an **`observer`** is a function `f1 = ( d ) ->` that takes one argument (`d`, the current data item)
+      and does not send any values into the pipeline; the value an observer gets called with will be the
+      same value that the next transformer will be called with. Note that if an observer receives a mutable
+      value it can modify it and thereby affect one data item at a time.
+    * a **`transducer`** is a function `f2 = ( d, send ) ->` that takes two arguments: the current data item
+      `d` and a `send` function that can be used any number of times to send values to the next transform
+      down the line.
+
+Without there being an `activator`, a pipeline will immediately finish without any results when its `run()`
+method is called; this is the reason `producer`s and `source`s are called `activator`s—without them, a
+pipeline will not do anything. That said, all pipelines do have a `send()` method which can be called with
+data which will be buffered until `walk()` or `run()` are called.
 
 ## List of Implemented Transforms
 
