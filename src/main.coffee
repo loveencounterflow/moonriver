@@ -203,10 +203,6 @@ class Pipeline
     @input              = @_new_collector()
     @output             = [] ### pipeline output buffer does not participate in datacount ###
     @segments           = []
-    @on_before_step     = cfg.on_before_step ? null
-    @on_after_step      = cfg.on_after_step  ? null
-    @on_before_process  = cfg.on_before_process ? null
-    @on_after_process   = cfg.on_after_process  ? null
     # hide  @, '$',             nameit '$', @_remit.bind @
     hide  @, 'types',         clasz.type_getter()
     def   @, 'sources',       get: -> Object.freeze ( s for s in @segments when s.transform_type is 'source' )
@@ -251,12 +247,8 @@ class Pipeline
   # PROCESSING
   #---------------------------------------------------------------------------------------------------------
   process: ->
-    @on_before_process() if @on_before_process?
     for segment, segment_idx in @segments
-      @on_before_step segment_idx if @on_before_step?
       segment.process()
-      @on_after_step segment_idx if @on_after_step?
-    @on_after_process() if @on_after_process?
     return null
 
 
@@ -348,12 +340,8 @@ class Async_pipeline extends Pipeline
   # PROCESSING
   #---------------------------------------------------------------------------------------------------------
   process: ->
-    @on_before_process() if @on_before_process?
     for segment, segment_idx in @segments
-      @on_before_step segment_idx if @on_before_step?
       await segment.process()
-      @on_after_step segment_idx if @on_after_step?
-    @on_after_process() if @on_after_process?
     return null
 
   #=========================================================================================================
