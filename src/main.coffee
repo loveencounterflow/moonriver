@@ -12,7 +12,7 @@ GUY                       = require 'guy'
   praise
   urge
   warn
-  whisper }               = GUY.trm.get_loggers 'MOONRIVER/NG'
+  whisper }               = GUY.trm.get_loggers 'MOONRIVER/MAIN'
 { rpr
   inspect
   echo
@@ -61,19 +61,11 @@ class Segment
   #---------------------------------------------------------------------------------------------------------
   @type_getter:                     get_sync_types
 
-  @my_type:                         'sync_segment_cfg'
-  @fitting_type:                    'sync_fitting'
-  @source_fitting_type:             'sync_source_fitting'
-  @repeatable_source_fitting_type:  'sync_repeatable_source_fitting'
-  @observer_fitting_type:           'sync_observer_fitting'
-  @transducer_fitting_type:         'sync_transducer_fitting'
-  @duct_fitting_type:               'sync_duct_fitting'
-
   #---------------------------------------------------------------------------------------------------------
   constructor: ( cfg ) ->
     clasz             = @constructor
     hide @, 'types', clasz.type_getter()
-    @types.create[ clasz.my_type ] cfg
+    @types.create.segment_cfg cfg
     @input            = cfg.input
     @output           = cfg.output
     @has_finished     = null
@@ -87,37 +79,32 @@ class Segment
   _as_transform: ( fitting ) ->
     clasz = @constructor
     sigil = null
-    debug '^4345^', @types.type_of fitting
-    # debug '^4345^', {
-    #   name:        fitting.name,
-    #   type:        ( @types.type_of fitting ),
-    #   isa_fitting: ( @types.isa[ clasz.fitting_type        ] fitting ),
-    #   isa_source:  ( @types.isa[ clasz.source_fitting_type ] fitting ),
-    #   isa_duct:    ( @types.isa[ clasz.duct_fitting_type   ] fitting ),
-    #   }
-    return fitting
     #.......................................................................................................
-    if @types.isa[ clasz.repeatable_source_fitting_type ] fitting
-      @_on_before_walk  = -> @transform = @_get_source_transform fitting()
-      @transform_type   = 'source'
-      R                 = fitting
-      sigil             = '?sr '
-    #.......................................................................................................
-    else if ( @types.isa[ clasz.source_fitting_type ] fitting )
-      R                 = @_get_source_transform fitting
-      @transform_type   = 'source'
-      sigil             = '?sn '
-    #.......................................................................................................
-    else
-      R = fitting
-      if      @types.isa[ clasz.observer_fitting_type   ] R
+    switch fitting_type = @types.type_of fitting
+      #.....................................................................................................
+      when 'producer_fitting'
+        @_on_before_walk  = ->
+          source      = fitting()
+          @transform  = @_get_source_transform ( @types.type_of source ), source
+          return null
+        @transform_type   = 'source'
+        R                 = fitting
+        sigil             = '?sr '
+      #.....................................................................................................
+      when 'observer_fitting'
+        R               = fitting
         @transform_type = 'observer'
         sigil           = '?o'
-      else if @types.isa[ clasz.transducer_fitting_type ] R
+      #.....................................................................................................
+      when 'transducer_fitting'
+        R               = fitting
         @transform_type = 'transducer'
         sigil           = '?t'
-      else
-        throw new Error "^mr.e#1^ fittings with arity #{arity} not implemented"
+      #.....................................................................................................
+      else # 'source_fitting'
+        R                 = @_get_source_transform fitting_type, fitting
+        @transform_type   = 'source'
+        sigil             = '?sn '
     #.......................................................................................................
     name  = if R.name is '' then 'ƒ' else R.name
     name  = sigil + name
@@ -128,8 +115,7 @@ class Segment
   #=========================================================================================================
   # SOURCE TRANSFORMS
   #---------------------------------------------------------------------------------------------------------
-  _get_source_transform: ( source ) ->
-    type = @types.type_of source
+  _get_source_transform: ( type, source ) ->
     unless ( method = @[stf type] )?
       throw new Error "^mr.e#2^ unable to convert a #{type} to a transform"
     @has_finished = false
@@ -310,14 +296,6 @@ class Async_segment extends Segment
 
   #---------------------------------------------------------------------------------------------------------
   @type_getter:                     get_async_types
-
-  @my_type:                         'segment_cfg'
-  @fitting_type:                    'fitting'
-  @source_fitting_type:             'source_fitting'
-  @repeatable_source_fitting_type:  'repeatable_source_fitting'
-  @observer_fitting_type:           'observer_fitting'
-  @transducer_fitting_type:         'transducer_fitting'
-  @duct_fitting_type:               'duct_fitting'
 
   #---------------------------------------------------------------------------------------------------------
   process: ->
