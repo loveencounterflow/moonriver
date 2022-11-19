@@ -18,128 +18,103 @@ GUY                       = require 'guy'
   echo
   log     }               = GUY.trm
 stf_prefix                = '_source_transform_from_'
-types                     = null
+{ Intertype }             = require 'intertype'
+snyc_types                = null
+asnyc_types               = null
 
-#===========================================================================================================
-get_types = ->
-  return types if types?
-  types                     = new ( require 'intertype' ).Intertype()
-  main                      = require './main'
 
-  # #---------------------------------------------------------------------------------------------------------
-  # types.declare.mr_segment        ( x ) -> x? and ( x instanceof main.Segment ) or ( x instanceof main.Async_segment )
-  # types.declare.mr_sync_segment   ( x ) -> x? and ( x instanceof main.Segment )
-  # types.declare.mr_async_segment  ( x ) -> x? and ( x instanceof main.Async_segment )
-
-  #---------------------------------------------------------------------------------------------------------
-  types.declare.function0
-    isa:        ( x ) -> ( @isa.function x ) and ( x.length is 0 )
-    default:    ->
-    override:   true
-
-  #---------------------------------------------------------------------------------------------------------
-  types.declare.function1
-    isa:        ( x ) -> ( @isa.function x ) and ( x.length is 1 )
-    default:    ( x ) ->
-    override:   true
-
-  #---------------------------------------------------------------------------------------------------------
-  types.declare.function2
-    isa:        ( x ) -> ( @isa.function x ) and ( x.length is 2 )
-    default:    ( x, y ) ->
-    override:   true
-
-  #---------------------------------------------------------------------------------------------------------
-  types.declare.asyncfunction0
-    isa:        ( x ) -> ( @isa.asyncfunction x ) and ( x.length is 0 )
-    default:    ( x ) ->
-    override:   true
-
-  #---------------------------------------------------------------------------------------------------------
-  types.declare.asyncfunction1
-    isa:        ( x ) -> ( @isa.asyncfunction x ) and ( x.length is 1 )
-    default:    ( x ) ->
-    override:   true
-
-  #---------------------------------------------------------------------------------------------------------
-  types.declare.asyncfunction2
-    isa:        ( x ) -> ( @isa.asyncfunction x ) and ( x.length is 2 )
-    default:    ( x, y ) ->
-    override:   true
-
-  #---------------------------------------------------------------------------------------------------------
-  sync_source_fitting_types  = new Set do =>
+#-----------------------------------------------------------------------------------------------------------
+get_sync_source_fitting_types = ->
+  main  = require './main'
+  R     = new Set do =>
     ( name.replace stf_prefix, '' \
       for name in ( GUY.props.keys main.Segment::, { hidden: true, } ) \
         when name.startsWith stf_prefix )
-  sync_source_fitting_types.add 'mr_sync_repeatable_source_fitting'
-  sync_source_fitting_types.add 'function0'
+  R.add 'repeatable_source_fitting'
+  R.add 'function0'
+  return R
 
-  #---------------------------------------------------------------------------------------------------------
-  async_source_fitting_types  = new Set do =>
+#-----------------------------------------------------------------------------------------------------------
+get_async_source_fitting_types = ->
+  main  = require './main'
+  R     = new Set do =>
     ( name.replace stf_prefix, '' \
       for name in ( GUY.props.keys main.Async_segment::, { hidden: true, } ) \
         when name.startsWith stf_prefix )
-  async_source_fitting_types.add 'mr_sync_repeatable_source_fitting'
-  async_source_fitting_types.add 'function0'
-  async_source_fitting_types.add 'mr_async_repeatable_source_fitting'
-  async_source_fitting_types.add 'asyncfunction0'
+  R.add 'repeatable_source_fitting'
+  R.add 'asyncfunction0'
+  return R
 
-  #---------------------------------------------------------------------------------------------------------
-  types.declare.mr_sync_source_fitting              ( x ) ->  sync_source_fitting_types.has @type_of x
-  types.declare.mr_sync_repeatable_source_fitting   { isa: 'function0', override: true, }
-  types.declare.mr_sync_observer_fitting            { isa: 'function1', override: true, }
-  types.declare.mr_sync_transducer_fitting          { isa: 'function2', override: true, }
-
-  #---------------------------------------------------------------------------------------------------------
-  types.declare.mr_async_source_fitting             ( x ) -> async_source_fitting_types.has @type_of x
-  types.declare.mr_async_repeatable_source_fitting  { isa: 'function0.or.asyncfunction0', override: true, }
-  types.declare.mr_async_observer_fitting           { isa: 'function1.or.asyncfunction1', override: true, }
-  types.declare.mr_async_transducer_fitting         { isa: 'function2.or.asyncfunction2', override: true, }
-
-  #---------------------------------------------------------------------------------------------------------
-  types.declare.mr_async_duct_fitting
-    isa:        'mr_sync_duct_fitting.or.asyncfunction1.or.asyncfunction2'
-    override:   true
-
-  #---------------------------------------------------------------------------------------------------------
-  types.declare.mr_sync_duct_fitting
-    isa:        'function1.or.function2'
-    override:   true
-
-  #---------------------------------------------------------------------------------------------------------
-  types.declare.mr_reporting_collector ( x ) -> x instanceof main.Reporting_collector
-  types.declare.mr_collector      'list.or.mr_reporting_collector'
-  types.declare.mr_sync_fitting   'mr_sync_duct_fitting.or.mr_sync_source_fitting'
-  types.declare.mr_async_fitting  'mr_async_duct_fitting.or.mr_async_source_fitting'
-
-  #---------------------------------------------------------------------------------------------------------
-  types.declare.mr_sync_segment_cfg
+#-----------------------------------------------------------------------------------------------------------
+get_sync_types = ->
+  return sync_types if sync_types?
+  #.........................................................................................................
+  sync_types                = new Intertype()
+  main                      = require './main'
+  { declare }               = sync_types
+  sync_source_fitting_types = get_sync_source_fitting_types()
+  #.........................................................................................................
+  declare.function0       override: true, isa: ( x ) -> ( @isa.function      x ) and ( x.length is 0 )
+  declare.function1       override: true, isa: ( x ) -> ( @isa.function      x ) and ( x.length is 1 )
+  declare.function2       override: true, isa: ( x ) -> ( @isa.function      x ) and ( x.length is 2 )
+  #.........................................................................................................
+  declare.reporting_collector  override: true, isa: ( x ) -> x instanceof main.Reporting_collector
+  declare.collector                            isa: 'list.or.reporting_collector'
+  #.........................................................................................................
+  declare.source_fitting                              isa:  ( x ) -> source_fitting_types.has @type_of x
+  declare.repeatable_source_fitting   override: true, isa: 'function0'
+  declare.observer_fitting            override: true, isa: 'function1'
+  declare.transducer_fitting          override: true, isa: 'function2'
+  declare.duct_fitting                override: true, isa: 'observer_fitting.or.transducer_fitting'
+  declare.fitting                                     isa: 'duct_fitting.or.source_fitting'
+  #.........................................................................................................
+  declare.segment_cfg
     fields:
-      input:    'mr_collector'
-      output:   'mr_collector'
-      fitting:  'mr_sync_fitting'
+      input:    'collector'
+      output:   'collector'
+      fitting:  'fitting'
     default:
       input:    null
       output:   null
       fitting:  null
+  #.........................................................................................................
+  return sync_types
 
-  #---------------------------------------------------------------------------------------------------------
-  types.declare.mr_async_segment_cfg
+
+#=========================================================================================================
+get_async_types = ->
+  return asnyc_types if asnyc_types?
+  #.........................................................................................................
+  async_types               = new Intertype get_sync_types()
+  main                      = require './main'
+  { declare }               = async_types
+  async_source_fitting_types  = get_async_source_fitting_types()
+  #.........................................................................................................
+  declare.asyncfunction0  override: true, isa: ( x ) -> ( @isa.asyncfunction x ) and ( x.length is 0 )
+  declare.asyncfunction1  override: true, isa: ( x ) -> ( @isa.asyncfunction x ) and ( x.length is 1 )
+  declare.asyncfunction2  override: true, isa: ( x ) -> ( @isa.asyncfunction x ) and ( x.length is 2 )
+  #.........................................................................................................
+  declare.source_fitting            ( x ) -> source_fitting_types.has @type_of x
+  declare.repeatable_source_fitting override: true, isa: 'function0.or.asyncfunction0'
+  declare.observer_fitting          override: true, isa: 'function1.or.asyncfunction1'
+  declare.transducer_fitting        override: true, isa: 'function2.or.asyncfunction2'
+  declare.duct_fitting              override: true, isa: 'sync_duct_fitting.or.asyncfunction1.or.asyncfunction2'
+  declare.fitting                                   isa: 'duct_fitting.or.source_fitting'
+  #.........................................................................................................
+  declare.segment_cfg
     fields:
-      input:    'mr_collector'
-      output:   'mr_collector'
-      fitting:  'mr_async_fitting'
+      input:    'collector'
+      output:   'collector'
+      fitting:  'fitting'
     default:
       input:    null
       output:   null
       fitting:  null
-
-  #---------------------------------------------------------------------------------------------------------
+  #.........................................................................................................
   return types
 
 
 ############################################################################################################
-module.exports = { stf_prefix, get_types, }
+module.exports = { stf_prefix, get_sync_types, get_async_types, }
 
 

@@ -24,7 +24,8 @@ UTIL                      = require 'node:util'
   def }                   = GUY.props
 nameit                    = ( name, f ) -> def f, 'name', { value: name, }
 { stf_prefix
-  get_types }             = require './types'
+  get_sync_types
+  get_async_types }       = require './types'
 stf                       = ( name ) -> stf_prefix + ( if Array.isArray name then name[ 0 ] else name )
 transforms                = require './transforms'
 noop                      = ->
@@ -58,18 +59,21 @@ class Reporting_collector
 class Segment
 
   #---------------------------------------------------------------------------------------------------------
-  @my_type:                         'mr_sync_segment_cfg'
-  @fitting_type:                    'mr_sync_fitting'
-  @source_fitting_type:             'mr_sync_source_fitting'
-  @repeatable_source_fitting_type:  'mr_sync_repeatable_source_fitting'
-  @observer_fitting_type:           'mr_sync_observer_fitting'
-  @transducer_fitting_type:         'mr_sync_transducer_fitting'
-  @duct_fitting_type:               'mr_sync_duct_fitting'
+  @type_getter:                     get_sync_types
+
+  @my_type:                         'sync_segment_cfg'
+  @fitting_type:                    'sync_fitting'
+  @source_fitting_type:             'sync_source_fitting'
+  @repeatable_source_fitting_type:  'sync_repeatable_source_fitting'
+  @observer_fitting_type:           'sync_observer_fitting'
+  @transducer_fitting_type:         'sync_transducer_fitting'
+  @duct_fitting_type:               'sync_duct_fitting'
 
   #---------------------------------------------------------------------------------------------------------
   constructor: ( cfg ) ->
-    hide @, 'types',      get_types()
-    @types.create[ @constructor.my_type ] cfg
+    clasz             = @constructor
+    hide @, 'types', clasz.type_getter()
+    @types.create[ clasz.my_type ] cfg
     @input            = cfg.input
     @output           = cfg.output
     @has_finished     = null
@@ -83,6 +87,15 @@ class Segment
   _as_transform: ( fitting ) ->
     clasz = @constructor
     sigil = null
+    debug '^4345^', @types.type_of fitting
+    # debug '^4345^', {
+    #   name:        fitting.name,
+    #   type:        ( @types.type_of fitting ),
+    #   isa_fitting: ( @types.isa[ clasz.fitting_type        ] fitting ),
+    #   isa_source:  ( @types.isa[ clasz.source_fitting_type ] fitting ),
+    #   isa_duct:    ( @types.isa[ clasz.duct_fitting_type   ] fitting ),
+    #   }
+    return fitting
     #.......................................................................................................
     if @types.isa[ clasz.repeatable_source_fitting_type ] fitting
       @_on_before_walk  = -> @transform = @_get_source_transform fitting()
@@ -192,12 +205,14 @@ class Segment
 class Pipeline
 
   #---------------------------------------------------------------------------------------------------------
+  @type_getter:   get_sync_types
   @segment_class: Segment
 
   #---------------------------------------------------------------------------------------------------------
   constructor: ( cfg ) ->
+    clasz               = @constructor
     cfg                 = { {}..., cfg..., }
-    # cfg                 = types.create.mr_pipeline_cfg cfg
+    # cfg                 = types.create.pipeline_cfg cfg
     @datacount          = 0
     @input              = @_new_collector()
     @output             = [] ### pipeline output buffer does not participate in datacount ###
@@ -207,7 +222,7 @@ class Pipeline
     @on_before_process  = cfg.on_before_process ? null
     @on_after_process   = cfg.on_after_process  ? null
     # hide  @, '$',             nameit '$', @_remit.bind @
-    hide  @, 'types',         get_types()
+    hide  @, 'types',         clasz.type_getter()
     def   @, 'sources',       get: -> Object.freeze ( s for s in @segments when s.transform_type is 'source' )
     def   @, 'has_finished',  get: -> ( @datacount < 1 ) and @sources.every ( s ) -> s.has_finished
     return undefined
@@ -294,13 +309,15 @@ class Pipeline
 class Async_segment extends Segment
 
   #---------------------------------------------------------------------------------------------------------
-  @my_type:                         'mr_async_segment_cfg'
-  @fitting_type:                    'mr_async_fitting'
-  @source_fitting_type:             'mr_async_source_fitting'
-  @repeatable_source_fitting_type:  'mr_async_repeatable_source_fitting'
-  @observer_fitting_type:           'mr_async_observer_fitting'
-  @transducer_fitting_type:         'mr_async_transducer_fitting'
-  @duct_fitting_type:               'mr_async_duct_fitting'
+  @type_getter:                     get_async_types
+
+  @my_type:                         'segment_cfg'
+  @fitting_type:                    'fitting'
+  @source_fitting_type:             'source_fitting'
+  @repeatable_source_fitting_type:  'repeatable_source_fitting'
+  @observer_fitting_type:           'observer_fitting'
+  @transducer_fitting_type:         'transducer_fitting'
+  @duct_fitting_type:               'duct_fitting'
 
   #---------------------------------------------------------------------------------------------------------
   process: ->
@@ -346,7 +363,8 @@ class Async_segment extends Segment
 class Async_pipeline extends Pipeline
 
   #---------------------------------------------------------------------------------------------------------
-  @segment_class: Async_segment
+  @type_getter:                     get_async_types
+  @segment_class:                   Async_segment
 
   #=========================================================================================================
   # PROCESSING
