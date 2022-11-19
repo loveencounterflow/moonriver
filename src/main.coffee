@@ -146,7 +146,7 @@ class Segment
       return null
 
   #---------------------------------------------------------------------------------------------------------
-  [stf'generatorfunction']: ( source ) -> @_get_source_transform source()
+  [stf'generatorfunction']: ( source ) -> @_get_source_transform 'generator', source()
   [stf'arrayiterator']:     ( source ) -> @[stf'generator'] source
   [stf'setiterator']:       ( source ) -> @[stf'generator'] source
   [stf'mapiterator']:       ( source ) -> @[stf'generator'] source
