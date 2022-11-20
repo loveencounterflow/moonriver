@@ -203,7 +203,7 @@ class Pipeline
     @input              = @_new_collector()
     @output             = [] ### pipeline output buffer does not participate in datacount ###
     @segments           = []
-    hide  @, '$',             nameit '$', @_segment_from_transform.bind @
+    hide  @, '$',             nameit '$', @_segment_from_fitting.bind @
     hide  @, 'types',         clasz.type_getter()
     def   @, 'sources',       get: -> Object.freeze ( s for s in @segments when s.transform_type is 'source' )
     def   @, 'has_finished',  get: -> ( @datacount < 1 ) and @sources.every ( s ) -> s.has_finished
@@ -216,8 +216,7 @@ class Pipeline
   #=========================================================================================================
   # BUILDING PIPELINE FROM SEGMENTS
   #---------------------------------------------------------------------------------------------------------
-  _segment_from_transform: ( modifiers, fitting ) ->
-  # _segment_from_transform: ( fitting ) ->
+  _segment_from_fitting: ( modifiers, fitting ) ->
     switch arity = arguments.length
       when 1 then [ modifiers, fitting, ] = [ null, modifiers, ]
       when 2 then null
@@ -242,8 +241,7 @@ class Pipeline
 
   #---------------------------------------------------------------------------------------------------------
   push: ( P... ) ->
-    @segments.push R = @_segment_from_transform P...
-    # @sources.push   R if R.transform_type is 'source'
+    @segments.push R = @_segment_from_fitting P...
     return R
 
 
