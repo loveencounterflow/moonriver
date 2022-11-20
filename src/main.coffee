@@ -23,7 +23,8 @@ UTIL                      = require 'node:util'
 { hide
   def }                   = GUY.props
 nameit                    = ( name, f ) -> def f, 'name', { value: name, }
-{ stf_prefix
+{ misfit
+  stf_prefix
   get_sync_types
   get_async_types }       = require './types'
 stf                       = ( name ) -> stf_prefix + ( if Array.isArray name then name[ 0 ] else name )
@@ -71,6 +72,8 @@ class Segment
     @has_finished     = null
     @transform_type   = null
     @_on_before_walk  = noop
+    @first            = cfg.modifiers.first
+    @last             = cfg.modifiers.last
     hide @, 'transform',  @_as_transform cfg.fitting
     hide @, '_send', send = ( d ) => @output.push d; d ### 'inner' send method ###
     return undefined
@@ -234,7 +237,7 @@ class Pipeline
       R.input   = input
       R.output  = @output
     else
-      try R = new @constructor.segment_class { input, fitting, output: @output, } catch error
+      try R = new @constructor.segment_class { modifiers, input, fitting, output: @output, } catch error
         error.message = error.message + "\n\n^mr.e#4^ unable to convert a #{@types.type_of fitting} into a segment"
         throw error
     return R
@@ -265,7 +268,15 @@ class Pipeline
   #---------------------------------------------------------------------------------------------------------
   run: -> ( d for d from @walk() )
   walk: ->
-    segment._on_before_walk() for segment in @segments
+    segment._on_before_walk()   for segment in @segments
+    segment.send segment.first  for segment in @segments when segment.first isnt misfit
+    yield from @_walk()
+    segment.send segment.last   for segment in @segments when segment.last isnt misfit
+    yield from @_walk() unless @has_finished
+    return null
+
+  #---------------------------------------------------------------------------------------------------------
+  _walk: ->
     loop
       @process()
       yield d for d in @output
