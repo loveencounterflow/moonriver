@@ -22,6 +22,7 @@ stf_prefix                = '_source_transform_from_'
 base_types                = null
 snyc_types                = null
 async_types               = null
+misfit                    = Symbol 'misfit'
 
 
 #-----------------------------------------------------------------------------------------------------------
@@ -60,6 +61,19 @@ get_base_types = ->
   #.........................................................................................................
   declare.reporting_collector   override: true, isa: ( x ) -> x instanceof main.Reporting_collector
   declare.collector                             isa: 'list.or.reporting_collector'
+  declare.misfit                override: true, default: misfit, isa: ( x ) -> x is misfit
+  #.........................................................................................................
+  declare.modifiers
+    fields:
+      first:      'anything'
+      last:       'anything'
+    default:
+      first:      misfit
+      last:       misfit
+    create: ( x ) ->
+      return { first: misfit, last: misfit, } unless x?
+      return x unless @isa.object x
+      return { first: ( GUY.props.get x, 'first', misfit ), last: ( GUY.props.get x, 'last',  misfit ), }
   #.........................................................................................................
   return base_types
 
@@ -68,6 +82,7 @@ get_sync_types = ->
   return sync_types if sync_types?
   #.........................................................................................................
   sync_types                = new Intertype get_base_types()
+  main                      = require './main'
   { declare }               = sync_types
   source_fitting_types      = get_sync_source_fitting_types()
   #.........................................................................................................
@@ -78,6 +93,7 @@ get_sync_types = ->
   declare.activator_fitting                     isa: 'producer_fitting.or.source_fitting'
   declare.duct_fitting                          isa: 'observer_fitting.or.transducer_fitting'
   declare.fitting                               isa: 'duct_fitting.or.activator_fitting'
+  declare.segment                               isa: ( x ) -> x? and x instanceof main.Segment
   #.........................................................................................................
   declare.segment_cfg
     fields:
@@ -101,13 +117,15 @@ get_async_types = ->
   { declare }               = async_types
   source_fitting_types      = get_async_source_fitting_types()
   #.........................................................................................................
-  declare.producer_fitting          override: true, isa: 'function0.or.asyncfunction0'
-  declare.observer_fitting          override: true, isa: 'function1.or.asyncfunction1'
-  declare.transducer_fitting        override: true, isa: 'function2.or.asyncfunction2'
-  declare.source_fitting                            isa: ( x ) -> source_fitting_types.has @type_of x
-  declare.activator_fitting                         isa: 'producer_fitting.or.source_fitting'
-  declare.duct_fitting                              isa: 'observer_fitting.or.transducer_fitting'
-  declare.fitting                                   isa: 'duct_fitting.or.activator_fitting'
+  declare.producer_fitting      override: true, isa: 'function0.or.asyncfunction0'
+  declare.observer_fitting      override: true, isa: 'function1.or.asyncfunction1'
+  declare.transducer_fitting    override: true, isa: 'function2.or.asyncfunction2'
+  declare.source_fitting                        isa: ( x ) -> source_fitting_types.has @type_of x
+  declare.activator_fitting                     isa: 'producer_fitting.or.source_fitting'
+  declare.duct_fitting                          isa: 'observer_fitting.or.transducer_fitting'
+  declare.fitting                               isa: 'duct_fitting.or.activator_fitting'
+  declare.segment                               isa: ( x ) -> x? and ( x instanceof main.Async_segment  ) \
+                                                                  or ( x instanceof main. Segment       )
   #.........................................................................................................
   declare.segment_cfg
     fields:
@@ -123,6 +141,6 @@ get_async_types = ->
 
 
 ############################################################################################################
-module.exports = { stf_prefix, get_sync_types, get_async_types, }
+module.exports = { stf_prefix, get_sync_types, get_async_types, misfit, }
 
 
