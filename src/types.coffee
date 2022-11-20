@@ -75,18 +75,6 @@ get_base_types = ->
       return x unless @isa.object x
       return { first: ( GUY.props.get x, 'first', misfit ), last: ( GUY.props.get x, 'last',  misfit ), }
   #.........................................................................................................
-  declare.segment_cfg
-    fields:
-      input:      'collector'
-      output:     'collector'
-      fitting:    'fitting'
-      modifiers:  'modifiers'
-    default:
-      input:      null
-      output:     null
-      fitting:    null
-      modifiers:  null
-  #.........................................................................................................
   return base_types
 
 #-----------------------------------------------------------------------------------------------------------
@@ -106,6 +94,18 @@ get_sync_types = ->
   declare.duct_fitting                          isa: 'observer_fitting.or.transducer_fitting'
   declare.fitting                               isa: 'duct_fitting.or.activator_fitting'
   declare.segment                               isa: ( x ) -> x? and x instanceof main.Segment
+  #.........................................................................................................
+  declare.segment_cfg
+    fields:
+      input:      'collector'
+      output:     'collector'
+      fitting:    'fitting'
+      modifiers:  'modifiers'
+    default:
+      input:      null
+      output:     null
+      fitting:    null
+      modifiers:  null
   #.........................................................................................................
   return sync_types
 
@@ -128,6 +128,18 @@ get_async_types = ->
   declare.fitting                               isa: 'duct_fitting.or.activator_fitting'
   declare.segment                               isa: ( x ) -> x? and ( x instanceof main.Async_segment  ) \
                                                                   or ( x instanceof main. Segment       )
+  #.........................................................................................................
+  declare.segment_cfg
+    fields:
+      input:      'collector'
+      output:     'collector'
+      fitting:    'fitting'
+      modifiers:  'modifiers'
+    default:
+      input:      null
+      output:     null
+      fitting:    null
+      modifiers:  null
   #.........................................................................................................
   return async_types
 
