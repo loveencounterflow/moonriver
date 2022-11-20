@@ -217,12 +217,18 @@ class Pipeline
   #=========================================================================================================
   # BUILDING PIPELINE FROM SEGMENTS
   #---------------------------------------------------------------------------------------------------------
-  _segment_from_fitting: ( modifiers, fitting ) ->
+  _get_modifiers_and_fitting: ( modifiers, fitting ) ->
     switch arity = arguments.length
       when 1 then [ modifiers, fitting, ] = [ null, modifiers, ]
       when 2 then null
       else throw new Error "^mr.e#5^ expected 1 or 2 arguments, got #{arity}"
     modifiers = @types.create.modifiers modifiers
+    return [ modifiers, fitting, ]
+
+  #---------------------------------------------------------------------------------------------------------
+  _segment_from_fitting: ( P... ) ->
+    [ modifiers
+      fitting   ] = @_get_modifiers_and_fitting P...
     return @_segment_from_fitting fitting.values... if @types.isa.proto_segment fitting
     ### TAINT consider to move this code to `Segment` class ###
     if ( count = @segments.length ) is 0
