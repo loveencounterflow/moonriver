@@ -225,6 +225,7 @@ class Pipeline
       when 2 then null
       else throw new Error "^mr.e#5^ expected 1 or 2 arguments, got #{arity}"
     modifiers = @types.create.modifiers modifiers
+    return @_segment_from_fitting fitting.values... if @types.isa.proto_segment fitting
     ### TAINT consider to move this code to `Segment` class ###
     if ( count = @segments.length ) is 0
       input               = @input
@@ -347,7 +348,6 @@ class Async_segment extends Segment
     return nameit '√readstream', @[stf'asyncgenerator'] rcv
 
 
-
 #===========================================================================================================
 class Async_pipeline extends Pipeline
 
@@ -378,11 +378,28 @@ class Async_pipeline extends Pipeline
 
 
 ############################################################################################################
+# HELPERS
+#===========================================================================================================
+class Proto_segment
+
+  #---------------------------------------------------------------------------------------------------------
+  constructor: ( P... ) ->
+    @values = P
+    return undefined
+
+#-----------------------------------------------------------------------------------------------------------
+$ = ( modifiers, fitting ) ->
+  new Proto_segment modifiers, fitting
+
+
+############################################################################################################
 module.exports = {
   Pipeline
   Segment
   Async_pipeline
   Async_segment
   Reporting_collector
-  transforms }
+  transforms
+  Proto_segment
+  $ }
 

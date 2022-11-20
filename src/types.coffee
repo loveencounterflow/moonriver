@@ -60,6 +60,7 @@ get_base_types = ->
   declare.asyncfunction2        override: true, isa: ( x ) -> ( @isa.asyncfunction x ) and ( x.length is 2 )
   #.........................................................................................................
   declare.reporting_collector   override: true, isa: ( x ) -> x instanceof main.Reporting_collector
+  declare.proto_segment         override: true, isa: ( x ) -> x instanceof main.Proto_segment
   declare.collector                             isa: 'list.or.reporting_collector'
   declare.misfit                override: true, default: misfit, isa: ( x ) -> x is misfit
   #.........................................................................................................
