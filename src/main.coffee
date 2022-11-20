@@ -203,7 +203,7 @@ class Pipeline
     @input              = @_new_collector()
     @output             = [] ### pipeline output buffer does not participate in datacount ###
     @segments           = []
-    # hide  @, '$',             nameit '$', @_remit.bind @
+    hide  @, '$',             nameit '$', @_segment_from_transform.bind @
     hide  @, 'types',         clasz.type_getter()
     def   @, 'sources',       get: -> Object.freeze ( s for s in @segments when s.transform_type is 'source' )
     def   @, 'has_finished',  get: -> ( @datacount < 1 ) and @sources.every ( s ) -> s.has_finished
@@ -216,23 +216,33 @@ class Pipeline
   #=========================================================================================================
   # BUILDING PIPELINE FROM SEGMENTS
   #---------------------------------------------------------------------------------------------------------
-  # _remit: ( modifiers, fitting ) ->
-  _remit: ( fitting ) ->
+  _segment_from_transform: ( modifiers, fitting ) ->
+  # _segment_from_transform: ( fitting ) ->
+    switch arity = arguments.length
+      when 1 then [ modifiers, fitting, ] = [ null, modifiers, ]
+      when 2 then null
+      else throw new Error "^mr.e#5^ expected 1 or 2 arguments, got #{arity}"
+    modifiers = @types.create.modifiers modifiers
+    ### TAINT consider to move this code to `Segment` class ###
     if ( count = @segments.length ) is 0
       input               = @input
     else
       prv_segment         = @segments[ count - 1 ]
       prv_segment.output  = @_new_collector()
       input               = prv_segment.output
-    try R = new @constructor.segment_class { input, fitting, output: @output, } catch error
-      error.message = error.message + "\n\n^mr.e#4^ unable to convert a #{@types.type_of fitting} into a segment"
-      throw error
+    if @types.isa.segment fitting
+      R         = fitting
+      R.input   = input
+      R.output  = @output
+    else
+      try R = new @constructor.segment_class { input, fitting, output: @output, } catch error
+        error.message = error.message + "\n\n^mr.e#4^ unable to convert a #{@types.type_of fitting} into a segment"
+        throw error
     return R
 
   #---------------------------------------------------------------------------------------------------------
   push: ( P... ) ->
-    R = @_remit P...
-    @segments.push  R
+    @segments.push R = @_segment_from_transform P...
     # @sources.push   R if R.transform_type is 'source'
     return R
 
