@@ -58,5 +58,15 @@
     send d
     return null
 
-
+#---------------------------------------------------------------------------------------------------------
+@$sink_from_writestream = ( writestream ) ->
+  # validate.writestream writestream
+  last = Symbol 'last'
+  return $ { last, }, writestream = ( d ) ->
+    if d is last
+      return await new Promise ( resolve ) ->
+        output.end -> resolve()
+        # output.close()
+    return await new Promise ( resolve ) ->
+      output.write d, -> resolve()
 
