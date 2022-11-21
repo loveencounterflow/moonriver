@@ -355,7 +355,7 @@ class Async_segment extends Segment
     return null
 
   #---------------------------------------------------------------------------------------------------------
-  [stf'readstream']: ( source ) ->
+  [stf'nodejs_readstream']: ( source ) ->
     { Receiver }  = require 'jfee'
     rcv           = Receiver.from_readstream source, { bare: true, }
     return nameit '√readstream', @[stf'asyncgenerator'] rcv
