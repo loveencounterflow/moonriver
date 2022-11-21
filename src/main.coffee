@@ -69,7 +69,7 @@ class Segment
     @input            = cfg.input
     @output           = cfg.output
     @has_finished     = null
-    @transform_type   = null
+    @role   = null
     @_on_before_walk  = noop
     @first            = cfg.modifiers.first
     @last             = cfg.modifiers.last
@@ -89,25 +89,25 @@ class Segment
           @transform      = ( @_get_source_transform ( @types.type_of source ), source ).transform
           @has_finished   = false
           return null
-        transform_type    = 'source'
+        role    = 'source'
         transform         = fitting
       #.....................................................................................................
       when 'observer_fitting'
-        transform_type    = 'observer'
+        role    = 'observer'
         transform         = fitting
       #.....................................................................................................
       when 'transducer_fitting'
-        transform_type    = 'transducer'
+        role    = 'transducer'
         transform         = fitting
       #.....................................................................................................
       else # 'source_fitting'
-        { transform_type
+        { role
           transform     } = @_get_source_transform fitting_type, fitting
     #.......................................................................................................
     name            = if transform.name is '' then 'ƒ' else transform.name
     nameit name, transform
-    @has_finished   = false if transform_type is 'source'
-    @transform_type = transform_type
+    @has_finished   = false if role is 'source'
+    @role = role
     hide @, 'transform', transform
     return null
 
@@ -128,7 +128,7 @@ class Segment
       @has_finished = dsc.done
       send dsc.value unless @has_finished
       return null
-    return { transform_type: 'source', transform, }
+    return { role: 'source', transform, }
 
   #---------------------------------------------------------------------------------------------------------
   [stf'text']: ( source ) ->
@@ -140,7 +140,7 @@ class Segment
         return null
       send match[ 0 ]
       return null
-    return { transform_type: 'source', transform, }
+    return { role: 'source', transform, }
 
   #---------------------------------------------------------------------------------------------------------
   [stf'generatorfunction']: ( source ) -> @_get_source_transform 'generator', source()
@@ -152,25 +152,25 @@ class Segment
   [stf'list']:              ( source ) ->
     { transform } = @[stf'generator'] source.values()
     nameit '√lst', transform
-    return { transform_type: 'source', transform, }
+    return { role: 'source', transform, }
 
   #---------------------------------------------------------------------------------------------------------
   [stf'object']:            ( source ) ->
     { transform } = @[stf'generator'] ( -> yield [ k, v, ] for k, v of source )()
     nameit '√obj', transform
-    return { transform_type: 'source', transform, }
+    return { role: 'source', transform, }
 
   #---------------------------------------------------------------------------------------------------------
   [stf'set']:               ( source ) ->
     { transform } = @[stf'generator'] source.values()
     nameit '√set', transform
-    return { transform_type: 'source', transform, }
+    return { role: 'source', transform, }
 
   #---------------------------------------------------------------------------------------------------------
   [stf'map']:               ( source ) ->
     { transform } = @[stf'generator'] source.entries()
     nameit '√map', transform
-    return { transform_type: 'source', transform, }
+    return { role: 'source', transform, }
 
 
   #=========================================================================================================
@@ -181,21 +181,21 @@ class Segment
 
   #---------------------------------------------------------------------------------------------------------
   process: ->
-    if @transform_type is 'source'
+    if @role is 'source'
       @_send @input.shift() while @input.length > 0 ### TAINT could be done with `.splice()` ###
       return 0 if @transform.has_finished
       @transform @_send
       return 1
     if @input.length > 0
       d = @input.shift()
-      switch @transform_type
+      switch @role
         when 'observer'
           @transform  d
           @_send      d
         when 'transducer'
           @transform d, @_send
         else
-          throw new Error "^mr.e#3^ internal error: unknown transform type #{rpr @transform_type}"
+          throw new Error "^mr.e#3^ internal error: unknown segment role #{rpr @role}"
       return 1
     return 0
 
@@ -222,7 +222,7 @@ class Pipeline
     @segments           = []
     hide  @, '$',             nameit '$', @_segment_from_fitting.bind @
     hide  @, 'types',         clasz.type_getter()
-    def   @, 'sources',       get: -> Object.freeze ( s for s in @segments when s.transform_type is 'source' )
+    def   @, 'sources',       get: -> Object.freeze ( s for s in @segments when s.role is 'source' )
     def   @, 'has_finished',  get: -> ( @datacount < 1 ) and @sources.every ( s ) -> s.has_finished
     return undefined
 
@@ -340,7 +340,7 @@ class Async_segment extends Segment
 
   #---------------------------------------------------------------------------------------------------------
   process: ->
-    if @transform_type is 'source'
+    if @role is 'source'
       @_send @input.shift() while @input.length > 0 ### TAINT could be done with `.splice()` ###
       return 0 if @transform.has_finished
       await @transform @_send
@@ -348,14 +348,14 @@ class Async_segment extends Segment
     if @input.length > 0
       d = @input.shift()
       d = await d if d instanceof Promise
-      switch @transform_type
+      switch @role
         when 'observer'
           await @transform  d
           @_send      d
         when 'transducer'
           await @transform d, @_send
         else
-          throw new Error "^mr.e#5^ internal error: unknown transform type #{rpr @transform_type}"
+          throw new Error "^mr.e#5^ internal error: unknown transform type #{rpr @role}"
       return 1
     return 0
 
@@ -370,7 +370,7 @@ class Async_segment extends Segment
       @has_finished = dsc.done
       send dsc.value unless @has_finished
       return null
-    return { transform_type: 'source', transform, }
+    return { role: 'source', transform, }
 
   #---------------------------------------------------------------------------------------------------------
   [stf'nodejs_readstream']: ( source ) ->
