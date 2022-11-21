@@ -29,6 +29,7 @@ nameit                    = ( name, f ) -> def f, 'name', { value: name, }
 stf                       = ( name ) -> stf_prefix + ( if Array.isArray name then name[ 0 ] else name )
 transforms                = require './transforms'
 noop                      = ->
+entries                   = ( φ ) -> ( -> yield [ k, v, ] for k, v of φ )()
 
 
 #===========================================================================================================
@@ -81,28 +82,9 @@ class Segment
   _set_transform: ( fitting ) ->
     sigil = null
     #.......................................................................................................
-    switch fitting_type = @types.type_of fitting
-      #.....................................................................................................
-      when 'producer_fitting'
-        @_on_before_walk  = ->
-          source          = fitting()
-          @transform      = ( @_get_source_transform ( @types.type_of source ), source ).transform
-          @has_finished   = false
-          return null
-        role    = 'source'
-        transform         = fitting
-      #.....................................................................................................
-      when 'observer_fitting'
-        role    = 'observer'
-        transform         = fitting
-      #.....................................................................................................
-      when 'transducer_fitting'
-        role    = 'transducer'
-        transform         = fitting
-      #.....................................................................................................
-      else # 'source_fitting'
-        { role
-          transform     } = @_get_source_transform fitting_type, fitting
+    fitting_type      = @types.type_of fitting
+    { role
+      transform     } = @_transform_from_fitting fitting_type, fitting
     #.......................................................................................................
     name            = if transform.name is '' then 'ƒ' else transform.name
     nameit name, transform
@@ -111,31 +93,37 @@ class Segment
     hide @, 'transform', transform
     return null
 
-
-  #=========================================================================================================
-  # SOURCE TRANSFORMS
   #---------------------------------------------------------------------------------------------------------
-  _get_source_transform: ( type, source ) ->
+  _transform_from_fitting: ( type, source ) ->
     unless ( method = @[stf type] )?
       throw new Error "^mr.e#2^ unable to convert a #{type} to a transform"
     return method.call @, source
 
   #---------------------------------------------------------------------------------------------------------
-  [stf'generator']: ( source ) ->
+  [stf'producer_fitting']: ( φ ) ->
+    @_on_before_walk  = ->
+      source          = φ()
+      @transform      = ( @_transform_from_fitting ( @types.type_of source ), source ).transform
+      @has_finished   = false
+      return null
+    return { role: 'source', transform: φ, }
+
+  #---------------------------------------------------------------------------------------------------------
+  [stf'generator']: ( φ ) ->
     transform = ( send ) =>
       return null if @has_finished
-      dsc           = source.next()
+      dsc           = φ.next()
       @has_finished = dsc.done
       send dsc.value unless @has_finished
       return null
     return { role: 'source', transform, }
 
   #---------------------------------------------------------------------------------------------------------
-  [stf'text']: ( source ) ->
+  [stf'text']: ( φ ) ->
     letter_re = /./uy
     transform = nameit '√txt', ( send ) =>
       return null if @has_finished
-      unless ( match = source.match letter_re )?
+      unless ( match = φ.match letter_re )?
         @has_finished = true
         return null
       send match[ 0 ]
@@ -143,35 +131,18 @@ class Segment
     return { role: 'source', transform, }
 
   #---------------------------------------------------------------------------------------------------------
-  [stf'generatorfunction']: ( source ) -> @_get_source_transform 'generator', source()
-  [stf'arrayiterator']:     ( source ) -> @[stf'generator'] source
-  [stf'setiterator']:       ( source ) -> @[stf'generator'] source
-  [stf'mapiterator']:       ( source ) -> @[stf'generator'] source
-
-  #---------------------------------------------------------------------------------------------------------
-  [stf'list']:              ( source ) ->
-    { transform } = @[stf'generator'] source.values()
-    nameit '√lst', transform
-    return { role: 'source', transform, }
-
-  #---------------------------------------------------------------------------------------------------------
-  [stf'object']:            ( source ) ->
-    { transform } = @[stf'generator'] ( -> yield [ k, v, ] for k, v of source )()
-    nameit '√obj', transform
-    return { role: 'source', transform, }
-
-  #---------------------------------------------------------------------------------------------------------
-  [stf'set']:               ( source ) ->
-    { transform } = @[stf'generator'] source.values()
-    nameit '√set', transform
-    return { role: 'source', transform, }
-
-  #---------------------------------------------------------------------------------------------------------
-  [stf'map']:               ( source ) ->
-    { transform } = @[stf'generator'] source.entries()
-    nameit '√map', transform
-    return { role: 'source', transform, }
-
+  [stf'generatorfunction']:   ( φ ) -> @[stf'generator'] φ()
+  [stf'arrayiterator']:       ( φ ) -> @[stf'generator'] φ
+  [stf'setiterator']:         ( φ ) -> @[stf'generator'] φ
+  [stf'mapiterator']:         ( φ ) -> @[stf'generator'] φ
+  #.........................................................................................................
+  [stf'transducer_fitting']:  ( φ ) -> { role: 'transducer',  transform: φ, }
+  [stf'observer_fitting']:    ( φ ) -> { role: 'observer',    transform: φ, }
+  #.........................................................................................................
+  [stf'list']:   ( φ ) -> R = @[stf'generator'] φ.values();  R.transform = nameit '√lst', R.transform; R
+  [stf'object']: ( φ ) -> R = @[stf'generator'] entries φ;   R.transform = nameit '√obj', R.transform; R
+  [stf'set']:    ( φ ) -> R = @[stf'generator'] φ.values();  R.transform = nameit '√set', R.transform; R
+  [stf'map']:    ( φ ) -> R = @[stf'generator'] φ.entries(); R.transform = nameit '√map', R.transform; R
 
   #=========================================================================================================
   #
