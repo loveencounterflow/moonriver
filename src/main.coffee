@@ -73,44 +73,43 @@ class Segment
     @_on_before_walk  = noop
     @first            = cfg.modifiers.first
     @last             = cfg.modifiers.last
-    hide @, 'transform',  @_as_transform cfg.fitting
+    @_set_transform cfg.fitting
     hide @, '_send', send = ( d ) => @output.push d; d ### 'inner' send method ###
     return undefined
 
   #---------------------------------------------------------------------------------------------------------
-  _as_transform: ( fitting ) ->
+  _set_transform: ( fitting ) ->
     sigil = null
     #.......................................................................................................
     switch fitting_type = @types.type_of fitting
       #.....................................................................................................
       when 'producer_fitting'
         @_on_before_walk  = ->
-          source      = fitting()
-          @transform  = @_get_source_transform ( @types.type_of source ), source
+          source          = fitting()
+          @transform      = ( @_get_source_transform ( @types.type_of source ), source ).transform
+          @has_finished   = false
           return null
-        @transform_type   = 'source'
-        R                 = fitting
-        sigil             = '?sr '
+        transform_type    = 'source'
+        transform         = fitting
       #.....................................................................................................
       when 'observer_fitting'
-        R               = fitting
-        @transform_type = 'observer'
-        sigil           = '?o'
+        transform_type    = 'observer'
+        transform         = fitting
       #.....................................................................................................
       when 'transducer_fitting'
-        R               = fitting
-        @transform_type = 'transducer'
-        sigil           = '?t'
+        transform_type    = 'transducer'
+        transform         = fitting
       #.....................................................................................................
       else # 'source_fitting'
-        R                 = @_get_source_transform fitting_type, fitting
-        @transform_type   = 'source'
-        sigil             = '?sn '
+        { transform_type
+          transform     } = @_get_source_transform fitting_type, fitting
     #.......................................................................................................
-    name  = if R.name is '' then 'ƒ' else R.name
-    name  = sigil + name
-    nameit name, R
-    return R
+    name            = if transform.name is '' then 'ƒ' else transform.name
+    nameit name, transform
+    @has_finished   = false if transform_type is 'source'
+    @transform_type = transform_type
+    hide @, 'transform', transform
+    return null
 
 
   #=========================================================================================================
@@ -119,42 +118,59 @@ class Segment
   _get_source_transform: ( type, source ) ->
     unless ( method = @[stf type] )?
       throw new Error "^mr.e#2^ unable to convert a #{type} to a transform"
-    @has_finished = false
-    R = method.call @, source
-    return nameit type, R if R.name is ''
-    return R
+    return method.call @, source
 
   #---------------------------------------------------------------------------------------------------------
   [stf'generator']: ( source ) ->
-    @has_finished = false
-    return ( send ) =>
+    transform = ( send ) =>
       return null if @has_finished
       dsc           = source.next()
       @has_finished = dsc.done
       send dsc.value unless @has_finished
       return null
+    return { transform_type: 'source', transform, }
 
   #---------------------------------------------------------------------------------------------------------
   [stf'text']: ( source ) ->
-    letter_re     = /./uy
-    @has_finished = false
-    return nameit '√txt', ( send ) =>
+    letter_re = /./uy
+    transform = nameit '√txt', ( send ) =>
       return null if @has_finished
       unless ( match = source.match letter_re )?
         @has_finished = true
         return null
       send match[ 0 ]
       return null
+    return { transform_type: 'source', transform, }
 
   #---------------------------------------------------------------------------------------------------------
   [stf'generatorfunction']: ( source ) -> @_get_source_transform 'generator', source()
   [stf'arrayiterator']:     ( source ) -> @[stf'generator'] source
   [stf'setiterator']:       ( source ) -> @[stf'generator'] source
   [stf'mapiterator']:       ( source ) -> @[stf'generator'] source
-  [stf'list']:              ( source ) -> nameit '√lst', @[stf'generator'] source.values()
-  [stf'object']:            ( source ) -> nameit '√obj', @[stf'generator'] ( -> yield [ k, v, ] for k, v of source )()
-  [stf'set']:               ( source ) -> nameit '√set', @[stf'generator'] source.values()
-  [stf'map']:               ( source ) -> nameit '√map', @[stf'generator'] source.entries()
+
+  #---------------------------------------------------------------------------------------------------------
+  [stf'list']:              ( source ) ->
+    { transform } = @[stf'generator'] source.values()
+    nameit '√lst', transform
+    return { transform_type: 'source', transform, }
+
+  #---------------------------------------------------------------------------------------------------------
+  [stf'object']:            ( source ) ->
+    { transform } = @[stf'generator'] ( -> yield [ k, v, ] for k, v of source )()
+    nameit '√obj', transform
+    return { transform_type: 'source', transform, }
+
+  #---------------------------------------------------------------------------------------------------------
+  [stf'set']:               ( source ) ->
+    { transform } = @[stf'generator'] source.values()
+    nameit '√set', transform
+    return { transform_type: 'source', transform, }
+
+  #---------------------------------------------------------------------------------------------------------
+  [stf'map']:               ( source ) ->
+    { transform } = @[stf'generator'] source.entries()
+    nameit '√map', transform
+    return { transform_type: 'source', transform, }
 
 
   #=========================================================================================================
@@ -347,12 +363,14 @@ class Async_segment extends Segment
   [stf'asyncgeneratorfunction']: ( source ) -> @[stf'asyncgenerator'] source()
 
   #---------------------------------------------------------------------------------------------------------
-  [stf'asyncgenerator']: ( source ) -> ( send ) =>
-    return null if @has_finished
-    dsc           = await source.next()
-    @has_finished = dsc.done
-    send dsc.value unless @has_finished
-    return null
+  [stf'asyncgenerator']: ( source ) ->
+    transform = ( send ) =>
+      return null if @has_finished
+      dsc           = await source.next()
+      @has_finished = dsc.done
+      send dsc.value unless @has_finished
+      return null
+    return { transform_type: 'source', transform, }
 
   #---------------------------------------------------------------------------------------------------------
   [stf'nodejs_readstream']: ( source ) ->

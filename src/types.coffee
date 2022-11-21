@@ -17,7 +17,7 @@ GUY                       = require 'guy'
   inspect
   echo
   log     }               = GUY.trm
-stf_prefix                = '_source_transform_from_'
+stf_prefix                = '_transform_from_'
 { Intertype }             = require 'intertype'
 base_types                = null
 snyc_types                = null
