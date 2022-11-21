@@ -23,6 +23,7 @@ base_types                = null
 snyc_types                = null
 async_types               = null
 misfit                    = Symbol 'misfit'
+STREAM                    = require 'node:stream'
 
 
 #-----------------------------------------------------------------------------------------------------------
@@ -58,6 +59,9 @@ get_base_types = ->
   declare.asyncfunction0        override: true, isa: ( x ) -> ( @isa.asyncfunction x ) and ( x.length is 0 )
   declare.asyncfunction1        override: true, isa: ( x ) -> ( @isa.asyncfunction x ) and ( x.length is 1 )
   declare.asyncfunction2        override: true, isa: ( x ) -> ( @isa.asyncfunction x ) and ( x.length is 2 )
+  #.........................................................................................................
+  declare.nodejs_writestream    override: true, isa: ( x ) -> x instanceof STREAM.Writable
+  declare.nodejs_readstream     override: true, isa: ( x ) -> x instanceof STREAM.Readable
   #.........................................................................................................
   declare.reporting_collector   override: true, isa: ( x ) -> x instanceof main.Reporting_collector
   declare.proto_segment         override: true, isa: ( x ) -> x instanceof main.Proto_segment
