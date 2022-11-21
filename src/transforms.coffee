@@ -61,12 +61,13 @@
 #---------------------------------------------------------------------------------------------------------
 @$sink_from_writestream = ( writestream ) ->
   # validate.writestream writestream
-  last = Symbol 'last'
-  return $ { last, }, writestream = ( d ) ->
+  { $ }         = require './main'
+  last          = Symbol 'last'
+  return $ { last, }, ( d ) ->
     if d is last
       return await new Promise ( resolve ) ->
-        output.end -> resolve()
-        # output.close()
+        writestream.end -> resolve()
+        # writestream.close()
     return await new Promise ( resolve ) ->
-      output.write d, -> resolve()
+      writestream.write d, -> resolve()
 
