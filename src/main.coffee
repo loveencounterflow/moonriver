@@ -266,6 +266,7 @@ class Pipeline
   #---------------------------------------------------------------------------------------------------------
   run: -> ( d for d from @walk() )
   walk: ->
+    @push ( nameit '(dummy)', ( d ) -> ) if @segments.length is 0
     segment._on_before_walk()   for segment in @segments
     segment.send segment.first  for segment in @segments when segment.first isnt misfit
     yield from @_walk()
