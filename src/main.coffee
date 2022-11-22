@@ -235,6 +235,9 @@ class Pipeline
       try R = new @constructor.segment_class { modifiers, input, fitting, output: @output, } catch error
         error.message = error.message + "\n\n^mr.e#4^ unable to convert a #{@types.type_of fitting} into a segment"
         throw error
+    ### TAINT this part should be simplified; we do it so methods `Segment::_transform_from_$type()` can
+    make use of the global `$()` method to define transforms. ###
+    return @_segment_from_fitting R.transform.values... if @types.isa.proto_segment R.transform
     return R
 
   #---------------------------------------------------------------------------------------------------------
