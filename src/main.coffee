@@ -441,6 +441,36 @@ class Async_pipeline extends Pipeline
       break if @has_finished
     return null
 
+  #---------------------------------------------------------------------------------------------------------
+  @walk_named_pipelines: ( named_pipelines ) ->
+    types = get_async_types()
+    types.validate.object.or.list named_pipelines
+    #.......................................................................................................
+    switch type = types.type_of named_pipelines
+      when 'object'
+        names     = Object.keys named_pipelines
+        pipelines = ( v for k, v of named_pipelines )
+      when 'list'
+        names     = ( idx for _, idx in named_pipelines )
+        pipelines = named_pipelines
+    #.......................................................................................................
+    process = ->
+      loop
+        for pipeline, idx in pipelines
+          name = names[ idx ]
+          await pipeline.process()
+          yield { name, data, } for data from pipeline.output
+          pipeline.output.length = 0
+        break if pipelines.every ( pipeline ) -> pipeline.has_finished
+      return null
+    #.......................................................................................................
+    pipeline.before_walk() for pipeline in pipelines
+    await yield from process()
+    pipeline.prepare_after_walk() for pipeline in pipelines
+    await yield from process()
+    #.......................................................................................................
+    return null
+
 
 ############################################################################################################
 # HELPERS
