@@ -293,6 +293,38 @@ class Pipeline
       break if @has_finished
     return null
 
+  #---------------------------------------------------------------------------------------------------------
+  walk_named_pipelines: ( P... ) -> @constructor.walk_named_pipeline P...
+
+  #---------------------------------------------------------------------------------------------------------
+  @walk_named_pipelines: ( named_pipelines ) ->
+    types = get_sync_types()
+    types.validate.object.or.list named_pipelines
+    #.......................................................................................................
+    switch type = types.type_of named_pipelines
+      when 'object'
+        names     = Object.keys named_pipelines
+        pipelines = ( v for k, v of named_pipelines )
+      when 'list'
+        names     = ( idx for _, idx in named_pipelines )
+        pipelines = named_pipelines
+    #.......................................................................................................
+    process = ->
+      loop
+        for pipeline, idx in pipelines
+          name = names[ idx ]
+          pipeline.process()
+          yield { name, data, } for data from pipeline.output
+          pipeline.output.length = 0
+        break if pipelines.every ( pipeline ) -> pipeline.has_finished
+      return null
+    #.......................................................................................................
+    pipeline.before_walk() for pipeline in pipelines
+    yield from process()
+    pipeline.prepare_after_walk() for pipeline in pipelines
+    yield from process()
+    #.......................................................................................................
+    return null
 
   #=========================================================================================================
   # CLI REPRESENTATION

@@ -156,6 +156,33 @@ Any pipeline that contains one or more explicitly or implicitly asynchronous seg
 include all segments derived from `asyncfunction`s, `asyncgeneratorfunction`s, `asyncgenerator`s,
 `readstream`s, `writestream`s, and all `function`s that return a `Promise`.
 
+## Multi-Pipeline Processing
+
+Multi-Pipeline Processing is a form of processing that allows to iterate over results from multiple
+interconnected pipelines. The iteration happens in a piecewise fashion so as to avoid accumulation of data
+items in the input or output buffers.
+
+```coffee
+p_1 = new Pipeline()
+p_2 = new Pipeline()
+p_1.push [ 0 .. 5 ]
+p_1.push $ { first, last, }, ( d, send ) -> send d
+p_1.push show = ( d ) -> whisper 'input', d
+p_1.push do ->
+  count = 0
+  return ( d, send ) ->
+    count++
+    if count %% 2 is 0 then return p_2.send d
+    send d
+p_1.push show = ( d ) -> urge 'p_1', d
+p_2.push show = ( d ) -> warn 'p_2', d
+#...................................................................
+result        = { even: [], odd: [], }
+for d from Pipeline.walk_named_pipelines { odd: p_1, even: p_2, }
+  info d
+  result[ d.name ].push d.data
+# result is now { even: [ 0, 2, 4, last ], odd: [ first, 1, 3, 5 ] }
+```
 
 ## To Do
 
@@ -173,6 +200,7 @@ include all segments derived from `asyncfunction`s, `asyncgeneratorfunction`s, `
 * **[+]** v2 MVP
 * **[+]** async sources, transducers
 * **[+]** implement modifiers `first`, `last` <del>(and `once_before_first` `once_after_last`?)</del>
+* **[+]** implement `Pipeline.walk_named_pipelines()`
 
 
 
