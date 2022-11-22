@@ -100,6 +100,9 @@ class Segment
     return method.call @, source
 
   #---------------------------------------------------------------------------------------------------------
+  ### NOTE in the below code, `φ` has been used as an abbreviation for 'fitting' ###
+
+  #---------------------------------------------------------------------------------------------------------
   [stf'producer_fitting']: ( φ ) ->
     @_on_before_walk  = ->
       source          = φ()
