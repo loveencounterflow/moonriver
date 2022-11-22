@@ -334,22 +334,22 @@ class Async_segment extends Segment
     return 0
 
   #---------------------------------------------------------------------------------------------------------
-  [stf'asyncgeneratorfunction']: ( source ) -> @[stf'asyncgenerator'] source()
+  [stf'asyncgeneratorfunction']: ( φ ) -> @[stf'asyncgenerator'] φ()
 
   #---------------------------------------------------------------------------------------------------------
-  [stf'asyncgenerator']: ( source ) ->
+  [stf'asyncgenerator']: ( φ ) ->
     transform = ( send ) =>
       return null if @has_finished
-      dsc           = await source.next()
+      dsc           = await φ.next()
       @has_finished = dsc.done
       send dsc.value unless @has_finished
       return null
     return { role: 'source', transform, }
 
   #---------------------------------------------------------------------------------------------------------
-  [stf'nodejs_readstream']: ( source ) ->
+  [stf'nodejs_readstream']: ( φ ) ->
     { Receiver }  = require 'jfee'
-    rcv           = Receiver.from_readstream source, { bare: true, }
+    rcv           = Receiver.from_readstream φ, { bare: true, }
     transform     = nameit '√readstream', ( @[stf'asyncgenerator'] rcv ).transform
     return { role: 'source', transform, }
 
