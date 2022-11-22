@@ -15,6 +15,7 @@
     - [Iterate over Lines of a File](#iterate-over-lines-of-a-file)
   - [Glossary](#glossary)
   - [List of Implemented Transforms](#list-of-implemented-transforms)
+  - [Synchronous and Asynchronous Pipelines](#synchronous-and-asynchronous-pipelines)
   - [To Do](#to-do)
   - [Is Done](#is-done)
 
@@ -134,8 +135,26 @@ data which will be buffered until `walk()` or `run()` are called.
 * `(async)generatorfunction`: will be called once to obtain an `(async)generator`, for which see below.
 * `(async)generator`: adds the generator's yielded values to the stream.
 * `set`: adds the set's elements to the stream.
-* `objects`: adds the object's attributes as `[ key, value, ]` pairs to the stream.
-* `maps`: adds the map's entries as `[ key, value, ]` pairs to the stream.
+* `object`: adds the object's attributes as `[ key, value, ]` pairs to the stream.
+* `map`: adds the map's entries as `[ key, value, ]` pairs to the stream.
+* `writestream`: adds like an `observer` with the side effect that data is written to the stream (and hence
+  a file in case the wtream was created using `node:fs.createWriteStream()` or something similar). Observe
+  that *no effort will be made to convert data items to comply with the requirements of a NodeJS
+  `writestream`* and, in general, only `text`s, `buffer`s and `uint8array`s are acceptable inputs here.
+  * (An implementation detail here is that the `role` of a segment derived from a `writestream` is
+    `observer`, not something like `sink`, a concept that exist only informally in MoonRiver. A transform
+    that writes to a file or some other receiver might as well be implemented as a transducer that modifies
+    or holds back data should that make sense for the application at hand.)
+* `readstream`: a stream created with something like `node:fs.createReadStream()` can act as a `source` in
+  MoonRiver pipelines.
+
+## Synchronous and Asynchronous Pipelines
+
+Any pipeline that contains one or more explicitly or implicitly asynchronous segments must be created as `p
+= new Async_pipeline()` and run as `await p.run()` or `for await d from p.walk()`. Asynchronous segments
+include all segments derived from `asyncfunction`s, `asyncgeneratorfunction`s, `asyncgenerator`s,
+`readstream`s, `writestream`s, and all `function`s that return a `Promise`.
+
 
 ## To Do
 
@@ -147,6 +166,7 @@ data which will be buffered until `walk()` or `run()` are called.
   return values will be interpreted as an error condition.
 * **[–]** allow, document how to implement source adapters (`@_transform_from_*()`), probably by deriving
   from class `Segment`
+* **[–]**
 
 ## Is Done
 
