@@ -353,6 +353,18 @@ class Async_segment extends Segment
     transform     = nameit '√readstream', ( @[stf'asyncgenerator'] rcv ).transform
     return { role: 'source', transform, }
 
+  #---------------------------------------------------------------------------------------------------------
+  [stf'nodejs_writestream']: ( φ ) ->
+    last = Symbol 'last'
+    return role: 'observer', transform: $ { last, }, ( d ) ->
+      if d is last
+        return await new Promise ( resolve ) ->
+          φ.end -> resolve()
+          # φ.close()
+      return await new Promise ( resolve ) ->
+        φ.write d, -> resolve()
+
+
 
 #===========================================================================================================
 class Async_pipeline extends Pipeline
