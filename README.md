@@ -16,6 +16,7 @@
   - [Glossary](#glossary)
   - [List of Implemented Transforms](#list-of-implemented-transforms)
   - [Synchronous and Asynchronous Pipelines](#synchronous-and-asynchronous-pipelines)
+  - [Multi-Pipeline Processing](#multi-pipeline-processing)
   - [To Do](#to-do)
   - [Is Done](#is-done)
 
@@ -201,6 +202,7 @@ for d from Pipeline.walk_named_pipelines { odd: p_1, even: p_2, }
 * **[+]** async sources, transducers
 * **[+]** implement modifiers `first`, `last` <del>(and `once_before_first` `once_after_last`?)</del>
 * **[+]** implement `Pipeline.walk_named_pipelines()`
+* **[+]** implement `Async_pipeline.walk_named_pipelines()`
 
 
 
