@@ -266,12 +266,22 @@ class Pipeline
   #---------------------------------------------------------------------------------------------------------
   run: -> ( d for d from @walk() )
   walk: ->
+    @before_walk()
+    yield from @_walk()
+    @prepare_after_walk()
+    yield from @_walk() unless @has_finished
+    return null
+
+  #---------------------------------------------------------------------------------------------------------
+  before_walk: ->
     @push ( nameit '(dummy)', ( d ) -> ) if @segments.length is 0
     segment._on_before_walk()   for segment in @segments
     segment.send segment.first  for segment in @segments when segment.first isnt misfit
-    yield from @_walk()
+    return null
+
+  #---------------------------------------------------------------------------------------------------------
+  prepare_after_walk: ->
     segment.send segment.last   for segment in @segments when segment.last isnt misfit
-    yield from @_walk() unless @has_finished
     return null
 
   #---------------------------------------------------------------------------------------------------------
