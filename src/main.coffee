@@ -390,6 +390,7 @@ class Async_pipeline extends Pipeline
   #---------------------------------------------------------------------------------------------------------
   run: -> ( d for await d from @walk() )
   walk: ->
+    @push ( nameit '(dummy)', ( d ) -> ) if @segments.length is 0
     await segment._on_before_walk() for segment in @segments
     loop
       await @process()
