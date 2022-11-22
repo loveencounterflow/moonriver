@@ -140,11 +140,12 @@ data which will be buffered until `walk()` or `run()` are called.
 * `writestream`: adds like an `observer` with the side effect that data is written to the stream (and hence
   a file in case the wtream was created using `node:fs.createWriteStream()` or something similar). Observe
   that *no effort will be made to convert data items to comply with the requirements of a NodeJS
-  `writestream`* and, in general, only `text`s, `buffer`s and `uint8array`s are acceptable inputs here.
-  * (An implementation detail here is that the `role` of a segment derived from a `writestream` is
-    `observer`, not something like `sink`, a concept that exist only informally in MoonRiver. A transform
-    that writes to a file or some other receiver might as well be implemented as a transducer that modifies
-    or holds back data should that make sense for the application at hand.)
+  `writestream`* and, in general, only `text`s, `buffer`s and `uint8array`s are acceptable inputs for
+  transforms derived from a `writestream`.
+  * (An implementation detail: the `role` of a segment derived from a `writestream` is `observer`, not
+    something like `sink`, a concept that exist only informally in MoonRiver; a transform that writes to a
+    file or some other receiver might as well be implemented as a transducer that modifies or holds back
+    data should that make sense for the application at hand.)
 * `readstream`: a stream created with something like `node:fs.createReadStream()` can act as a `source` in
   MoonRiver pipelines.
 
@@ -159,19 +160,19 @@ include all segments derived from `asyncfunction`s, `asyncgeneratorfunction`s, `
 ## To Do
 
 * **[–]** documentation
-* **[–]** implement modifiers `first`, `last` (and `once_before_first` `once_after_last`?)
 * **[–]** move source documentation from `Segment._as_transform()`
 * **[–]** implement `start()` method that will signal all sources (with `Symbol 'start'`) to reset.
   Compliant sources that *can* reset themselves to be repeated must respond with `Symbol 'ok'`; all other
   return values will be interpreted as an error condition.
 * **[–]** allow, document how to implement source adapters (`@_transform_from_*()`), probably by deriving
   from class `Segment`
-* **[–]**
+* **[–]** does it make sense to implement Tees and Wyes?
 
 ## Is Done
 
 * **[+]** v2 MVP
 * **[+]** async sources, transducers
+* **[+]** implement modifiers `first`, `last` <del>(and `once_before_first` `once_after_last`?)</del>
 
 
 
