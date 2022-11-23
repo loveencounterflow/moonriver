@@ -17,6 +17,8 @@
   - [List of Implemented Transforms](#list-of-implemented-transforms)
   - [Synchronous and Asynchronous Pipelines](#synchronous-and-asynchronous-pipelines)
   - [Multi-Pipeline Processing](#multi-pipeline-processing)
+  - [Implementation Details](#implementation-details)
+    - [Avoidable Code Duplication for Sync, Async Pipelines?](#avoidable-code-duplication-for-sync-async-pipelines)
   - [To Do](#to-do)
   - [Is Done](#is-done)
 
@@ -184,6 +186,50 @@ for d from Pipeline.walk_named_pipelines { odd: p_1, even: p_2, }
   result[ d.name ].push d.data
 # result is now { even: [ 0, 2, 4, last ], odd: [ first, 1, 3, 5 ] }
 ```
+
+## Implementation Details
+
+### Avoidable Code Duplication for Sync, Async Pipelines?
+
+
+Perusing the [implementation of the synchronous and asynchronous `Pipeline` and `Segment`
+classes](blob/main/src/main.coffee), one will come accross apparent code duplication like
+
+```coffee
+class Pipeline
+  process: ->
+    for segment, segment_idx in @segments
+      segment.process()
+    return null
+
+#———————————————————— vs ————————————————————
+
+class Async_pipeline extends Pipeline
+  process: ->
+    for segment, segment_idx in @segments
+      await segment.process()
+    return null
+```
+
+which are identical save for the addition of `await` in the latter. Given that JS accepts calls to sync
+functions with `await` with seemingly no difference in functionality, wouldn't it be better to define these
+methods just once and just live with the fact that although some methods are `asyncfunction`s they can still
+be called *without* await by the user?
+
+Unfortunately this is not at all the case. A quite simple-minded
+[benchmark](/loveencounterflow/hengist/blob/master/dev/moonriver/src/benchmark-await-sync-vs-plain-sync.coffee)
+shows a staggering difference in performance: when dealing with small (i.e. dozens) of loops over plain
+calls vs (synchronous, to be sure) function calls with prefixed `await`, there's no discernible effect. But
+already when the loop count is in the 100s or 1,000s, the performance of the code with `await` only reaches
+25% to 20% of the identical same code called without `await`, and the figures only get (much, much) worse:
+with a million loops, we're looking at a performance degradation from 100% for the `await`-less code vs <1%
+for the code with `await`. So there's a big incentive to *always avoid extraneous `await`* in one's code.
+
+But of course the code duplication is still real, and somewhat annoying. There have been efforts like
+`gensync` introduced in a blog post titled [*Optionally async functions in
+JavaScript*](https://writing.bakkot.com/gensync)) which (as far as I understand) seems to tackle the
+problem, but I haven't tested and benchmarked that solution. That said, I'd also be happy with a code
+transformation step for this, but then again maybe even more code transformations should be avoided in JS.
 
 ## To Do
 
