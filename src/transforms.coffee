@@ -46,6 +46,28 @@ GUY                       = require 'guy'
     buffer[ max ] = d
     send { buffer..., } unless buffer[ 0 ] is empty
 
+#-----------------------------------------------------------------------------------------------------------
+@$named_window = ( cfg ) ->
+  cfg                   = get_transform_types().create.transform_named_window_cfg cfg
+  { names
+    empty }             = cfg
+  { Pipeline }          = require './main'
+  R                     = new Pipeline()
+  #.........................................................................................................
+  min                   = -( names.length - 1 ) / 2
+  max                   = -min
+  map                   = {}
+  map[ idx + min + 1 ]  = names[ idx + max ] for idx in [ min .. max ]
+  debug '^89384563^', map
+  #.........................................................................................................
+  R.push @$window { min, max, empty, }
+  R.push ( d, send ) ->
+    debug '^647698^', d
+    e         = {}
+    e[ name ] = d[ idx ] for idx, name of map
+    send e
+  return R
+
 # #-----------------------------------------------------------------------------------------------------------
 # @$window_list = ( min, max, empty = misfit ) ->
 #   { $ }         = require './main'

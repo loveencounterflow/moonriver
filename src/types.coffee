@@ -175,6 +175,18 @@ get_transform_types = ->
       return false unless x.min < x.max
       return true
   #.........................................................................................................
+  declare.transform_named_window_cfg
+    fields:
+      names:      'list.of.nonempty.text'
+      empty:      'anything'
+    default:
+      names:      [ 'left', 'mid', 'right', ]
+      empty:      misfit
+    isa: ( x ) ->
+      return false unless @isa.object x
+      return false unless @isa.odd.integer x.names.length
+      return true
+  #.........................................................................................................
   return transform_types
 
 
