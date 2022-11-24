@@ -1,6 +1,26 @@
 
 'use strict'
 
+############################################################################################################
+GUY                       = require 'guy'
+{ alert
+  debug
+  help
+  info
+  plain
+  praise
+  urge
+  warn
+  whisper }               = GUY.trm.get_loggers 'MOONRIVER/TRANSFORMS'
+{ rpr
+  inspect
+  echo
+  log     }               = GUY.trm
+#...........................................................................................................
+{ get_transform_types
+  misfit                } = require './types'
+
+
 #-----------------------------------------------------------------------------------------------------------
 @$window = ( cfg ) ->
   cfg           = get_transform_types().create.transform_window_cfg cfg
