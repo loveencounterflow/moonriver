@@ -24,6 +24,7 @@ UTIL                      = require 'node:util'
 nameit                    = ( name, f ) -> def f, 'name', { value: name, }
 { misfit
   stf_prefix
+  get_base_types
   get_sync_types
   get_async_types }       = require './types'
 stf                       = ( name ) -> stf_prefix + ( if Array.isArray name then name[ 0 ] else name )
@@ -496,5 +497,8 @@ module.exports = {
   Reporting_collector
   transforms
   Proto_segment
-  $ }
+  $
+  get_base_types
+  get_sync_types
+  get_async_types }
 

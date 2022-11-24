@@ -150,6 +150,6 @@ get_async_types = ->
 
 
 ############################################################################################################
-module.exports = { stf_prefix, get_sync_types, get_async_types, misfit, }
+module.exports = { stf_prefix, get_base_types, get_sync_types, get_async_types, misfit, }
 
 
