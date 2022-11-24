@@ -22,6 +22,7 @@ stf_prefix                = '_transform_from_'
 base_types                = null
 snyc_types                = null
 async_types               = null
+transform_types           = null
 misfit                    = Symbol 'misfit'
 STREAM                    = require 'node:stream'
 
@@ -154,7 +155,22 @@ get_async_types = ->
   return async_types
 
 
+#=========================================================================================================
+get_transform_types = ->
+  return transform_types if transform_types?
+  transform_types = new Intertype get_base_types()
+  { declare }     = transform_types
+  #.........................................................................................................
+  return transform_types
+
+
 ############################################################################################################
-module.exports = { stf_prefix, get_base_types, get_sync_types, get_async_types, misfit, }
+module.exports = {
+  stf_prefix
+  get_base_types
+  get_sync_types
+  get_async_types
+  get_transform_types
+  misfit }
 
 

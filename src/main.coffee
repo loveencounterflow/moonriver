@@ -26,7 +26,8 @@ nameit                    = ( name, f ) -> def f, 'name', { value: name, }
   stf_prefix
   get_base_types
   get_sync_types
-  get_async_types }       = require './types'
+  get_async_types
+  get_transform_types   } = require './types'
 stf                       = ( name ) -> stf_prefix + ( if Array.isArray name then name[ 0 ] else name )
 transforms                = require './transforms'
 noop                      = ->
@@ -516,5 +517,7 @@ module.exports = {
   $
   get_base_types
   get_sync_types
-  get_async_types }
+  get_async_types
+  get_transform_types
+  misfit }
 
