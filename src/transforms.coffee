@@ -2,7 +2,11 @@
 'use strict'
 
 #-----------------------------------------------------------------------------------------------------------
-@$window = ( min, max, empty = misfit ) ->
+@$window = ( cfg ) ->
+  cfg           = get_transform_types().create.transform_window_cfg cfg
+  { min
+    max
+    empty }     = cfg
   { $ }         = require './main'
   last          = Symbol 'last'
   buffer        = {}

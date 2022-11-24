@@ -161,6 +161,20 @@ get_transform_types = ->
   transform_types = new Intertype get_base_types()
   { declare }     = transform_types
   #.........................................................................................................
+  declare.transform_window_cfg
+    fields:
+      min:        'integer'
+      max:        'integer'
+      empty:      'anything'
+    default:
+      min:        -1
+      max:        1
+      empty:      misfit
+    isa: ( x ) ->
+      return false unless @isa.object x
+      return false unless x.min < x.max
+      return true
+  #.........................................................................................................
   return transform_types
 
 
