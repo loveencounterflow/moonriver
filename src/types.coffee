@@ -60,6 +60,11 @@ get_base_types = ->
   declare.asyncfunction1        override: true, isa: ( x ) -> ( @isa.asyncfunction x ) and ( x.length is 1 )
   declare.asyncfunction2        override: true, isa: ( x ) -> ( @isa.asyncfunction x ) and ( x.length is 2 )
   #.........................................................................................................
+  declare.pipeline                              isa: ( x ) -> x instanceof main.Pipeline
+  declare.sync_pipeline         override: true, isa: ( x ) -> ( x instanceof main.Pipeline ) and not \
+                                                              ( x instanceof main.Async_pipeline )
+  declare.async_pipeline        override: true, isa: ( x ) -> x instanceof main.Async_pipeline
+  #.........................................................................................................
   declare.nodejs_writestream    override: true, isa: ( x ) -> x instanceof STREAM.Writable
   declare.nodejs_readstream     override: true, isa: ( x ) -> x instanceof STREAM.Readable
   #.........................................................................................................

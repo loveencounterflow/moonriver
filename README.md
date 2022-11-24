@@ -249,6 +249,9 @@ transformation step for this, but then again maybe even more code transformation
 * **[+]** implement modifiers `first`, `last` <del>(and `once_before_first` `once_after_last`?)</del>
 * **[+]** implement `Pipeline.walk_named_pipelines()`
 * **[+]** implement `Async_pipeline.walk_named_pipelines()`
+* **[+]** composibility:
+  * **[+]** can we use a pipeline as a segment?
+  * **[+]** <del>can we call the transform function of a segment outside of its use in a pipeline?</del>
 
 
 
