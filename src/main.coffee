@@ -244,7 +244,10 @@ class Pipeline
 
   #---------------------------------------------------------------------------------------------------------
   push: ( P... ) ->
-    @segments.push R = @_segment_from_fitting P...
+    if @types.isa.sync_pipeline R = P[ 0 ]
+      @push segment for segment in R.segments
+    else
+      @segments.push R = @_segment_from_fitting P...
     return R
 
 
