@@ -185,6 +185,7 @@ get_transform_types = ->
     isa: ( x ) ->
       return false unless @isa.object x
       return false unless @isa.odd.integer x.names.length
+      return false unless ( new Set x.names ).size is x.names.length
       return true
   #.........................................................................................................
   return transform_types
