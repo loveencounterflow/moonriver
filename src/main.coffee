@@ -136,14 +136,6 @@ class Segment
     return { role: 'source', transform, }
 
   #---------------------------------------------------------------------------------------------------------
-  [stf'sync_pipeline']: ( φ ) ->
-    transform = nameit 'pipeline', ( d, send ) ->
-      φ.send d
-      send e for e in φ.run()
-      return null
-    return { role: 'transducer', transform, }
-
-  #---------------------------------------------------------------------------------------------------------
   [stf'generatorfunction']:   ( φ ) -> @[stf'generator'] φ()
   [stf'arrayiterator']:       ( φ ) -> @[stf'generator'] φ
   [stf'setiterator']:         ( φ ) -> @[stf'generator'] φ
