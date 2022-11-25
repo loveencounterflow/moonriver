@@ -86,5 +86,19 @@ GUY                       = require 'guy'
     send d
     return null
 
+#-----------------------------------------------------------------------------------------------------------
+@$collect = ( collector = [] ) ->
+  { $ }         = require './main'
+  last          = Symbol 'last'
+  return $ { last, }, collect = ( d, send ) ->
+    return send collector if d is last
+    collector.push d
+    return null
+
+#-----------------------------------------------------------------------------------------------------------
+@$map       = ( f, P... ) -> ( d, send ) -> send        f P...
+@$async_map = ( f, P... ) -> ( d, send ) -> send await  f P...
+
+
 
 
