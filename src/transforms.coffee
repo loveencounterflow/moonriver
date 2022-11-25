@@ -48,43 +48,25 @@ GUY                       = require 'guy'
 
 #-----------------------------------------------------------------------------------------------------------
 @$named_window = ( cfg ) ->
-  cfg                   = get_transform_types().create.transform_named_window_cfg cfg
+  cfg                       = get_transform_types().create.transform_named_window_cfg cfg
   { names
-    empty }             = cfg
-  { Pipeline }          = require './main'
-  R                     = new Pipeline()
+    empty }                 = cfg
+  { Pipeline }              = require './main'
+  R                         = new Pipeline()
   #.........................................................................................................
-  min                   = -( names.length - 1 ) / 2
-  max                   = -min
-  map                   = {}
-  map[ idx + min + 1 ]  = names[ idx + max ] for idx in [ min .. max ]
-  debug '^89384563^', map
+  min                       = -( names.length - 1 ) / 2
+  max                       = -min
+  map                       = {}
+  idxs                      = [ min .. max ]
+  map[ names[ list_idx ] ]  = window_idx for window_idx, list_idx in idxs
   #.........................................................................................................
   R.push @$window { min, max, empty, }
-  R.push ( d, send ) ->
-    debug '^647698^', d
+  R.push ( d, send ) =>
     e         = {}
-    e[ name ] = d[ idx ] for idx, name of map
+    e[ name ] = d[ window_idx ] for name, window_idx of map
     send e
+  #.........................................................................................................
   return R
-
-# #-----------------------------------------------------------------------------------------------------------
-# @$window_list = ( min, max, empty = misfit ) ->
-#   { $ }         = require './main'
-#   last          = Symbol 'last'
-#   buffer        = ( empty for nr in [ min .. max ] )
-#   #.........................................................................................................
-#   return $ { last, }, ( d, send ) ->
-#     if d is last
-#       loop
-#         buffer.shift()
-#         buffer.push empty
-#         break if buffer[ 0 ] is empty
-#         send [ buffer..., ]
-#       return null
-#     buffer.shift()
-#     buffer.push d
-#     send [ buffer..., ] unless buffer[ 0 ] is empty
 
 #-----------------------------------------------------------------------------------------------------------
 @$split_lines = ->
