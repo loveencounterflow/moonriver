@@ -225,16 +225,19 @@ class Pipeline
     ### TAINT consider to move this code to `Segment` class ###
     if ( count = @segments.length ) is 0
       input               = @input
+      output              = @output
     else
       prv_segment         = @segments[ count - 1 ]
       prv_segment.output  = @_new_collector()
       input               = prv_segment.output
+      output              = @output
+    #.......................................................................................................
     if @types.isa.segment fitting
       R         = fitting
       R.input   = input
-      R.output  = @output
+      R.output  = output
     else
-      try R = new @constructor.segment_class { modifiers, input, fitting, output: @output, } catch error
+      try R = new @constructor.segment_class { modifiers, input, fitting, output, } catch error
         error.message = error.message + "\n\n^mr.e#4^ unable to convert a #{@types.type_of fitting} into a segment"
         throw error
     ### TAINT this part should be simplified; we do it so methods `Segment::_transform_from_$type()` can
