@@ -351,15 +351,6 @@ class Async_segment extends Segment
   #---------------------------------------------------------------------------------------------------------
   @type_getter:                     get_async_types
 
-  # #---------------------------------------------------------------------------------------------------------
-  # _segment_from_fitting: ( P... ) ->
-  #   [ modifiers
-  #     fitting   ] = @_get_modifiers_and_fitting P...
-  #   ### TAINT `modifiers` silently discarded ###
-  #   debug '^34953609457^'
-  #   return transforms.$sink_from_writestream fitting if @types.isa.nodejs_writestream fitting
-  #   return super modifiers, fitting
-
   #---------------------------------------------------------------------------------------------------------
   process: ->
     if @role is 'source'
