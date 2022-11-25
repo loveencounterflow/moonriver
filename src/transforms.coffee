@@ -33,7 +33,7 @@ GUY                       = require 'guy'
   buffer[ nr ]  = empty for nr in [ min .. max ]
   advance       = -> buffer[ nr - 1 ]  = buffer[ nr ] for nr in [ min + 1 .. max ]
   #.........................................................................................................
-  return $ { last, }, ( d, send ) ->
+  return $ { last, }, window = ( d, send ) ->
     if d is last
       loop
         advance()
