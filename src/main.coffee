@@ -41,7 +41,7 @@ class Reporting_collector
   constructor: ( callback ) ->
     hide @, 'callback', callback
     hide @, 'd',        []
-    GUY.props.def @,  'length',   get: -> @d.length
+    GUY.props.def @,  'length',   get: ( -> @d.length ), set: ( ( x ) -> @d.length = x )
     return undefined
 
   #---------------------------------------------------------------------------------------------------------
