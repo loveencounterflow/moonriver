@@ -45,10 +45,11 @@ class Reporting_collector
     return undefined
 
   #---------------------------------------------------------------------------------------------------------
-  push:     ( d ) -> @callback +1; @d.push d
-  unshift:  ( d ) -> @callback +1; @d.unshift d
-  pop:            -> @callback -1; @d.pop()
-  shift:          -> @callback -1; @d.shift()
+  push:        ( d ) -> @callback +1; @d.push d
+  unshift:     ( d ) -> @callback +1; @d.unshift d
+  pop:               -> @callback -1; @d.pop()
+  shift:             -> @callback -1; @d.shift()
+  [Symbol.iterator]: -> yield from @d
 
   #---------------------------------------------------------------------------------------------------------
   [UTIL.inspect.custom]:  -> @toString()
