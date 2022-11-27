@@ -221,12 +221,28 @@ class Pipeline
     # @_prepare_journal() if @journal.length is 0
     d       = {}
     d.step  = @journal.length
-    d.i     = rpr @input
-    d[ "#{segment.idx} #{segment.transform.name}"     ] = ' ' for segment in @segments
-    d[ "#{j.segment.idx} #{j.segment.transform.name}" ] = rpr j.d if j?
-    d.o     = if @_last_output isnt misfit then @_last_output else rpr @output
+    d.i     = @_prpr @input
+    for segment in @segments
+      d[ "#{segment.idx} #{segment.transform.name}" ] = ' '
+      d[ "◊ #{segment.idx}"                         ] = ' '
+    if j?
+      d[ "#{j.segment.idx} #{j.segment.transform.name}" ] = @_prpr j.d
+      d[ "◊ #{j.segment.idx}"                           ] = @_prpr j.segment.output
+    if @_last_output isnt misfit then d.o = @_last_output; @_last_output = misfit
+    else                              d.o = @_prpr @output
     @journal.push d
     return null
+
+  #---------------------------------------------------------------------------------------------------------
+  _prpr: ( x ) ->
+    ### `rpr()` for the protocol ###
+    R = rpr x
+    if @types.isa.collector x
+      return ' ' if x.length is 0
+      return R[ 2 ... R.length - 2 ]
+    else if @types.isa.symbol x
+      return R.replace /^Symbol\((.*)\)$/, 'Σ $1'
+    return R
 
   # #---------------------------------------------------------------------------------------------------------
   # _prepare_journal: ->
