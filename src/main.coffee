@@ -169,12 +169,12 @@ class Segment
       d = @input.shift()
       switch @role
         when 'observer'
-          @protocol { segment: @, d, }
           @transform  d
           @_send      d
-        when 'transducer'
           @protocol { segment: @, d, }
+        when 'transducer'
           @transform d, @_send
+          @protocol { segment: @, d, }
         else
           throw new Error "^mr.e#3^ internal error: unknown segment role #{rpr @role}"
       return 1
