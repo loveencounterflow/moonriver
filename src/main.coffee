@@ -74,7 +74,7 @@ class Segment
     @input            = cfg.input
     @output           = cfg.output
     @has_finished     = null
-    @role   = null
+    @role             = null
     @_on_before_walk  = noop
     @first            = cfg.modifiers.first
     @last             = cfg.modifiers.last
@@ -196,26 +196,46 @@ class Pipeline
     clasz             = @constructor
     hide  @, 'types',   clasz.type_getter()
     cfg               = @types.create.pipeline_cfg cfg
-    @protocol         = switch cfg.protocol
-      when true   then  @protocol
-      when false  then  ->
-      else              cfg.protocol
     @datacount        = 0
     @input            = @_new_collector()
     @output           = [] ### pipeline output buffer does not participate in datacount ###
     @segments         = []
-    hide  @, '$',             nameit '$', @_segment_from_fitting.bind @
-    def   @, 'sources',       get: -> Object.freeze ( s for s in @segments when s.role is 'source' )
-    def   @, 'has_finished',  get: -> ( @datacount < 1 ) and @sources.every ( s ) -> s.has_finished
+    hide  @, 'protocol',          if cfg.protocol then @_protocol.bind @ else noop
+    hide  @, 'journal',           []
+    hide  @, '_last_output',      misfit
+    hide  @, '_journal_template', {}
+    hide  @, '$',                 nameit '$', @_segment_from_fitting.bind @
+    def   @, 'sources',           get: -> Object.freeze ( s for s in @segments when s.role is 'source' )
+    def   @, 'has_finished',      get: -> ( @datacount < 1 ) and @sources.every ( s ) -> s.has_finished
     return undefined
 
   #---------------------------------------------------------------------------------------------------------
   _new_collector:                   -> new Reporting_collector ( delta ) => @datacount += delta
 
+
+  #=========================================================================================================
+  # PROTOCOL
   #---------------------------------------------------------------------------------------------------------
-  protocol: ( xxx ) ->
-    debug '^3234^', "protocol", xxx
+  _protocol: ( journal_entry = null ) ->
+    # @_prepare_journal() if @journal.length is 0
+    d       = {}
+    ### TAINT names need not be unique ###
+    d.step  = @journal.length
+    d.i     = rpr @input
+    d[ segment.transform.name ] = ' ' for segment in @segments
+    d[ journal_entry.segment.transform.name ] = rpr journal_entry.d if journal_entry?
+    d.o     = if @_last_output isnt misfit then rpr @_last_output else rpr @output
+    @journal.push d
     return null
+
+  # #---------------------------------------------------------------------------------------------------------
+  # _prepare_journal: ->
+  #   @_journal_template = j = {}
+  #   for segment in @segments
+  #     j[ "i#{segment.idx}" ] = []
+  #     j[ "n#{segment.idx}" ] = segment.transform.name
+  #   j[ "o#{segment?.idx ? 0}" ] = null
+  #   return null
 
   #=========================================================================================================
   # BUILDING PIPELINE FROM SEGMENTS
@@ -248,7 +268,7 @@ class Pipeline
       R.input   = input
       R.output  = output
     else
-      segment_cfg = { protocol: @protocol, modifiers, input, fitting, output, }
+      segment_cfg = { idx: @segments.length, protocol: @protocol, modifiers, input, fitting, output, }
       try R = new @constructor.segment_class segment_cfg catch error
         error.message = error.message + "\n\n^mr.e#4^ unable to convert a #{@types.type_of fitting} into a segment"
         throw error
@@ -286,10 +306,14 @@ class Pipeline
   #---------------------------------------------------------------------------------------------------------
   run: -> ( d for d from @walk() )
   walk: ->
+    @protocol()
     @before_walk()
     yield from @_walk()
     @prepare_after_walk()
     yield from @_walk() unless @has_finished
+    ### TAINT should use API ###
+    @protocol()
+    @_last_output = misfit
     return null
 
   #---------------------------------------------------------------------------------------------------------
@@ -308,6 +332,8 @@ class Pipeline
   _walk: ->
     loop
       @process()
+      ### TAINT should use API ###
+      @_last_output = rpr @output if @protocol?
       yield d for d in @output
       @output.length = 0
       break if @has_finished
