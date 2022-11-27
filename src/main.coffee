@@ -323,7 +323,7 @@ class Pipeline
   run: -> ( d for d from @walk() )
   walk: ->
     @protocol()
-    @before_walk()
+    @_before_walk()
     yield from @_walk()
     @prepare_after_walk()
     yield from @_walk() unless @has_finished
@@ -333,14 +333,14 @@ class Pipeline
     return null
 
   #---------------------------------------------------------------------------------------------------------
-  before_walk: ->
+  _before_walk: ->
     @push ( nameit '(dummy)', ( d ) -> ) if @segments.length is 0
     segment._on_before_walk()   for segment in @segments
     segment.send segment.first  for segment in @segments when segment.first isnt misfit
     return null
 
   #---------------------------------------------------------------------------------------------------------
-  prepare_after_walk: ->
+  _prepare_after_walk: ->
     segment.send segment.last   for segment in @segments when segment.last isnt misfit
     return null
 
@@ -381,9 +381,9 @@ class Pipeline
         break if pipelines.every ( pipeline ) -> pipeline.has_finished
       return null
     #.......................................................................................................
-    pipeline.before_walk() for pipeline in pipelines
+    pipeline._before_walk() for pipeline in pipelines
     yield from process()
-    pipeline.prepare_after_walk() for pipeline in pipelines
+    pipeline._prepare_after_walk() for pipeline in pipelines
     yield from process()
     #.......................................................................................................
     return null
@@ -525,9 +525,9 @@ class Async_pipeline extends Pipeline
         break if pipelines.every ( pipeline ) -> pipeline.has_finished
       return null
     #.......................................................................................................
-    pipeline.before_walk() for pipeline in pipelines
+    pipeline._before_walk() for pipeline in pipelines
     await yield from process()
-    pipeline.prepare_after_walk() for pipeline in pipelines
+    pipeline._prepare_after_walk() for pipeline in pipelines
     await yield from process()
     #.......................................................................................................
     return null
