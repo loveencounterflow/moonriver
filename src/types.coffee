@@ -108,15 +108,23 @@ get_sync_types = ->
   #.........................................................................................................
   declare.segment_cfg
     fields:
+      protocol:   'boolean.or.function'
       input:      'collector'
       output:     'collector'
       fitting:    'fitting'
       modifiers:  'modifiers'
     default:
+      protocol:   false
       input:      null
       output:     null
       fitting:    null
       modifiers:  null
+  #.........................................................................................................
+  declare.pipeline_cfg
+    fields:
+      protocol:   'boolean.or.function'
+    default:
+      protocol:   false
   #.........................................................................................................
   return sync_types
 
@@ -142,15 +150,24 @@ get_async_types = ->
   #.........................................................................................................
   declare.segment_cfg
     fields:
+      protocol:   'function'
       input:      'collector'
       output:     'collector'
       fitting:    'fitting'
       modifiers:  'modifiers'
     default:
+      protocol:   false
       input:      null
       output:     null
       fitting:    null
       modifiers:  null
+  #.........................................................................................................
+  declare.pipeline_cfg
+    fields:
+      ### TAINT could also be asyncfunction ###
+      protocol:   'boolean.or.function'
+    default:
+      protocol:   false
   #.........................................................................................................
   return async_types
 
