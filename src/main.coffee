@@ -325,8 +325,8 @@ class Pipeline
     @protocol()
     @_before_walk()
     yield from @_walk()
-    @prepare_after_walk()
-    yield from @_walk() unless @has_finished
+    for _ from @_prepare_after_walk()
+      yield from @_walk() unless @has_finished
     ### TAINT should use API ###
     @protocol()
     @_last_output = misfit
@@ -342,6 +342,9 @@ class Pipeline
   #---------------------------------------------------------------------------------------------------------
   _prepare_after_walk: ->
     segment.send segment.last   for segment in @segments when segment.last isnt misfit
+    for segment in @segments when segment.last isnt misfit
+      segment.send segment.last
+      yield null
     return null
 
   #---------------------------------------------------------------------------------------------------------
