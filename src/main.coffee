@@ -70,6 +70,7 @@ class Segment
     clasz             = @constructor
     hide @, 'types', clasz.type_getter()
     @types.create.segment_cfg cfg
+    @protocol         = cfg.protocol
     @input            = cfg.input
     @output           = cfg.output
     @has_finished     = null
@@ -167,9 +168,11 @@ class Segment
       d = @input.shift()
       switch @role
         when 'observer'
+          @protocol { segment: @, d, }
           @transform  d
           @_send      d
         when 'transducer'
+          @protocol { segment: @, d, }
           @transform d, @_send
         else
           throw new Error "^mr.e#3^ internal error: unknown segment role #{rpr @role}"
@@ -190,15 +193,18 @@ class Pipeline
 
   #---------------------------------------------------------------------------------------------------------
   constructor: ( cfg ) ->
-    clasz               = @constructor
-    cfg                 = { {}..., cfg..., }
-    # cfg                 = types.create.pipeline_cfg cfg
-    @datacount          = 0
-    @input              = @_new_collector()
-    @output             = [] ### pipeline output buffer does not participate in datacount ###
-    @segments           = []
+    clasz             = @constructor
+    hide  @, 'types',   clasz.type_getter()
+    cfg               = @types.create.pipeline_cfg cfg
+    @protocol         = switch cfg.protocol
+      when true   then  @protocol
+      when false  then  ->
+      else              cfg.protocol
+    @datacount        = 0
+    @input            = @_new_collector()
+    @output           = [] ### pipeline output buffer does not participate in datacount ###
+    @segments         = []
     hide  @, '$',             nameit '$', @_segment_from_fitting.bind @
-    hide  @, 'types',         clasz.type_getter()
     def   @, 'sources',       get: -> Object.freeze ( s for s in @segments when s.role is 'source' )
     def   @, 'has_finished',  get: -> ( @datacount < 1 ) and @sources.every ( s ) -> s.has_finished
     return undefined
@@ -206,6 +212,10 @@ class Pipeline
   #---------------------------------------------------------------------------------------------------------
   _new_collector:                   -> new Reporting_collector ( delta ) => @datacount += delta
 
+  #---------------------------------------------------------------------------------------------------------
+  protocol: ( xxx ) ->
+    debug '^3234^', "protocol", xxx
+    return null
 
   #=========================================================================================================
   # BUILDING PIPELINE FROM SEGMENTS
@@ -238,7 +248,8 @@ class Pipeline
       R.input   = input
       R.output  = output
     else
-      try R = new @constructor.segment_class { modifiers, input, fitting, output, } catch error
+      segment_cfg = { protocol: @protocol, modifiers, input, fitting, output, }
+      try R = new @constructor.segment_class segment_cfg catch error
         error.message = error.message + "\n\n^mr.e#4^ unable to convert a #{@types.type_of fitting} into a segment"
         throw error
     ### TAINT this part should be simplified; we do it so methods `Segment::_transform_from_$type()` can
