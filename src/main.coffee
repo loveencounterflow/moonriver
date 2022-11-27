@@ -70,6 +70,7 @@ class Segment
     clasz             = @constructor
     hide @, 'types', clasz.type_getter()
     @types.create.segment_cfg cfg
+    @idx              = cfg.idx
     @protocol         = cfg.protocol
     @input            = cfg.input
     @output           = cfg.output
@@ -216,15 +217,14 @@ class Pipeline
   #=========================================================================================================
   # PROTOCOL
   #---------------------------------------------------------------------------------------------------------
-  _protocol: ( journal_entry = null ) ->
+  _protocol: ( j = null ) ->
     # @_prepare_journal() if @journal.length is 0
     d       = {}
-    ### TAINT names need not be unique ###
     d.step  = @journal.length
     d.i     = rpr @input
-    d[ segment.transform.name ] = ' ' for segment in @segments
-    d[ journal_entry.segment.transform.name ] = rpr journal_entry.d if journal_entry?
-    d.o     = if @_last_output isnt misfit then rpr @_last_output else rpr @output
+    d[ "#{segment.idx} #{segment.transform.name}"     ] = ' ' for segment in @segments
+    d[ "#{j.segment.idx} #{j.segment.transform.name}" ] = rpr j.d if j?
+    d.o     = if @_last_output isnt misfit then @_last_output else rpr @output
     @journal.push d
     return null
 
