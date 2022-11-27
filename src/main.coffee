@@ -341,7 +341,6 @@ class Pipeline
 
   #---------------------------------------------------------------------------------------------------------
   _prepare_after_walk: ->
-    segment.send segment.last   for segment in @segments when segment.last isnt misfit
     for segment in @segments when segment.last isnt misfit
       segment.send segment.last
       yield null
