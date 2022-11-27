@@ -352,7 +352,7 @@ class Pipeline
     loop
       @process()
       ### TAINT should use API ###
-      @_last_output = rpr @output if @protocol?
+      @_last_output = @_prpr @output if @protocol?
       yield d for d in @output
       @output.length = 0
       break if @has_finished
