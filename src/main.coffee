@@ -388,8 +388,9 @@ class Pipeline
     #.......................................................................................................
     pipeline._before_walk() for pipeline in pipelines
     yield from process()
-    pipeline._prepare_after_walk() for pipeline in pipelines
-    yield from process()
+    for pipeline in pipelines
+      for _ from pipeline._prepare_after_walk()
+        yield from process()
     #.......................................................................................................
     return null
 
