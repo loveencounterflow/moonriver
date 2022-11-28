@@ -427,8 +427,10 @@ class Async_segment extends Segment
         when 'observer'
           await @transform  d
           @_send      d
+          @protocol { segment: @, d, }
         when 'transducer'
           await @transform d, @_send
+          @protocol { segment: @, d, }
         else
           throw new Error "^mr.e#5^ internal error: unknown transform type #{rpr @role}"
       return 1
@@ -495,11 +497,37 @@ class Async_pipeline extends Pipeline
   #---------------------------------------------------------------------------------------------------------
   run: -> ( d for await d from @walk() )
   walk: ->
+    @protocol()
+    await @_before_walk()
+    await yield from @_walk()
+    for _ from @_prepare_after_walk()
+      await yield from @_walk() unless @has_finished
+    ### TAINT should use API ###
+    @protocol()
+    @_last_output = misfit
+    return null
+
+  #---------------------------------------------------------------------------------------------------------
+  _before_walk: ->
     @push ( nameit '(dummy)', ( d ) -> ) if @segments.length is 0
-    await segment._on_before_walk() for segment in @segments
+    await segment._on_before_walk()   for segment in @segments
+    await segment.send segment.first  for segment in @segments when segment.first isnt misfit
+    return null
+
+  #---------------------------------------------------------------------------------------------------------
+  _prepare_after_walk: ->
+    for segment in @segments when segment.last isnt misfit
+      segment.send segment.last
+      yield null
+    return null
+
+  #---------------------------------------------------------------------------------------------------------
+  _walk: ->
     loop
       await @process()
-      yield ( if d instanceof Promise then await d else d ) for d in @output
+      ### TAINT should use API ###
+      @_last_output = @_prpr @output if @protocol?
+      yield d for d in @output
       @output.length = 0
       break if @has_finished
     return null
