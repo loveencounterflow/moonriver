@@ -159,6 +159,9 @@ class Segment
   send: ( d ) -> @input.push d; d
 
   #---------------------------------------------------------------------------------------------------------
+  _is_my_modifier: ( x ) -> ( x is @first ) or ( x is @last )
+
+  #---------------------------------------------------------------------------------------------------------
   process: ->
     if @role is 'source'
       @_send @input.shift() while @input.length > 0 ### TAINT could be done with `.splice()` ###
@@ -170,7 +173,7 @@ class Segment
       switch @role
         when 'observer'
           @transform  d
-          @_send      d
+          @_send      d unless @_is_my_modifier d
           @protocol { segment: @, d, }
         when 'transducer'
           @transform d, @_send
@@ -426,7 +429,7 @@ class Async_segment extends Segment
       switch @role
         when 'observer'
           await @transform  d
-          @_send      d
+          @_send            d unless @_is_my_modifier d
           @protocol { segment: @, d, }
         when 'transducer'
           await @transform d, @_send
