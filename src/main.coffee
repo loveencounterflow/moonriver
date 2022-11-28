@@ -559,10 +559,11 @@ class Async_pipeline extends Pipeline
         break if pipelines.every ( pipeline ) -> pipeline.has_finished
       return null
     #.......................................................................................................
-    pipeline._before_walk() for pipeline in pipelines
+    await pipeline._before_walk() for pipeline in pipelines
     await yield from process()
-    pipeline._prepare_after_walk() for pipeline in pipelines
-    await yield from process()
+    for pipeline in pipelines
+      for _ from pipeline._prepare_after_walk()
+        await yield from process()
     #.......................................................................................................
     return null
 
