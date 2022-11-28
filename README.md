@@ -19,6 +19,7 @@
   - [Multi-Pipeline Processing](#multi-pipeline-processing)
   - [Implementation Details](#implementation-details)
     - [Avoidable Code Duplication for Sync, Async Pipelines?](#avoidable-code-duplication-for-sync-async-pipelines)
+  - [Modifiers](#modifiers)
   - [To Do](#to-do)
   - [Is Done](#is-done)
 
@@ -230,6 +231,43 @@ But of course the code duplication is still real, and somewhat annoying. There h
 JavaScript*](https://writing.bakkot.com/gensync)) which (as far as I understand) seems to tackle the
 problem, but I haven't tested and benchmarked that solution. That said, I'd also be happy with a code
 transformation step for this, but then again maybe even more code transformations should be avoided in JS.
+
+## Modifiers
+
+```coffee
+first = Symbol 'first'
+last  = Symbol 'last'
+$ { first, last, }, ( d ) -> ...
+$ { first, last, }, ( d, send ) -> ...
+```
+
+* modifiers to be compared with the JS triple-equal-signs operator `==` (CS: `==`, `is`), which boils down
+  to equality for primitive types (numbers, texts, booleans, null, undefined) but identity for lists,
+  objects, and symbols
+* to prevent misidentification, modifiers should always be set to a private `Symbol`, never to a primitive
+  value
+* in case one wants to inject a first and last value into a stream, do not:
+
+  ```coffee
+  first = 0
+  last  = 999
+  $ { first, last, }, ( d, send ) -> send d
+  ```
+
+  but rather
+
+  ```coffee
+  first = Symbol 'first'
+  last  = Symbol 'last'
+  $ { first, last, }, ( d, send ) ->
+    return 0    if d is first
+    return 999  if d is last
+    send d
+  ```
+
+* this is especially relevant for observers used in conjuntion with `first` and `last`. Be aware that if one
+  uses a primitive value like `42` for a modifier in an observer, the value `42` will not appear immediately
+  downstream from that observer, whether it originated as a modifier or came from an upstream segment.
 
 ## To Do
 
