@@ -265,9 +265,10 @@ $ { first, last, }, ( d, send ) -> ...
     send d
   ```
 
-* this is especially relevant for observers used in conjuntion with `first` and `last`. Be aware that if one
-  uses a primitive value like `42` for a modifier in an observer, the value `42` will not appear immediately
-  downstream from that observer, whether it originated as a modifier or came from an upstream segment.
+* this is especially relevant for observers used in conjunction with `first` and `last`. Be aware that if
+  one uses a primitive value like `42` for a modifier in an observer, the value `42` will not appear
+  immediately downstream from that observer, whether it originated as a modifier or came from an upstream
+  segment.
 
 ## To Do
 
