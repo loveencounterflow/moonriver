@@ -280,6 +280,8 @@ $ { first, last, }, ( d, send ) -> ...
 * **[–]** allow, document how to implement source adapters (`@_transform_from_*()`), probably by deriving
   from class `Segment`
 * **[–]** does it make sense to implement Tees and Wyes?
+* **[–]** does it make sense to allow to build pipelines from topologically sorted transforms (using
+  [`ltsort`](https://github.com/loveencounterflow/ltsort))
 
 ## Is Done
 
