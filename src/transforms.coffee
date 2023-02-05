@@ -29,22 +29,26 @@ GUY                       = require 'guy'
     empty }     = cfg
   { $ }         = require './main'
   last          = Symbol 'last'
-  buffer        = {}
-  buffer[ nr ]  = empty for nr in [ min .. max ]
-  advance       = -> buffer[ nr - 1 ]  = buffer[ nr ] for nr in [ min + 1 .. max ]
+  buffer        = []
+  idxs          = [ min .. max ]
+  zero_idx      = idxs.indexOf 0
+  if zero_idx < 0
+    throw new Error "^transforms.window^ index 0 missing with settings #{rpr { min, max, }}"
+  buffer.push empty for nr in idxs
+  advance       = -> buffer.splice 0, 1
   #.........................................................................................................
   return $ { last, }, window = ( d, send ) ->
     if d is last
       loop
         advance()
-        buffer[ max ] = empty
+        buffer.push empty
         ### TAINT incorrect condition ###
-        break if buffer[ 0 ] is empty
-        send { buffer..., }
+        break if buffer[ zero_idx ] is empty
+        send [ buffer..., ]
       return null
     advance()
-    buffer[ max ] = d
-    send { buffer..., } unless buffer[ 0 ] is empty
+    buffer.push d
+    send [ buffer..., ] unless buffer[ zero_idx ] is empty
 
 #-----------------------------------------------------------------------------------------------------------
 @$named_window = ( cfg ) ->
