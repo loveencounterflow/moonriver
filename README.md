@@ -282,8 +282,6 @@ $ { first, last, }, ( d, send ) -> ...
 * **[–]** does it make sense to implement Tees and Wyes?
 * **[–]** does it make sense to allow to build pipelines from topologically sorted transforms (using
   [`ltsort`](https://github.com/loveencounterflow/ltsort))
-* **[–]** change `$window()` transform such that it always sends lists of values, indexed from 0
-  as usual, so that the receiver can always `[ rename, using, destructuring, ] = d`
 
 ## Is Done
 
@@ -295,6 +293,8 @@ $ { first, last, }, ( d, send ) -> ...
 * **[+]** composibility:
   * **[+]** can we use a pipeline as a segment?
   * **[+]** <del>can we call the transform function of a segment outside of its use in a pipeline?</del>
+* **[+]** change `$window()` transform such that it always sends lists of values, indexed from 0
+  as usual, so that the receiver can always `[ rename, using, destructuring, ] = d`
 
 
 
