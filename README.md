@@ -282,6 +282,8 @@ $ { first, last, }, ( d, send ) -> ...
 * **[–]** does it make sense to implement Tees and Wyes?
 * **[–]** does it make sense to allow to build pipelines from topologically sorted transforms (using
   [`ltsort`](https://github.com/loveencounterflow/ltsort))
+* **[–]** change `$window()` transform such that it always sends lists of values, indexed from 0
+  as usual, so that the receiver can always `[ rename, using, destructuring, ] = d`
 
 ## Is Done
 
