@@ -284,6 +284,14 @@ $ { first, last, }, ( d, send ) -> ...
   [`ltsort`](https://github.com/loveencounterflow/ltsort))
 * **[–]** review behavior with strings, readstreams, open files: may want to always step over lines instead
   of codepoints
+* **[–]** make this:
+
+  ```coffee
+  p.push window = transforms.$window { min: -2, max: 0, empty: null, }
+  p.push add_parbreak_markers = ( [ lookbehind, previous, current, ], send ) ->
+  ```
+
+  possible in a single transform
 
 ## Is Done
 
