@@ -282,6 +282,8 @@ $ { first, last, }, ( d, send ) -> ...
 * **[–]** does it make sense to implement Tees and Wyes?
 * **[–]** does it make sense to allow to build pipelines from topologically sorted transforms (using
   [`ltsort`](https://github.com/loveencounterflow/ltsort))
+* **[–]** review behavior with strings, readstreams, open files: may want to always step over lines instead
+  of codepoints
 
 ## Is Done
 
