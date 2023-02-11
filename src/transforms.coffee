@@ -50,28 +50,6 @@ GUY                       = require 'guy'
     buffer.push d
     send [ buffer..., ] unless buffer[ zero_idx ] is empty
 
-# #-----------------------------------------------------------------------------------------------------------
-# @$named_window = ( cfg ) ->
-#   cfg                       = get_transform_types().create.transform_named_window_cfg cfg
-#   { names
-#     empty }                 = cfg
-#   { Pipeline }              = require './main'
-#   R                         = new Pipeline()
-#   #.........................................................................................................
-#   min                       = -( names.length - 1 ) / 2
-#   max                       = -min
-#   map                       = {}
-#   idxs                      = [ min .. max ]
-#   map[ names[ list_idx ] ]  = window_idx for window_idx, list_idx in idxs
-#   #.........................................................................................................
-#   R.push @$window { min, max, empty, }
-#   R.push ( d, send ) =>
-#     e         = {}
-#     e[ name ] = d[ window_idx ] for name, window_idx of map
-#     send e
-#   #.........................................................................................................
-#   return R
-
 #-----------------------------------------------------------------------------------------------------------
 @$split_lines = ->
   SL  = require 'intertext-splitlines'
