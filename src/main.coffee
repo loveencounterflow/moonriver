@@ -32,6 +32,7 @@ stf                       = ( name ) -> stf_prefix + ( if Array.isArray name the
 transforms                = require './transforms'
 noop                      = ->
 entries                   = ( φ ) -> ( -> yield [ k, v, ] for k, v of φ )()
+{ Pipeline_module }       = require './pipeline-module'
 
 
 #===========================================================================================================
@@ -590,6 +591,7 @@ module.exports = {
   Async_pipeline
   Async_segment
   Reporting_collector
+  Pipeline_module
   transforms
   Proto_segment
   $

@@ -27,7 +27,7 @@ class Pipeline_module
 
   #---------------------------------------------------------------------------------------------------------
   constructor: ->
-    GUY.props.hide @, 'types', types
+    GUY.props.hide @, 'types', get_base_types()
     return @_build()
 
   #---------------------------------------------------------------------------------------------------------
@@ -51,10 +51,12 @@ class Pipeline_module
         yield d for d from @_walk_values e
       return null
     #.......................................................................................................
-    if value instanceof Pipeline
+    if value instanceof ( require './main' ).Pipeline
       return yield value
     #.......................................................................................................
     throw new Error "^Pipeline_module@1^ unable to ingest #{rpr value}"
 
 
+#===========================================================================================================
+module.exports = { Pipeline_module, }
 
