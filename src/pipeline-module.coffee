@@ -27,34 +27,36 @@ class Pipeline_module
 
   #---------------------------------------------------------------------------------------------------------
   constructor: ->
-    GUY.props.hide @, 'types', get_base_types()
+    GUY.props.hide @, '_types', get_base_types()
+    GUY.props.hide @, '_Pipeline', ( require './main' ).Pipeline
     return @_build()
 
   #---------------------------------------------------------------------------------------------------------
   _build: ( value = null ) ->
-    R = new Pipeline()
-    for k in GUY.props.keys @, { hidden: true, }
-      continue unless /^\$/.test k
+    R = new @_Pipeline()
+    for k in GUY.props.keys @, { hidden: true, builtins: false, depth: 1, }
+      continue if k is 'constructor'
+      continue if k.startsWith '_'
       R.push d for d from @_walk_values @[ k ]
     return R
 
   #---------------------------------------------------------------------------------------------------------
   _walk_values: ( value ) ->
-    value = new value() if @types.isa.class value
+    return yield new value() if @_types.isa.class value
     #.......................................................................................................
-    if @types.isa.function value
+    if @_types.isa.function value
       return yield value unless value.name.startsWith '$'
       return yield value.call @
     #.......................................................................................................
-    if @types.isa.list value
+    if @_types.isa.list value
       for e in value
         yield d for d from @_walk_values e
       return null
     #.......................................................................................................
-    if value instanceof ( require './main' ).Pipeline
+    if value instanceof @_Pipeline
       return yield value
     #.......................................................................................................
-    throw new Error "^Pipeline_module@1^ unable to ingest #{rpr value}"
+    throw new Error "^Pipeline_module@1^ unable to turn a #{@_types.type_of value} into a transform (#{rpr value})"
 
 
 #===========================================================================================================
