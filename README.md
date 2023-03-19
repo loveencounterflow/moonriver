@@ -294,10 +294,10 @@ $ { first, last, }, ( d, send ) -> ...
 * derive pipeline module class from class `Pipeline_module`
 * base class looks for methods on instance (prototype) whose names start with a dollar sign `$`
 * each of these will be called, added to pipeline
-* constructor returns new instance of a MoonRiver `Pipeline` containing the results of calling each `$`
-  method
-* ordering is preserved
-* modules may in turn be combined
+* ordering of properties is preserved
+* constructor (unusually so bit allowed by ES6 classes) returns new instance of a MoonRiver `Pipeline`;
+  observe that `Pipeline` instances can be inserted as transforms in other `Pipeline` instances
+* can also combine `Pipeline_module`s (classes or instances)
 * can return list with
   * **remitters** (functions that when called return a transform); these transforms must have a name that
     starts with a dollar sign `$`
