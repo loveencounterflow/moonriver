@@ -11,17 +11,16 @@
 
 - [MoonRiver](#moonriver)
   - [Async Pipelines](#async-pipelines)
-  - [Common Tasks](#common-tasks)
-    - [Iterate over Lines of a File](#iterate-over-lines-of-a-file)
   - [Glossary](#glossary)
   - [List of Implemented Transforms](#list-of-implemented-transforms)
   - [Synchronous and Asynchronous Pipelines](#synchronous-and-asynchronous-pipelines)
+  - [Usage Patterns](#usage-patterns)
+    - [Remitter](#remitter)
+    - [Iterate over Lines of a File](#iterate-over-lines-of-a-file)
   - [Multi-Pipeline Processing](#multi-pipeline-processing)
   - [Implementation Details](#implementation-details)
     - [Avoidable Code Duplication for Sync, Async Pipelines?](#avoidable-code-duplication-for-sync-async-pipelines)
   - [Modifiers](#modifiers)
-  - [Usage Patterns](#usage-patterns)
-    - [Remitter](#remitter)
   - [Modular Pipelines](#modular-pipelines)
   - [To Do](#to-do)
   - [Is Done](#is-done)
@@ -72,33 +71,6 @@ demo_3b = ->
   return null
 ```
 
-## Common Tasks
-
-### Iterate over Lines of a File
-
-* Can use `GUY.fs.walk_lines()` which gives you a synchronous iterator over lines of a (UTF-8-encoded) file:
-
-```coffee
-p = new Pipeline()
-p.push GUY.fs.walk_lines __filename
-p.push $do_something_with_one_line()
-p.run()
-```
-
-* using a NodeJS `ReadableStream` with Transform `$split_lines()`:
-
-```coffee
-FS                  = require 'node:fs'
-{ Async_pipeline, \
-  transforms: T,  } = require '../../../apps/moonriver'
-p = new Async_pipeline()
-p.push FS.createReadStream __filename # , { highWaterMark: 50, }
-p.push T.$split_lines()
-p.push show = ( d ) -> whisper 'Ⅱ', rpr d
-await p.run()
-```
-
-**NB** this stream is asynchronous because of the `ReadableStream`; `$split_lines()` is synchronous.
 
 ## Glossary
 
@@ -155,6 +127,10 @@ data which will be buffered until `walk()` or `run()` are called.
     data should that make sense for the application at hand.)
 * `readstream`: a stream created with something like `node:fs.createReadStream()` can act as a `source` in
   MoonRiver pipelines.
+* instances of `Pipeline` can be used as transforms; the current implementation will add all transforms
+  of the `push()`ed pipeline to the target.
+  * Invariant: en empty pipeline's output always equals its input; likewise, an empty pipeline used as a
+    transform in another pipeline is a no-op that does not modify, add or subtract any data
 
 ## Synchronous and Asynchronous Pipelines
 
@@ -162,6 +138,46 @@ Any pipeline that contains one or more explicitly or implicitly asynchronous seg
 = new Async_pipeline()` and run as `await p.run()` or `for await d from p.walk()`. Asynchronous segments
 include all segments derived from `asyncfunction`s, `asyncgeneratorfunction`s, `asyncgenerator`s,
 `readstream`s, `writestream`s, and all `function`s that return a `Promise`.
+
+
+## Usage Patterns
+
+### Remitter
+
+> remit (v.) late 14c., remitten, [...] from Latin remittere "send back [...]" from re- "back" (see re-) +
+> mittere "to send"—[*Etymonline*](https://www.etymonline.com/search?q=remit)
+
+* a *remitter* is a higher-order function that, when called, returns a stream transform
+* often practical to configure a transform's behavior and/or to provide it with a closure to preserve state
+* conventianlly marked with a dollar sign `$` sigil
+
+
+### Iterate over Lines of a File
+
+* Can use `GUY.fs.walk_lines()` which gives you a synchronous iterator over lines of a (UTF-8-encoded) file:
+
+```coffee
+p = new Pipeline()
+p.push GUY.fs.walk_lines __filename
+p.push $do_something_with_one_line()
+p.run()
+```
+
+* using a NodeJS `ReadableStream` with Transform `$split_lines()`:
+
+```coffee
+FS                  = require 'node:fs'
+{ Async_pipeline, \
+  transforms: T,  } = require '../../../apps/moonriver'
+p = new Async_pipeline()
+p.push FS.createReadStream __filename # , { highWaterMark: 50, }
+p.push T.$split_lines()
+p.push show = ( d ) -> whisper 'Ⅱ', rpr d
+await p.run()
+```
+
+**NB** this stream is asynchronous because of the `ReadableStream`; `$split_lines()` is synchronous.
+
 
 ## Multi-Pipeline Processing
 
@@ -273,18 +289,6 @@ $ { first, last, }, ( d, send ) -> ...
   immediately downstream from that observer, whether it originated as a modifier or came from an upstream
   segment.
 
-
-
-## Usage Patterns
-
-### Remitter
-
-> remit (v.) late 14c., remitten, [...] from Latin remittere "send back [...]" from re- "back" (see re-) +
-> mittere "to send"—[*Etymonline*](https://www.etymonline.com/search?q=remit)
-
-* a *remitter* is a higher-order function that, when called, returns a stream transform
-* often practical to configure a transform's behavior and/or to provide it with a closure to preserve state
-* conventianlly marked with a dollar sign `$` sigil
 
 
 
