@@ -20,6 +20,8 @@
   - [Implementation Details](#implementation-details)
     - [Avoidable Code Duplication for Sync, Async Pipelines?](#avoidable-code-duplication-for-sync-async-pipelines)
   - [Modifiers](#modifiers)
+  - [Usage Patterns](#usage-patterns)
+    - [Remitter](#remitter)
   - [Modular Pipelines](#modular-pipelines)
   - [To Do](#to-do)
   - [Is Done](#is-done)
@@ -273,6 +275,20 @@ $ { first, last, }, ( d, send ) -> ...
 
 
 
+## Usage Patterns
+
+### Remitter
+
+> remit (v.) late 14c., remitten, [...] from Latin remittere "send back [...]" from re- "back" (see re-) +
+> mittere "to send"—[*Etymonline*](https://www.etymonline.com/search?q=remit)
+
+* a *remitter* is a higher-order function that, when called, returns a stream transform
+* often practical to configure a transform's behavior and/or to provide it with a closure to preserve state
+* conventianlly marked with a dollar sign `$` sigil
+
+
+
+
 ## Modular Pipelines
 
 * derive pipeline module class from class `Pipeline_module`
@@ -283,12 +299,15 @@ $ { first, last, }, ( d, send ) -> ...
 * ordering is preserved
 * modules may in turn be combined
 * can return list with
-  * functions that when called return a transform; these transforms must have a name that starts with a
-    dollar sign `$`
-  * functions (whose name must not start with a dollar sign `$`)
-  * instances of `Pipeline`
-  * instances of (derivatives of) `Pipeline_module`
-  * classes derivatived from `Pipeline_module` (will be instantiated)
+  * **remitters** (functions that when called return a transform); these transforms must have a name that
+    starts with a dollar sign `$`
+  * **transforms** (whose name must not start with a dollar sign `$`); these (as well as the functions
+    returned by remitters) must conform to the calling conventions of transforms (so will most often look
+    like `t = ( d, send ) ->` where `d` is the data item coming from upstream and `send()` is the method to
+    send data downstream)
+  * **instances** of `Pipeline`
+  * **instances** of (derivatives of) `Pipeline_module`
+  * **classes** derived from `Pipeline_module` (will be instantiated)
 
 
 ## To Do
