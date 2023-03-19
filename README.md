@@ -20,6 +20,7 @@
   - [Implementation Details](#implementation-details)
     - [Avoidable Code Duplication for Sync, Async Pipelines?](#avoidable-code-duplication-for-sync-async-pipelines)
   - [Modifiers](#modifiers)
+  - [Modular Pipelines](#modular-pipelines)
   - [To Do](#to-do)
   - [Is Done](#is-done)
 
@@ -269,6 +270,26 @@ $ { first, last, }, ( d, send ) -> ...
   one uses a primitive value like `42` for a modifier in an observer, the value `42` will not appear
   immediately downstream from that observer, whether it originated as a modifier or came from an upstream
   segment.
+
+
+
+## Modular Pipelines
+
+* derive pipeline module class from class `Pipeline_module`
+* base class looks for methods on instance (prototype) whose names start with a dollar sign `$`
+* each of these will be called, added to pipeline
+* constructor returns new instance of a MoonRiver `Pipeline` containing the results of calling each `$`
+  method
+* ordering is preserved
+* modules may in turn be combined
+* can return list with
+  * functions that when called return a transform; these transforms must have a name that starts with a
+    dollar sign `$`
+  * functions (whose name must not start with a dollar sign `$`)
+  * instances of `Pipeline`
+  * instances of (derivatives of) `Pipeline_module`
+  * classes derivatived from `Pipeline_module` (will be instantiated)
+
 
 ## To Do
 
