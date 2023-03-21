@@ -198,6 +198,7 @@ class Pipeline
 
   #---------------------------------------------------------------------------------------------------------
   constructor: ( cfg ) ->
+    ### TAINT use @cfg, @state to separate static, dynamic properties ###
     clasz             = @constructor
     hide  @, 'types',   clasz.type_getter()
     cfg               = @types.create.pipeline_cfg cfg
