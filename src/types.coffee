@@ -75,6 +75,7 @@ get_base_types = ->
   declare.misfit                override: true, default: misfit, isa: ( x ) -> x is misfit
   #.........................................................................................................
   declare.modifiers
+    extras:     false
     fields:
       first:      'anything'
       last:       'anything'
