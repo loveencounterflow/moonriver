@@ -336,6 +336,7 @@ $ { first, last, }, ( d, send ) -> ...
   ```
 
   possible in a single transform
+* **[–]** in constructors, use `@cfg`, `@state` to separate static, dynamic properties
 
 ## Is Done
 
