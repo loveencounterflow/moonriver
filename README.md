@@ -253,6 +253,17 @@ transformation step for this, but then again maybe even more code transformation
 
 ## Modifiers
 
+* four modifiers:
+  * `start`: to be sent once when the pipeline's `walk()` (or `run()`) method is called for the first time
+  * `first`: to be sent whenever the pipeline's `walk()` (or `run()`) method is called
+  * `last`: to be sent whenever the pipeline's `walk()` iterator is exhausted (or `run()` returns)
+  * `stop`: to be sent when the pipeline's `stop_walk()` method is called
+
+* any value for the modifiers is appropriate, including `undefined` and `null`
+* `stop_walk()` is necessary if you want to call the pipeline in a piecemeal fashion, e.g. when feeding
+  it the output of another generator. Under these circumstances, only the user can know when an iteration
+  should be considered finished
+
 ```coffee
 first = Symbol 'first'
 last  = Symbol 'last'
@@ -279,8 +290,8 @@ $ { first, last, }, ( d, send ) -> ...
   first = Symbol 'first'
   last  = Symbol 'last'
   $ { first, last, }, ( d, send ) ->
-    return 0    if d is first
-    return 999  if d is last
+    return send 0    if d is first
+    return send 999  if d is last
     send d
   ```
 
