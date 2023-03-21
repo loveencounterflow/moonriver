@@ -552,6 +552,13 @@ class Async_pipeline extends Pipeline
     return null
 
   #---------------------------------------------------------------------------------------------------------
+  stop_walk: ->
+    for segment in @segments when segment.stop isnt misfit
+      segment.send segment.stop
+      yield from await @_walk() unless @has_finished
+    return null
+
+  #---------------------------------------------------------------------------------------------------------
   @walk_named_pipelines: ( named_pipelines ) ->
     types = get_async_types()
     types.validate.object.or.list named_pipelines
