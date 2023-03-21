@@ -79,13 +79,17 @@ get_base_types = ->
     fields:
       first:      'anything'
       last:       'anything'
+      start:      'anything'
+      stop:       'anything'
     default:
       first:      misfit
       last:       misfit
+      start:      misfit
+      stop:       misfit
     create: ( x ) ->
-      return { first: misfit, last: misfit, } unless x?
+      return { @registry.modifiers.default..., } unless x?
       return x unless @isa.object x
-      return { first: ( GUY.props.get x, 'first', misfit ), last: ( GUY.props.get x, 'last',  misfit ), }
+      return { @registry.modifiers.default..., x..., }
   #.........................................................................................................
   return base_types
 

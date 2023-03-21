@@ -80,6 +80,8 @@ class Segment
     @_on_before_walk  = noop
     @first            = cfg.modifiers.first
     @last             = cfg.modifiers.last
+    @start            = cfg.modifiers.start
+    @stop             = cfg.modifiers.stop
     @_set_transform cfg.fitting
     hide @, '_send', send = ( d ) => @output.push d; d ### 'inner' send method ###
     return undefined
@@ -207,6 +209,7 @@ class Pipeline
     @output           = [] ### pipeline output buffer does not participate in datacount ###
     @segments         = []
     hide  @, 'protocol',          if cfg.protocol then @_protocol.bind @ else noop
+    hide  @, 'has_started',       false
     hide  @, 'journal',           []
     hide  @, '_last_output',      misfit
     hide  @, '_journal_template', {}
@@ -341,6 +344,9 @@ class Pipeline
   _before_walk: ->
     @push ( nameit '(dummy)', ( d ) -> ) if @segments.length is 0
     segment._on_before_walk()   for segment in @segments
+    unless @has_started
+      @has_started = true
+      segment.send segment.start  for segment in @segments when segment.start isnt misfit
     segment.send segment.first  for segment in @segments when segment.first isnt misfit
     return null
 
@@ -349,6 +355,13 @@ class Pipeline
     for segment in @segments when segment.last isnt misfit
       segment.send segment.last
       yield null
+    return null
+
+  #---------------------------------------------------------------------------------------------------------
+  stop_walk: ->
+    for segment in @segments when segment.stop isnt misfit
+      segment.send segment.stop
+      yield from @_walk() unless @has_finished
     return null
 
   #---------------------------------------------------------------------------------------------------------
