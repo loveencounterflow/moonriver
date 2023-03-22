@@ -348,6 +348,12 @@ $ { first, last, }, ( d, send ) -> ...
 
   possible in a single transform
 * **[–]** in constructors, use `@cfg`, `@state` to separate static, dynamic properties
+* **[–]** implement `stop_run()` in analogy to `stop_walk()`; `walk_and_stop()`, `run_and_stop()` to
+  avoid having to do two iterations
+* **[–]** clarify the usability or non-usability of bound methods of `Pipeline_module`; ensure methods
+  are called with the correct `this` context
+* **[–]** a better name for `Pipeline_module`?
+
 
 ## Is Done
 
