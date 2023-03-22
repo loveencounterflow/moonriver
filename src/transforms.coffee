@@ -28,7 +28,7 @@ GUY                       = require 'guy'
     max
     empty }     = cfg
   { $ }         = require './main'
-  last          = Symbol 'last'
+  stop          = Symbol 'stop'
   buffer        = []
   idxs          = [ min .. max ]
   zero_idx      = idxs.indexOf 0
@@ -37,8 +37,8 @@ GUY                       = require 'guy'
   buffer.push empty for nr in idxs
   advance       = -> buffer.splice 0, 1
   #.........................................................................................................
-  return $ { last, }, window = ( d, send ) ->
-    if d is last
+  return $ { stop, }, window = ( d, send ) ->
+    if d is stop
       loop
         advance()
         buffer.push empty
@@ -71,9 +71,9 @@ GUY                       = require 'guy'
 #-----------------------------------------------------------------------------------------------------------
 @$collect = ( collector = [] ) ->
   { $ }         = require './main'
-  last          = Symbol 'last'
-  return $ { last, }, collect = ( d, send ) ->
-    return send collector if d is last
+  stop          = Symbol 'stop'
+  return $ { stop, }, collect = ( d, send ) ->
+    return send collector if d is stop
     collector.push d
     return null
 
