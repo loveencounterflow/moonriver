@@ -358,10 +358,20 @@ class Pipeline
     return null
 
   #---------------------------------------------------------------------------------------------------------
+  stop_run:     -> [ @stop_walk()..., ]
+  run_and_stop: -> [ @walk_and_stop()..., ]
+
+  #---------------------------------------------------------------------------------------------------------
   stop_walk: ->
     for segment in @segments when segment.stop isnt misfit
       segment.send segment.stop
       yield from @_walk() unless @has_finished
+    return null
+
+  #---------------------------------------------------------------------------------------------------------
+  walk_and_stop: ->
+    yield from @walk()
+    yield from @stop_walk()
     return null
 
   #---------------------------------------------------------------------------------------------------------
@@ -552,10 +562,20 @@ class Async_pipeline extends Pipeline
     return null
 
   #---------------------------------------------------------------------------------------------------------
+  stop_run:     -> [ ( await @stop_walk()     )..., ]
+  run_and_stop: -> [ ( await @walk_and_stop() )..., ]
+
+  #---------------------------------------------------------------------------------------------------------
   stop_walk: ->
     for segment in @segments when segment.stop isnt misfit
       segment.send segment.stop
       yield from await @_walk() unless @has_finished
+    return null
+
+  #---------------------------------------------------------------------------------------------------------
+  walk_and_stop: ->
+    yield from await @walk()
+    yield from await @stop_walk()
     return null
 
   #---------------------------------------------------------------------------------------------------------

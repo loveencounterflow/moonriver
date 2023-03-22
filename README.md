@@ -300,6 +300,11 @@ $ { first, last, }, ( d, send ) -> ...
   immediately downstream from that observer, whether it originated as a modifier or came from an upstream
   segment.
 
+* use `p.run()`, and `p.stop_run()` to obtain lists of results
+* use `p.walk_and_stop()`, `p.run_and_stop()` to avoid having to call two methods plus dependent logic for
+  each time when the use case allows this (i.e. each time you have one piece of input data, that represents
+  a complete run for your pipeline, as opposed to each chunk of input data represents a fraction of the
+  complete work)
 
 
 
@@ -348,8 +353,6 @@ $ { first, last, }, ( d, send ) -> ...
 
   possible in a single transform
 * **[–]** in constructors, use `@cfg`, `@state` to separate static, dynamic properties
-* **[–]** implement `stop_run()` in analogy to `stop_walk()`; `walk_and_stop()`, `run_and_stop()` to
-  avoid having to do two iterations
 * **[–]** clarify the usability or non-usability of bound methods of `Pipeline_module`; ensure methods
   are called with the correct `this` context
 * **[–]** a better name for `Pipeline_module`?
@@ -367,6 +370,8 @@ $ { first, last, }, ( d, send ) -> ...
   * **[+]** <del>can we call the transform function of a segment outside of its use in a pipeline?</del>
 * **[+]** change `$window()` transform such that it always sends lists of values, indexed from 0
   as usual, so that the receiver can always `[ rename, using, destructuring, ] = d`
+* **[+]** implement `stop_run()` in analogy to `stop_walk()`; `walk_and_stop()`, `run_and_stop()` to
+  avoid having to do two iterations
 
 
 
