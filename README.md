@@ -311,6 +311,8 @@ $ { first, last, }, ( d, send ) -> ...
 
 ## Modular Pipelines
 
+**to be rewritten**
+
 * derive pipeline module class from class `Pipeline_module`
 * base class looks for methods on instance (prototype) whose names start with a dollar sign `$`
 * each of these will be called, added to pipeline
@@ -355,7 +357,8 @@ $ { first, last, }, ( d, send ) -> ...
 * **[–]** in constructors, use `@cfg`, `@state` to separate static, dynamic properties
 * **[–]** clarify the usability or non-usability of bound methods of `Pipeline_module`; ensure methods
   are called with the correct `this` context
-* **[–]** a better name for `Pipeline_module`?
+* **[–]** a better name for `Pipeline_module`? `Transformator`?
+* **[–]** rewrite documentation for pipeline modules, esp. order of transforms in case of inheritance
 
 
 ## Is Done
