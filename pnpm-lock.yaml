@@ -1,13 +1,13 @@
 lockfileVersion: 5.4
 
 specifiers:
-  guy: 13.2.0
+  guy: 13.3.0
   intertext-splitlines: ^1.2.1
   intertype: 0.112.0
   jfee: ^0.1.4
 
 dependencies:
-  guy: 13.2.0
+  guy: 13.3.0
   intertext-splitlines: 1.2.1
   intertype: 0.112.0
   jfee: 0.1.4
@@ -43,8 +43,8 @@ packages:
       letsfreezethat: 3.1.0
     dev: false
 
-  /guy/13.2.0:
-    resolution: {integrity: sha512-YdE19XaufMS4NwpdJfBEL4hm+xmaQoEWrU76WHalV+oN4xHW/W3XAgcoCfEwCdSJpu8rLSEVSTzU80qJRdbOQw==}
+  /guy/13.3.0:
+    resolution: {integrity: sha512-tfomLp5oW4VDtgqYqlr7AUkmW5be8jvnu44vFkliuhBD8d3WmHWruY0qrONnMaC8tZMAZeGNiqAVfTCSGTcMBA==}
     peerDependencies:
       acorn: ^8.7.1
       acorn-loose: ^8.3.0
