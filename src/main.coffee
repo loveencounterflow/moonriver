@@ -303,10 +303,18 @@ class Pipeline
 
   #---------------------------------------------------------------------------------------------------------
   push: ( P... ) ->
-    if @types.isa.sync_pipeline R = P[ 0 ]
-      @push segment for segment in R.segments
+    R = P[ 0 ]
+    ### TAINT move below line to types ###
+    if ( R is Pipeline_module or (R::) instanceof Pipeline_module )
+      R = new R()
+    if R instanceof Pipeline_module
+      for transform from R
+        @push transform
     else
-      @segments.push R = @_segment_from_fitting P...
+      if @types.isa.sync_pipeline R
+        @push segment for segment in R.segments
+      else
+        @segments.push R = @_segment_from_fitting P...
     return R
 
 

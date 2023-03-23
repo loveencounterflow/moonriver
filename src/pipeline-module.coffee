@@ -28,17 +28,24 @@ class Pipeline_module
   #---------------------------------------------------------------------------------------------------------
   constructor: ->
     GUY.props.hide @, '_types', get_base_types()
-    GUY.props.hide @, '_Pipeline', ( require './main' ).Pipeline
-    return @_build()
+    GUY.props.hide @, '_transforms', []
+    GUY.props.def @, 'length',
+      get:        -> @_transforms.length
+      set: ( n )  -> @_transforms.length = n
+    @_build()
+    return undefined
 
   #---------------------------------------------------------------------------------------------------------
-  _build: ( value = null ) ->
-    R = new @_Pipeline()
-    for k in GUY.props.keys @, { hidden: true, builtins: false, depth: 1, }
+  [Symbol.iterator]: -> yield from @_transforms
+
+  #---------------------------------------------------------------------------------------------------------
+  _build: ->
+    for k in GUY.props.keys @, { hidden: true, builtins: false, depth: null, depth_first: true, }
       continue if k is 'constructor'
+      continue if k is 'length'
       continue if k.startsWith '_'
-      R.push d for d from @_walk_values @[ k ]
-    return R
+      @_transforms.push d for d from @_walk_values @[ k ]
+    return null
 
   #---------------------------------------------------------------------------------------------------------
   _walk_values: ( value ) ->
@@ -53,10 +60,7 @@ class Pipeline_module
         yield d for d from @_walk_values e
       return null
     #.......................................................................................................
-    if value instanceof @_Pipeline
-      return yield value
-    #.......................................................................................................
-    throw new Error "^Pipeline_module@1^ unable to turn a #{@_types.type_of value} into a transform (#{rpr value})"
+    return yield value
 
 
 #===========================================================================================================
