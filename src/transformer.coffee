@@ -26,6 +26,10 @@ GUY                       = require 'guy'
 class Transformer
 
   #---------------------------------------------------------------------------------------------------------
+  @as_pipeline: ( cfg ) ->
+    R = new ( require './main' ).Pipeline cfg; R.push new @(); return R
+
+  #---------------------------------------------------------------------------------------------------------
   constructor: ->
     GUY.props.hide @, '_types', get_base_types()
     GUY.props.hide @, '_transforms', []
