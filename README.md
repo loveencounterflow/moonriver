@@ -309,17 +309,17 @@ $ { first, last, }, ( d, send ) -> ...
 
 
 
-## Modular Pipelines
+## `Transformer`: Helper Class for Modular Pipelines
 
 **to be rewritten**
 
-* derive pipeline module class from class `Pipeline_module`
+* derive pipeline module class from class `Transformer`
 * base class looks for methods on instance (prototype) whose names start with a dollar sign `$`
 * each of these will be called, added to pipeline
 * ordering of properties is preserved
 * constructor (unusually so bit allowed by ES6 classes) returns new instance of a MoonRiver `Pipeline`;
   observe that `Pipeline` instances can be inserted as transforms in other `Pipeline` instances
-* can also combine `Pipeline_module`s (classes or instances)
+* can also combine `Transformer`s (classes or instances)
 * can return list with
   * **remitters** (functions that when called return a transform); these transforms must have a name that
     starts with a dollar sign `$`
@@ -328,8 +328,8 @@ $ { first, last, }, ( d, send ) -> ...
     like `t = ( d, send ) ->` where `d` is the data item coming from upstream and `send()` is the method to
     send data downstream)
   * **instances** of `Pipeline`
-  * **instances** of (derivatives of) `Pipeline_module`
-  * **classes** derived from `Pipeline_module` (will be instantiated)
+  * **instances** of (derivatives of) `Transformer`
+  * **classes** derived from `Transformer` (will be instantiated)
 
 
 ## To Do
@@ -355,9 +355,9 @@ $ { first, last, }, ( d, send ) -> ...
 
   possible in a single transform
 * **[–]** in constructors, use `@cfg`, `@state` to separate static, dynamic properties
-* **[–]** clarify the usability or non-usability of bound methods of `Pipeline_module`; ensure methods
+* **[–]** clarify the usability or non-usability of bound methods of `Transformer`; ensure methods
   are called with the correct `this` context
-* **[–]** a better name for `Pipeline_module`? `Transformator`?
+* **[–]** a better name for `Pipeline_module`? `Transform`<del>`ato`</del><ins>`e`</ins>`r`<del>?</del>
 * **[–]** rewrite documentation for pipeline modules, esp. order of transforms in case of inheritance
 
 

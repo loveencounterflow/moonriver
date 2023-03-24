@@ -32,7 +32,7 @@ stf                       = ( name ) -> stf_prefix + ( if Array.isArray name the
 transforms                = require './transforms'
 noop                      = ->
 entries                   = ( φ ) -> ( -> yield [ k, v, ] for k, v of φ )()
-{ Pipeline_module }       = require './pipeline-module'
+{ Transformer }           = require './transformer'
 
 
 #===========================================================================================================
@@ -305,9 +305,9 @@ class Pipeline
   push: ( P... ) ->
     R = P[ 0 ]
     ### TAINT move below line to types ###
-    if ( R is Pipeline_module or (R::) instanceof Pipeline_module )
+    if ( R is Transformer or (R::) instanceof Transformer )
       R = new R()
-    if R instanceof Pipeline_module
+    if R instanceof Transformer
       for transform from R
         @push transform
     else
@@ -640,7 +640,7 @@ module.exports = {
   Async_pipeline
   Async_segment
   Reporting_collector
-  Pipeline_module
+  Transformer
   transforms
   Proto_segment
   $

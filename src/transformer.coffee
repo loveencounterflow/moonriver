@@ -12,7 +12,7 @@ GUY                       = require 'guy'
   praise
   urge
   warn
-  whisper }               = GUY.trm.get_loggers 'MOONRIVER/MODULES'
+  whisper }               = GUY.trm.get_loggers 'MOONRIVER/TRANSFORMER'
 { rpr
   inspect
   echo
@@ -23,7 +23,7 @@ GUY                       = require 'guy'
 
 
 #===========================================================================================================
-class Pipeline_module
+class Transformer
 
   #---------------------------------------------------------------------------------------------------------
   constructor: ->
@@ -64,5 +64,5 @@ class Pipeline_module
 
 
 #===========================================================================================================
-module.exports = { Pipeline_module, }
+module.exports = { Transformer, }
 
