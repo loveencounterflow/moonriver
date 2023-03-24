@@ -305,7 +305,7 @@ class Pipeline
   push: ( P... ) ->
     R = P[ 0 ]
     ### TAINT move below line to types ###
-    if ( R is Transformer or (R::) instanceof Transformer )
+    if @types.is_extension_of R, Transformer
       R = new R()
     if R instanceof Transformer
       for transform from R
