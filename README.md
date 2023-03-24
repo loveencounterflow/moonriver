@@ -21,7 +21,7 @@
   - [Implementation Details](#implementation-details)
     - [Avoidable Code Duplication for Sync, Async Pipelines?](#avoidable-code-duplication-for-sync-async-pipelines)
   - [Modifiers](#modifiers)
-  - [Modular Pipelines](#modular-pipelines)
+  - [`Transformer`: Helper Class for Modular Pipelines](#transformer-helper-class-for-modular-pipelines)
   - [To Do](#to-do)
   - [Is Done](#is-done)
 
@@ -314,22 +314,54 @@ $ { first, last, }, ( d, send ) -> ...
 **to be rewritten**
 
 * derive pipeline module class from class `Transformer`
-* base class looks for methods on instance (prototype) whose names start with a dollar sign `$`
-* each of these will be called, added to pipeline
-* ordering of properties is preserved
-* constructor (unusually so bit allowed by ES6 classes) returns new instance of a MoonRiver `Pipeline`;
-  observe that `Pipeline` instances can be inserted as transforms in other `Pipeline` instances
-* can also combine `Transformer`s (classes or instances)
-* can return list with
-  * **remitters** (functions that when called return a transform); these transforms must have a name that
-    starts with a dollar sign `$`
-  * **transforms** (whose name must not start with a dollar sign `$`); these (as well as the functions
-    returned by remitters) must conform to the calling conventions of transforms (so will most often look
-    like `t = ( d, send ) ->` where `d` is the data item coming from upstream and `send()` is the method to
-    send data downstream)
-  * **instances** of `Pipeline`
-  * **instances** of (derivatives of) `Transformer`
-  * **classes** derived from `Transformer` (will be instantiated)
+* on instantiation, the constructor will try to build a list of transforms (in the private property
+  `t._transforms`) from the class declaration by iterating over all properties, skipping the names
+  `constructor` and `length` and all names that start with an underscore `_`
+  * if a property is a JS `class`, it will be instantiated
+  * if a property is a function whose name starts with a dollar sign `$` the result of calling that function
+    (in the context of the instance) will become the value for the transform
+  * if a property value is a list, the list's elements will be pushed to `_transforms`
+  * to insert a list source into the chain of transforms, declare them as the return value of a `$`-prefixed
+    function, e.g. `$mylist: -> [ 1, 2, 3, ]`
+* The ordering of properties is preserved. The inheritance chain will be walked from the most distant
+  ancestor down to the last descendant in order to have derivatives of `Transform` always add to the *end*
+  of the chain (making the transforms of the base class come before the transforms of the derived class).
+* For convenience, there is a class method (static method) `Transformer.as_pipeline()` which will return a
+  pipeline with the class's transforms.
+
+The last two points are demonstrated below. The thing to look out here is that the re-declaration of
+transform `$a2` in derived class `B` does **not** override `$a2` as defined in the base class, so the result
+is `[ [ '*', 'a1', 'a2', 'a3', 'b1', '!b2!', 'b3' ] ]` (one element from the list in `$source()`, and the
+other one from each transform that adds its name to the list). This is different from regular inheritance
+where the re-definition of a method in a derivative will cause the upstream version of the method with the
+same name inaccessible and has been done because otherwise **(1)**&nbsp;one can easily overwrite a prior
+method using such generic transform names as `$show()`; **(2)**&nbsp;a pipeline is rather thought of as a
+*sequence* of processing steps than a unordered *collection* of methods; **(3)**&nbsp;it is not immediately
+clear whether an overriding method should be placed in its *original* spot (second in transformer `A` in
+this case) or its *overriding* position (second in transformer `B`). it has also been felt that
+**(3)**&nbsp;since both behaviors would be sort of surprising, an *explicit* handling of either ('replace
+this transform with that other one') would be much preferrable.
+
+```coffee
+{ Transformer } = require '../../../apps/moonriver'
+#.........................................................................................................
+class A extends Transformer
+  $source: -> [ [ '*', ], ]
+  $show: -> ( d ) -> urge '^a@1^', d
+  $a1: -> ( d, send ) -> d.push 'a1'; send d
+  $a2: -> ( d, send ) -> d.push 'a2'; send d    # <- this transform will not be overridden in B
+  $a3: -> ( d, send ) -> d.push 'a3'; send d
+#.........................................................................................................
+class B extends A
+  $b1: -> ( d, send ) -> d.push 'b1'; send d
+  $a2: -> ( d, send ) -> d.push '!b2!'; send d  # <- this does not override the second transform in class A
+  $b3: -> ( d, send ) -> d.push 'b3'; send d
+#.........................................................................................................
+p = B.as_pipeline()
+result = p.run_and_stop()
+T?.eq result, [ [ '*', 'a1', 'a2', 'a3', 'b1', '!b2!', 'b3' ] ]
+```
+
 
 
 ## To Do
