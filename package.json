@@ -22,9 +22,9 @@
   },
   "homepage": "https://github.com/loveencounterflow/moonriver#readme",
   "dependencies": {
-    "guy": "13.3.0",
+    "guy": "13.4.1",
     "intertext-splitlines": "^1.2.1",
-    "intertype": "0.112.0",
+    "intertype": "0.113.0",
     "jfee": "^0.1.4"
   }
 }

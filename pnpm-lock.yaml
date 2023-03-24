@@ -1,15 +1,15 @@
 lockfileVersion: 5.4
 
 specifiers:
-  guy: 13.3.0
+  guy: 13.4.1
   intertext-splitlines: ^1.2.1
-  intertype: 0.112.0
+  intertype: 0.113.0
   jfee: ^0.1.4
 
 dependencies:
-  guy: 13.3.0
+  guy: 13.4.1
   intertext-splitlines: 1.2.1
-  intertype: 0.112.0
+  intertype: 0.113.0
   jfee: 0.1.4
 
 packages:
@@ -43,8 +43,8 @@ packages:
       letsfreezethat: 3.1.0
     dev: false
 
-  /guy/13.3.0:
-    resolution: {integrity: sha512-tfomLp5oW4VDtgqYqlr7AUkmW5be8jvnu44vFkliuhBD8d3WmHWruY0qrONnMaC8tZMAZeGNiqAVfTCSGTcMBA==}
+  /guy/13.4.1:
+    resolution: {integrity: sha512-on37Rey168p+CO6VqXgt7QlSUwDMZz+AtkzBNMo7Ez5v27sSPZcp+oj74Htx/DnLon+RfkJgs7BCuwpr6wwoaQ==}
     peerDependencies:
       acorn: ^8.7.1
       acorn-loose: ^8.3.0
@@ -70,8 +70,8 @@ packages:
       multimix: 5.0.0
     dev: false
 
-  /intertype/0.112.0:
-    resolution: {integrity: sha512-4BM83SygeggNtzD01afJxwGcTBZE0EjR+hutqtonkEa+aiPxFtZ3yV1amvvyCKJ6onUrUJ+S8kXXEzoOsJDhVA==}
+  /intertype/0.113.0:
+    resolution: {integrity: sha512-j3/p8HAKOQ4WEu7vB+Y6MT6gGaIlleNzL902PYrgNEFx4Ip6xfhXNxxtvFd222+ABfL4DRRKCMEyo7i8zeIb8Q==}
     dependencies:
       guy: 11.12.0
       intertype-legacy: 7.7.1
