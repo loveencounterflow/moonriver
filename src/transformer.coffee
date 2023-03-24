@@ -44,11 +44,13 @@ class Transformer
 
   #---------------------------------------------------------------------------------------------------------
   _build: ->
-    for k in GUY.props.keys @, { hidden: true, builtins: false, depth: null, depth_first: true, }
-      continue if k is 'constructor'
-      continue if k is 'length'
-      continue if k.startsWith '_'
-      @_transforms.push d for d from @_walk_values @[ k ]
+    chain = ( GUY.props.get_prototype_chain @ ).reverse()
+    for object in chain
+      for key from GUY.props.walk_keys object, { hidden: true, builtins: false, depth: 0, }
+        continue if key is 'constructor'
+        continue if key is 'length'
+        continue if key.startsWith '_'
+        @_transforms.push d for d from @_walk_values object[ key ]
     return null
 
   #---------------------------------------------------------------------------------------------------------
