@@ -19,10 +19,21 @@ GUY                       = require 'guy'
 #...........................................................................................................
 { get_transform_types
   misfit                } = require './types'
+# { Transformer }           = require './transformer'
 
 
 #-----------------------------------------------------------------------------------------------------------
-@$window = ( cfg ) ->
+@$window = ( cfg, transform = null ) ->
+  return @_$window cfg unless transform
+  # @types.validate.function f
+  { Pipeline } = require './main'
+  R = new Pipeline()
+  R.push @_$window cfg
+  R.push transform
+  return R
+
+#-----------------------------------------------------------------------------------------------------------
+@_$window = ( cfg ) ->
   cfg           = get_transform_types().create.transform_window_cfg cfg
   { min
     max
