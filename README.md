@@ -378,19 +378,12 @@ T?.eq result, [ [ '*', 'a1', 'a2', 'a3', 'b1', '!b2!', 'b3' ] ]
   [`ltsort`](https://github.com/loveencounterflow/ltsort))
 * **[–]** review behavior with strings, readstreams, open files: may want to always step over lines instead
   of codepoints
-* **[–]** make this:
-
-  ```coffee
-  p.push window = transforms.$window { min: -2, max: 0, empty: null, }
-  p.push add_parbreak_markers = ( [ lookbehind, previous, current, ], send ) ->
-  ```
-
-  possible in a single transform
 * **[–]** in constructors, use `@cfg`, `@state` to separate static, dynamic properties
 * **[–]** clarify the usability or non-usability of bound methods of `Transformer`; ensure methods
   are called with the correct `this` context
 * **[–]** a better name for `Pipeline_module`? `Transform`<del>`ato`</del><ins>`e`</ins>`r`<del>?</del>
 * **[–]** rewrite documentation for pipeline modules, esp. order of transforms in case of inheritance
+* **[–]** documentation for transforms including `$window()`
 
 
 ## Is Done
@@ -407,6 +400,14 @@ T?.eq result, [ [ '*', 'a1', 'a2', 'a3', 'b1', '!b2!', 'b3' ] ]
   as usual, so that the receiver can always `[ rename, using, destructuring, ] = d`
 * **[+]** implement `stop_run()` in analogy to `stop_walk()`; `walk_and_stop()`, `run_and_stop()` to
   avoid having to do two iterations
+* **[+]** make this:
+
+  ```coffee
+  p.push window = transforms.$window { min: -2, max: 0, empty: null, }
+  p.push add_parbreak_markers = ( [ lookbehind, previous, current, ], send ) ->
+  ```
+
+  possible in a single transform
 
 
 
