@@ -58,7 +58,7 @@ class Transformer
     return yield new value() if @_types.isa.class value
     #.......................................................................................................
     if @_types.isa.function value
-      return yield value unless value.name.startsWith '$'
+      return yield value unless ( value.name.startsWith '$' ) or ( value.name.startsWith 'bound $' )
       return yield value.call @
     #.......................................................................................................
     if @_types.isa.list value
