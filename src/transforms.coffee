@@ -23,7 +23,7 @@ GUY                       = require 'guy'
 
 
 #-----------------------------------------------------------------------------------------------------------
-@$window = ( cfg, transform = null ) ->
+@$window = ( cfg, transform = null ) =>
   return @_$window cfg unless transform
   # @types.validate.function f
   { Pipeline } = require './main'
@@ -33,7 +33,7 @@ GUY                       = require 'guy'
   return R
 
 #-----------------------------------------------------------------------------------------------------------
-@_$window = ( cfg ) ->
+@_$window = ( cfg ) =>
   cfg           = get_transform_types().create.transform_window_cfg cfg
   { min
     max
@@ -46,9 +46,9 @@ GUY                       = require 'guy'
   if zero_idx < 0
     throw new Error "^transforms.window^ index 0 missing with settings #{rpr { min, max, }}"
   buffer.push empty for nr in idxs
-  advance       = -> buffer.splice 0, 1
+  advance       = => buffer.splice 0, 1
   #.........................................................................................................
-  return $ { stop, }, window = ( d, send ) ->
+  return $ { stop, }, window = ( d, send ) =>
     if d is stop
       loop
         advance()
@@ -62,35 +62,35 @@ GUY                       = require 'guy'
     send [ buffer..., ] unless buffer[ zero_idx ] is empty
 
 #-----------------------------------------------------------------------------------------------------------
-@$split_lines = ->
+@$split_lines = =>
   SL  = require 'intertext-splitlines'
   ctx = SL.new_context()
-  return split_lines = ( d, send ) ->
+  return split_lines = ( d, send ) =>
     for line from SL.walk_lines ctx, d
       send line
     return null
 
 #-----------------------------------------------------------------------------------------------------------
-@$limit = ( n ) ->
+@$limit = ( n ) =>
   count = 0
-  return limit = ( d, send ) ->
+  return limit = ( d, send ) =>
     return null if count >= n
     count++
     send d
     return null
 
 #-----------------------------------------------------------------------------------------------------------
-@$collect = ( collector = [] ) ->
+@$collect = ( collector = [] ) =>
   { $ }         = require './main'
   stop          = Symbol 'stop'
-  return $ { stop, }, collect = ( d, send ) ->
+  return $ { stop, }, collect = ( d, send ) =>
     return send collector if d is stop
     collector.push d
     return null
 
 #-----------------------------------------------------------------------------------------------------------
-@$map       = ( f, P... ) -> ( d, send ) -> send        f P...
-@$async_map = ( f, P... ) -> ( d, send ) -> send await  f P...
+@$map       = ( f, P... ) => ( d, send ) => send        f P...
+@$async_map = ( f, P... ) => ( d, send ) => send await  f P...
 
 
 
