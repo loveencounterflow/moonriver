@@ -62,13 +62,12 @@ GUY                       = require 'guy'
     send [ buffer..., ] unless buffer[ zero_idx ] is empty
 
 #-----------------------------------------------------------------------------------------------------------
-@$split_lines = =>
-  SL  = require 'intertext-splitlines'
-  ctx = SL.new_context()
-  return split_lines = ( d, send ) =>
-    for line from SL.walk_lines ctx, d
-      send line
-    return null
+@$split_lines = ( cfg = null ) =>
+  split_lines = ( d, send ) ->
+    text = if Buffer.isBuffer d then d.toString 'utf-8' else d
+    send line for line from GUY.str.walk_lines text, cfg
+  return split_lines.bind @
+
 
 #-----------------------------------------------------------------------------------------------------------
 @$limit = ( n ) =>

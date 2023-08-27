@@ -8,9 +8,6 @@ dependencies:
   guy:
     specifier: 13.7.1
     version: 13.7.1(acorn-loose@8.3.0)(acorn-walk@8.2.0)(acorn@8.10.0)(astring@1.8.6)(chokidar@3.5.3)(dayjs@1.11.9)(tmp@0.2.1)
-  intertext-splitlines:
-    specifier: ^1.2.1
-    version: 1.2.1
   intertype:
     specifier: 0.114.0
     version: 0.114.0(acorn-loose@8.3.0)(acorn-walk@8.2.0)(acorn@8.10.0)(astring@1.8.6)(tmp@0.2.1)
@@ -92,13 +89,6 @@ packages:
       readdirp: 3.6.0
     optionalDependencies:
       fsevents: 2.3.3
-    dev: false
-
-  /cnd@9.2.3:
-    resolution: {integrity: sha512-CdgrCS/KS2p5TvvtpjiG+sCdAkqCDBHcmUBKGGH8owlJ5/DMZAcbJ6PDJFMUOhL+y2jzdDVl0OeMUrh1Fd1LOQ==}
-    hasBin: true
-    dependencies:
-      jsx-number-format: 0.1.5
     dev: false
 
   /concat-map@0.0.1:
@@ -201,13 +191,6 @@ packages:
     resolution: {integrity: sha512-k/vGaX4/Yla3WzyMCvTQOXYeIHvqOKtnqBduzTHpzpQZzAskKMhZ2K+EnBiSM9zGSoIFeMpXKxa4dYeZIQqewQ==}
     dev: false
 
-  /intertext-splitlines@1.2.1:
-    resolution: {integrity: sha512-bnIqoTOk8ie/jE3g4ec7h5ZdjpUNF+ynQ0/oTwn3I973vhCjMtnd9DCp/i1hxVMO55uqDgyYQ42f44Quzc6zXg==}
-    dependencies:
-      cnd: 9.2.3
-      intertype: 7.6.5
-    dev: false
-
   /intertype-legacy@7.7.1:
     resolution: {integrity: sha512-Bj3k9bCu8vA6JLIvnCrJXOdkecgY5wtCmORclJ87uq22N53swREHT5bezSeK5TwcxgSJEDg2wEfcn4kNr9Qv8A==}
     dependencies:
@@ -268,10 +251,6 @@ packages:
     resolution: {integrity: sha512-v42H3sBFLTw2WDxLDe5Nsa/e9bcsZ8YBBuNtXQrbbOfRq+1qeL1bZiFuqIWkC+OPb+ZClB4XdCJO31/zwSrqxw==}
     dependencies:
       intertype: 7.6.5
-    dev: false
-
-  /jsx-number-format@0.1.5:
-    resolution: {integrity: sha512-eS1SvW5Lm+UQOrpxqtTF6NgPDupYlCV1GXJr+f/1yp+nwQH/4qW6XarwCcdphQjNHrJFC4ko2MgRyRDS/ypqZw==}
     dev: false
 
   /letsfreezethat@3.1.0:
