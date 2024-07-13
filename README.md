@@ -22,6 +22,7 @@
     - [Avoidable Code Duplication for Sync, Async Pipelines?](#avoidable-code-duplication-for-sync-async-pipelines)
   - [Modifiers](#modifiers)
   - [`Transformer`: Helper Class for Modular Pipelines](#transformer-helper-class-for-modular-pipelines)
+  - [Also See](#also-see)
   - [To Do](#to-do)
   - [Is Done](#is-done)
 
@@ -41,7 +42,7 @@ Can return `new Promise()` from (formally sync) function:
 ```coffee
 demo_3 = ->
   { Pipeline
-    Async_pipeline }  = require '../../../apps/moonriver'
+    Async_pipeline }  = require 'moonriver'
   p = new Async_pipeline()
   p.push [ 1, 2, 3, ]
   p.push ( d ) -> whisper 'Ⅱ', rpr d
@@ -59,7 +60,7 @@ demo_3b = ->
   { Pipeline
     Async_pipeline
     Segment
-    Async_segment } = require '../../../apps/moonriver'
+    Async_segment } = require 'moonriver'
   after  = ( dts, f  ) => new Promise ( resolve ) -> setTimeout ( -> resolve f() ), dts * 1000
   p = new Async_pipeline()
   p.push [ 1, 2, 3, ]
@@ -168,7 +169,7 @@ p.run()
 ```coffee
 FS                  = require 'node:fs'
 { Async_pipeline, \
-  transforms: T,  } = require '../../../apps/moonriver'
+  transforms: T,  } = require 'moonriver'
 p = new Async_pipeline()
 p.push FS.createReadStream __filename # , { highWaterMark: 50, }
 p.push T.$split_lines()
@@ -343,7 +344,7 @@ this case) or its *overriding* position (second in transformer `B`). it has also
 this transform with that other one') would be much preferrable.
 
 ```coffee
-{ Transformer } = require '../../../apps/moonriver'
+{ Transformer } = require 'moonriver'
 #.........................................................................................................
 class A extends Transformer
   $source: -> [ [ '*', ], ]
@@ -362,7 +363,9 @@ result = p.run_and_stop()
 T?.eq result, [ [ '*', 'a1', 'a2', 'a3', 'b1', '!b2!', 'b3' ] ]
 ```
 
+## Also See
 
+* https://ismaelcelis.com/posts/practical-railway-oriented-pipelines-in-ruby/
 
 ## To Do
 
